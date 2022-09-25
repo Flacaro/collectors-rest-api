@@ -6,7 +6,8 @@ import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-// @Entity e' una classe che rappresenta una tabella nel database
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @Entity
 public class Collector {
 
@@ -28,7 +29,7 @@ public class Collector {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.password = password;
+        this.password = new BCryptPasswordEncoder().encode(password);
     }
 
     public Collector() {}

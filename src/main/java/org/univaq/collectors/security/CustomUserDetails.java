@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+
+// Serve solamente come tipo di ritorno per il metodo loadUserByUsername di CustomUserDetailsService
 public class CustomUserDetails implements UserDetails {
 
     private String email;

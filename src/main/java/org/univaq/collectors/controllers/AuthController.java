@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,8 +15,6 @@ import org.univaq.collectors.models.requests.Token;
 import org.univaq.collectors.models.Collector;
 import org.univaq.collectors.models.requests.Login;
 import org.univaq.collectors.repositories.CollectorsRepository;
-import org.univaq.collectors.security.CustomUserDetails;
-import org.univaq.collectors.security.CustomUserDetailsService;
 import org.univaq.collectors.security.JwtUtil;
 
 @RestController
@@ -26,20 +23,16 @@ public class AuthController {
     
     private final CollectorsRepository collectorsRepository;
 
-    private final CustomUserDetailsService userDetailsService;
-
     private final AuthenticationManager authenticationManager;
 
     private final JwtUtil jwtUtil;
 
     public AuthController(
         CollectorsRepository collectorsRepository, 
-        CustomUserDetailsService userDetailsService,
         AuthenticationManager authenticationManager, 
         JwtUtil jwtUtil
     ) {
         this.collectorsRepository = collectorsRepository;
-        this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -48,6 +41,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Token> login(@Valid @RequestBody Login login) {
         try {
+            // se non viene lanciata un eccezione, vuol dire che le credenziali sono corrette
             this.authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword())
             );
@@ -55,8 +49,8 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
 
-        final CustomUserDetails userDetails = userDetailsService.loadUserByUsername(login.getEmail());
-        String jwt = this.jwtUtil.generateToken(userDetails);
+        // Il token conterrà l'email dell'utente
+        String jwt = this.jwtUtil.generateToken(login.getEmail());
 
         return ResponseEntity.ok(new Token(jwt));
     }
@@ -65,9 +59,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Collector> register(@Valid @RequestBody Registration collector) {
 
-        Collector newCollector = new Collector(null, collector.getName(), collector.getEmail(), null);
-
-        newCollector.setPassword(new BCryptPasswordEncoder().encode(collector.getPassword()));
+        Collector newCollector = new Collector(null, collector.getName(), collector.getEmail(), collector.getPassword());
 
         Collector savedCollector = this.collectorsRepository.save(newCollector);
         

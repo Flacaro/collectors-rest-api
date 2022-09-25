@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class JwtFilter extends OncePerRequestFilter {
@@ -44,22 +44,19 @@ public class JwtFilter extends OncePerRequestFilter {
             email = jwtUtil.extractEmail(jwt);
         }
 
-        if (email != null) {
+        // Cerchiamo l'utente nel database con l'email che abbiamo estratto dal token
+        CustomUserDetails userDetails = this.customUserDetailsService.loadUserByUsername(email);
 
-            CustomUserDetails userDetails = this.customUserDetailsService.loadUserByUsername(email);
+        // 2.
+        if (!jwtUtil.isTokenExpired(jwt)) {
 
-            // 2.
-            if (jwtUtil.validateToken(jwt, userDetails)) {
-
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-
-                // 3.
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
+            // 3.
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
+            // SecurityContextHolder viene utilizzato per memorizzare i dettagli dell'utente attualmente autenticato
+            // noto anche come Principal
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
