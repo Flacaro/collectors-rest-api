@@ -27,11 +27,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-
-    @Bean
-    public JwtFilter jwtFilter() {
-        return new JwtFilter();
-    }
+    @Autowired
+    private JwtFilter jwtFilter;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -43,18 +40,13 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
-        http.cors().and().csrf().disable()
-                // Permette l'accesso agli endpoint pubblici 
-                .authorizeRequests().antMatchers(publicRoutes).permitAll()
-                // Tutti gli altri endpoint richiedono l'autenticazione
-                .anyRequest().authenticated()
-                .and()
-                // Permette di non creare sessioni
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        // Aggiunge il filtro per la gestione del token jwt
-        http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.csrf().disable()
+        .authorizeRequests().antMatchers(publicRoutes).permitAll()
+        .anyRequest().authenticated()
+        .and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
 
