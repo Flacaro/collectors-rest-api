@@ -2,13 +2,20 @@ package org.univaq.collectors.models.requests;
 
 import java.sql.Date;
 
+import javax.management.loading.PrivateClassLoader;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 public class Registration {
 
-    @NotBlank(message = "Name is required")
     private String name;
+
+    private String surname;
+
+    @NotBlank
+    private String username;
+    
+    private Date date;
 
     @NotBlank(message = "Email is required")
     @Email
@@ -17,9 +24,6 @@ public class Registration {
     @NotBlank(message = "Password is required")
     private String password;
 
-    public String surname;
-
-    public Date date;
     
 
     public Registration() {}
@@ -62,6 +66,14 @@ public class Registration {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
     
 
