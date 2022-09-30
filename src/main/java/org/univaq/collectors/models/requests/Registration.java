@@ -1,8 +1,6 @@
 package org.univaq.collectors.models.requests;
 
 import java.sql.Date;
-
-import javax.management.loading.PrivateClassLoader;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -24,9 +22,17 @@ public class Registration {
     @NotBlank(message = "Password is required")
     private String password;
 
-    
 
     public Registration() {}
+
+    public Registration(String name, String surname, String username, Date date, String email, String password) {
+        this.name = name;
+        this.surname = surname;
+        this.username = username;
+        this.date = date;
+        this.email = email;
+        this.password = password;
+    }
 
     public String getName() {
         return name;
@@ -34,6 +40,30 @@ public class Registration {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public String getEmail() {
@@ -51,31 +81,6 @@ public class Registration {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    
 
     
 }
