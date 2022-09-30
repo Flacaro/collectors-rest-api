@@ -1,11 +1,9 @@
 package org.univaq.collectors.models;
-
-import javax.annotation.Generated;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
 
-import org.springframework.lang.NonNull;
 
 @Entity
 public class Disk {
@@ -14,28 +12,28 @@ public class Disk {
     @GeneratedValue
     private Long id;
 
-    @NonNull
+    @NotBlank
     private String title;
 
-    @NonNull
+    @NotBlank
     private String author;
 
-    @NonNull
+    @NotBlank
     private String label;
 
-    @NonNull
+    @NotBlank
     private String diskType;
 
-    @NonNull
+    @NotBlank
     private String state;
 
-    @NonNull
+    @NotBlank
     private String format;
 
-    @NonNull
+    @NotBlank
     private Integer barcode;
 
-    @NonNull
+    @NotBlank
     private Integer duplicate;
 
     public Long getId() {
@@ -109,12 +107,6 @@ public class Disk {
 
 }
 
-    
-
-    
-
-    
-}
 
 
 

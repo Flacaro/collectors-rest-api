@@ -25,7 +25,6 @@ public class Collection {
     @NotBlank
     private String status;
 
-    @
     private boolean shared;
 
 
@@ -36,42 +35,44 @@ public class Collection {
         this.shared = shared;
     }
 
-    public Collection(){
+    public Collection(){}
 
-        public Long getId() {
-            return id;   
-        }
-
-        public String name() {
-            return name;
+    public Long getId() {
+        return id;
     }
 
-        public void setName(String name) {
-            this.name = name;
+    public String getName() {
+        return name;
     }
 
-        public String getCollector() {
-            return collector;
+    public void setName(String name) {
+        this.name = name;
     }
 
-        public void setCollector(String collector) {
-            this.collector = collector;
+    public String getCollector() {
+        return collector;
     }
 
-        public String getStatus() {
-            return status;
+    public void setCollector(String collector) {
+        this.collector = collector;
     }
 
-        public void setStatus(String status) {
-            this.status = status;
+    public String getStatus() {
+        return status;
     }
 
-        public boolean getShared() {
-            return shared;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-        public void setShared(Boolean share) {
+    public boolean isShared() {
+        return shared;
+    }
+
+    public void setShared(boolean shared) {
         this.shared = shared;
-    }
-}
+    } 
+
+    
+
 }
