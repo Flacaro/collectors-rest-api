@@ -8,8 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-
-import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
@@ -28,7 +26,7 @@ public class Collector {
     @Basic(optional=true)
     private Date date;
 
-    @NonNull
+    @Basic(optional=false)
     private String username;
 
     @Email
@@ -93,5 +91,15 @@ public class Collector {
     public void setDate(Date date) {
         this.date = date;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+
 
 }
