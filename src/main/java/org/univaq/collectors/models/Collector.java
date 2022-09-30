@@ -1,6 +1,7 @@
 package org.univaq.collectors.models;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
@@ -9,6 +10,8 @@ import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 public class Collector {
@@ -24,7 +27,8 @@ public class Collector {
     private String surname;
 
     @Basic(optional=true)
-    private Date date;
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private Date birthday;
 
     @Basic(optional=false)
     private String username;
@@ -38,9 +42,12 @@ public class Collector {
     private String password;
 
 
-    public Collector(Long id, String name, String surname, Date date, String email, String password) {
+    public Collector(Long id, String name, String surname, String username, Date birthday, String email, String password) {
         this.id = id;
         this.name = name;
+        this.surname = surname;
+        this.birthday = birthday;
+        this.username = username;
         this.email = email;
         this.password = new BCryptPasswordEncoder().encode(password);
     }
