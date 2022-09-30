@@ -2,7 +2,7 @@ package org.univaq.collectors.models;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 public class Track {
@@ -11,22 +11,22 @@ public class Track {
     @GeneratedValue
     private Long id;
 
-    @NonNull
+    @NotBlank
     private String title;
 
-    @NonNull
+    @NotBlank
     private String artist;
 
-    @NonNull
+    @NotBlank
     private String album;
 
-    @NonNull
+    @NotBlank
     private String band;
 
-    @NonNull
+    @NotBlank
     private String compositor;
 
-    @NonNull
+    
     private long time;
 
     public Track(Long id, String title, String artist, String album, String band, String compositor, long time) {
