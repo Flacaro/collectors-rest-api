@@ -59,7 +59,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Collector> register(@Valid @RequestBody Registration collector) {
 
-        Collector newCollector = new Collector(null, collector.getName(), collector.getSurname(), collector.getDate(), collector.getEmail(), collector.getPassword());
+        Collector newCollector = new Collector(null, collector.getName(), collector.getSurname(), collector.getBirthday(),collector.getUsername(), collector.getEmail(), collector.getPassword());
 
         Collector savedCollector = this.collectorsRepository.save(newCollector);
         

@@ -1,8 +1,12 @@
 package org.univaq.collectors.models.requests;
 
 import java.sql.Date;
+
+import javax.persistence.Basic;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class Registration {
 
@@ -12,8 +16,10 @@ public class Registration {
 
     @NotBlank
     private String username;
-    
-    private Date date;
+
+    @Basic(optional=true)
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private Date birthday;
 
     @NotBlank(message = "Email is required")
     @Email
@@ -25,11 +31,11 @@ public class Registration {
 
     public Registration() {}
 
-    public Registration(String name, String surname, String username, Date date, String email, String password) {
+    public Registration(String name, String surname, String username, Date birthday, String email, String password) {
         this.name = name;
         this.surname = surname;
         this.username = username;
-        this.date = date;
+        this.birthday = birthday;
         this.email = email;
         this.password = password;
     }
@@ -58,12 +64,12 @@ public class Registration {
         this.username = username;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getEmail() {
@@ -81,6 +87,8 @@ public class Registration {
     public void setPassword(String password) {
         this.password = password;
     }
+
+
 
     
 }

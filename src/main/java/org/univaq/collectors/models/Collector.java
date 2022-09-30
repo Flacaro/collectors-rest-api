@@ -42,7 +42,7 @@ public class Collector {
     private String password;
 
 
-    public Collector(Long id, String name, String surname, String username, Date birthday, String email, String password) {
+    public Collector(Long id, String name, String surname, Date birthday, String username, String email, String password) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -91,12 +91,12 @@ public class Collector {
         this.surname = surname;
     }
     
-    public Date getDate() {
-        return date;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getUsername() {
