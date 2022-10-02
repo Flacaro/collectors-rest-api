@@ -1,10 +1,11 @@
 package org.univaq.collectors.models;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
-@Entity
+@Entity(name = "tracks")
 public class Track {
     
     @Id
@@ -12,21 +13,26 @@ public class Track {
     private Long trackId;
 
     @NotBlank
+    @Column(nullable = false)
     private String title;
 
     @NotBlank
+    @Column(nullable = false)
     private String artist;
 
     @NotBlank
+    @Column(nullable = false)
     private String album;
 
     @NotBlank
+    @Column(nullable = false)
     private String band;
 
     @NotBlank
+    @Column(nullable = false)
     private String compositor;
 
-    
+    @Column(nullable = false)
     private long time;
 
     public Track(Long trackId, String title, String artist, String album, String band, String compositor, long time) {

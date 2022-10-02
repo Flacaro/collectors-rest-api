@@ -1,11 +1,12 @@
 package org.univaq.collectors.models;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
 
-@Entity
+@Entity(name = "disks")
 public class Disk {
     
     @Id
@@ -13,27 +14,35 @@ public class Disk {
     private Long diskId;
 
     @NotBlank
+    @Column(nullable = false)
     private String title;
 
     @NotBlank
+    @Column(nullable = false)
     private String author;
 
     @NotBlank
+    @Column(nullable = false)
     private String label;
 
     @NotBlank
+    @Column(nullable = false)
     private String diskType;
 
     @NotBlank
+    @Column(nullable = false)
     private String state;
 
     @NotBlank
+    @Column(nullable = false)
     private String format;
 
     @NotBlank
+    @Column(nullable = true)
     private Integer barcode;
 
     @NotBlank
+    @Column(nullable = false)
     private Integer duplicate;
 
     

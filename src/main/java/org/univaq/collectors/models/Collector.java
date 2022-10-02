@@ -14,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-@Entity
+@Entity(name = "collectors")
 public class Collector {
 
     @Id
@@ -29,7 +29,7 @@ public class Collector {
 
     @JsonFormat(pattern="yyyy-MM-dd")
     @Column(unique=true, nullable = false)
-    private Date birthday;
+    private LocalDate birthday;
 
     @Column(unique = true, nullable = false)
     @NotBlank
@@ -46,7 +46,7 @@ public class Collector {
     private String password;
 
 
-    public Collector(Long collectorId, String name, String surname, Date birthday, String username, String email, String password) {
+    public Collector(Long collectorId, String name, String surname, LocalDate birthday, String username, String email, String password) {
         this.collectorId = collectorId;
         this.name = name;
         this.surname = surname;
@@ -95,11 +95,11 @@ public class Collector {
         this.surname = surname;
     }
     
-    public Date getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 

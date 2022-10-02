@@ -1,15 +1,12 @@
 package org.univaq.collectors.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
-import org.springframework.lang.NonNull;
-
-import antlr.collections.List;
-
-@Entity 
+@Entity(name = "collections")
 public class Collection {
     
     @Id
@@ -17,21 +14,19 @@ public class Collection {
     private Long collectionId;
 
     @NotBlank
+    @Column(nullable = false)
     private String name;
 
     @NotBlank
-    private String collector; 
-
-    @NotBlank
+    @Column(nullable = false)
     private String status;
 
     private boolean shared;
 
 
-    public Collection (Long collectionId, String name, String collector, String status,Boolean shared ){
+    public Collection (Long collectionId, String name, String status,Boolean shared ){
         this.collectionId = collectionId;
         this.name = name;
-        this.collector = collector;
         this.status = status;
         this.shared = shared;
     }
@@ -48,14 +43,6 @@ public class Collection {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getCollector() {
-        return collector;
-    }
-
-    public void setCollector(String collector) {
-        this.collector = collector;
     }
 
     public String getStatus() {

@@ -1,8 +1,8 @@
 package org.univaq.collectors.models.requests;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
-import javax.persistence.Basic;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -17,9 +17,8 @@ public class Registration {
     @NotBlank
     private String username;
 
-    @Basic(optional=true)
     @JsonFormat(pattern="yyyy-MM-dd")
-    private Date birthday;
+    private LocalDate birthday;
 
     @NotBlank(message = "Email is required")
     @Email
@@ -31,7 +30,7 @@ public class Registration {
 
     public Registration() {}
 
-    public Registration(String name, String surname, String username, Date birthday, String email, String password) {
+    public Registration(String name, String surname, String username, LocalDate birthday, String email, String password) {
         this.name = name;
         this.surname = surname;
         this.username = username;
@@ -64,11 +63,11 @@ public class Registration {
         this.username = username;
     }
 
-    public Date getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 
