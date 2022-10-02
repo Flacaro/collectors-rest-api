@@ -7,5 +7,8 @@ import org.univaq.collectors.models.Collector;
 
 // Repository<Domain class, ID type of the domain class>
 public interface CollectorsRepository extends PagingAndSortingRepository<Collector, Long> {
-    Optional<Collector> findByEmail(String email);
+    // findBy<field name>
+    public Optional<Collector> findByEmail(String email);
+
+
 }

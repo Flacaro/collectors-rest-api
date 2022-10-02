@@ -14,7 +14,7 @@ public class Collection {
     
     @Id
     @GeneratedValue
-    private Long id;
+    private Long collectionId;
 
     @NotBlank
     private String name;
@@ -28,7 +28,8 @@ public class Collection {
     private boolean shared;
 
 
-    public Collection (Long id, String name, String collector, String status,Boolean shared ){
+    public Collection (Long collectionId, String name, String collector, String status,Boolean shared ){
+        this.collectionId = collectionId;
         this.name = name;
         this.collector = collector;
         this.status = status;
@@ -37,8 +38,8 @@ public class Collection {
 
     public Collection(){}
 
-    public Long getId() {
-        return id;
+    public Long getCollectionId() {
+        return collectionId;
     }
 
     public String getName() {

@@ -10,7 +10,7 @@ public class Disk {
     
     @Id
     @GeneratedValue
-    private Long id;
+    private Long diskId;
 
     @NotBlank
     private String title;
@@ -36,8 +36,27 @@ public class Disk {
     @NotBlank
     private Integer duplicate;
 
-    public Long getId() {
-        return id;
+    
+
+    public Disk(Long diskId, @NotBlank String title, @NotBlank String author, @NotBlank String label,
+            @NotBlank String diskType, @NotBlank String state, @NotBlank String format, @NotBlank Integer barcode,
+            @NotBlank Integer duplicate) {
+        this.diskId = diskId;
+        this.title = title;
+        this.author = author;
+        this.label = label;
+        this.diskType = diskType;
+        this.state = state;
+        this.format = format;
+        this.barcode = barcode;
+        this.duplicate = duplicate;
+    }
+
+    public Disk() {}
+
+
+    public Long getDiskId() {
+        return diskId;
     }
 
 

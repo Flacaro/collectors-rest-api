@@ -9,7 +9,7 @@ public class Track {
     
     @Id
     @GeneratedValue
-    private Long id;
+    private Long trackId;
 
     @NotBlank
     private String title;
@@ -29,8 +29,8 @@ public class Track {
     
     private long time;
 
-    public Track(Long id, String title, String artist, String album, String band, String compositor, long time) {
-        this.title = title;
+    public Track(Long trackId, String title, String artist, String album, String band, String compositor, long time) {
+        this.trackId = trackId;
         this.artist = artist;
         this.album = album;
         this.band = band;
@@ -40,8 +40,8 @@ public class Track {
 
     public Track() {}
     
-    public Long getId() {
-        return id;
+    public Long getTrackId() {
+        return trackId;
     }
 
     public String getTitle() {

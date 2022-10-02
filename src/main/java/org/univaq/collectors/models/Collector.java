@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,32 +19,35 @@ public class Collector {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private Long collectorId;
 
-    @Basic(optional=true)
+    @Column(nullable = true)
     private String name;
 
-    @Basic(optional=true)
+    @Column(nullable = true)
     private String surname;
 
-    @Basic(optional=true)
     @JsonFormat(pattern="yyyy-MM-dd")
+    @Column(unique=true, nullable = false)
     private Date birthday;
 
-    @Basic(optional=false)
+    @Column(unique = true, nullable = false)
+    @NotBlank
     private String username;
 
     @Email
     @NotBlank
+    @Column(unique=true, nullable = false)
     private String email;
 
 
     @NotBlank
+    @Column(nullable = false)
     private String password;
 
 
-    public Collector(Long id, String name, String surname, Date birthday, String username, String email, String password) {
-        this.id = id;
+    public Collector(Long collectorId, String name, String surname, Date birthday, String username, String email, String password) {
+        this.collectorId = collectorId;
         this.name = name;
         this.surname = surname;
         this.birthday = birthday;
@@ -79,8 +83,8 @@ public class Collector {
         this.password = password;
     }
 
-    public Long getId() {
-        return id;
+    public Long getCollectorId() {
+        return collectorId;
     }
 
     public String getSurname() {

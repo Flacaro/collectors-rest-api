@@ -12,7 +12,7 @@ services:
       MYSQL_PASSWORD: password
     ports:
       # porta host : porta container
-      - 3306:3306
+      - 3307:3306
     volumes:
       # cartella sul host : cartella nel container
       - ./db:/var/lib/mysql
