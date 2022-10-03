@@ -11,7 +11,7 @@ public class Disk {
     
     @Id
     @GeneratedValue
-    private Long diskId;
+    private Long id;
 
     @NotBlank
     @Column(nullable = false)
@@ -47,10 +47,14 @@ public class Disk {
 
     
 
-    public Disk(Long diskId, @NotBlank String title, @NotBlank String author, @NotBlank String label,
+    public Disk() {
+    }
+    
+
+    public Disk(Long id, @NotBlank String title, @NotBlank String author, @NotBlank String label,
             @NotBlank String diskType, @NotBlank String state, @NotBlank String format, @NotBlank Integer barcode,
             @NotBlank Integer duplicate) {
-        this.diskId = diskId;
+        this.id = id;
         this.title = title;
         this.author = author;
         this.label = label;
@@ -61,13 +65,14 @@ public class Disk {
         this.duplicate = duplicate;
     }
 
-    public Disk() {}
 
-
-    public Long getDiskId() {
-        return diskId;
+    public Long getId() {
+        return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -132,6 +137,85 @@ public class Disk {
     public void setDuplicate(Integer duplicate) {
         this.duplicate = duplicate;
     }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        result = prime * result + ((author == null) ? 0 : author.hashCode());
+        result = prime * result + ((label == null) ? 0 : label.hashCode());
+        result = prime * result + ((diskType == null) ? 0 : diskType.hashCode());
+        result = prime * result + ((state == null) ? 0 : state.hashCode());
+        result = prime * result + ((format == null) ? 0 : format.hashCode());
+        result = prime * result + ((barcode == null) ? 0 : barcode.hashCode());
+        result = prime * result + ((duplicate == null) ? 0 : duplicate.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Disk other = (Disk) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        if (author == null) {
+            if (other.author != null)
+                return false;
+        } else if (!author.equals(other.author))
+            return false;
+        if (label == null) {
+            if (other.label != null)
+                return false;
+        } else if (!label.equals(other.label))
+            return false;
+        if (diskType == null) {
+            if (other.diskType != null)
+                return false;
+        } else if (!diskType.equals(other.diskType))
+            return false;
+        if (state == null) {
+            if (other.state != null)
+                return false;
+        } else if (!state.equals(other.state))
+            return false;
+        if (format == null) {
+            if (other.format != null)
+                return false;
+        } else if (!format.equals(other.format))
+            return false;
+        if (barcode == null) {
+            if (other.barcode != null)
+                return false;
+        } else if (!barcode.equals(other.barcode))
+            return false;
+        if (duplicate == null) {
+            if (other.duplicate != null)
+                return false;
+        } else if (!duplicate.equals(other.duplicate))
+            return false;
+        return true;
+    }
+
+    
+
+    
 
     //aggiungere metodo ADD
 }

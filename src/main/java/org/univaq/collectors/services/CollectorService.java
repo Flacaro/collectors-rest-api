@@ -39,17 +39,24 @@ public class CollectorService {
         .orElseGet(() -> this.collectorsRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
-    public Collector save(Collector collector) {
-        return collectorsRepository.save(collector);
-    }
+    // public Collector save(Collector collector) {
+    //     return collectorsRepository.save(collector);
+    // }
 
 
     public Optional<Collector> getCollectorById(Long collectorId) {
         return this.collectorsRepository.findById(collectorId);
     }
 
-
-    // public Optional<Collector> getCollector(Long collectorId) {
-    //     return collectorsRepository.findById(collectorId);
+    // public Optional<Collector> getCollectorsCollectionByCollectionId(Long collectionId) {
+    //     return this.collectorsRepository.findCollectorsCollectionByCollectionId(collectionId);
     // }
+
+
+    public void deleteCollector(Long collectorId) {
+        this.collectorsRepository.deleteById(collectorId);
+    }
+
+
+    
 }

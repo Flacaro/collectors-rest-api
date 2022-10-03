@@ -5,11 +5,15 @@ import java.util.Optional;
 // import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.univaq.collectors.models.Collection;
 import org.univaq.collectors.models.Collector;
+import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
 
 
@@ -20,13 +24,14 @@ public class CollectorsController {
     //private final Logger logger = LoggerFactory.getLogger(CollectorsController.class);
 
     private final CollectorService collectorService;
-
+    private final CollectionService collectionService;
     // Dependency Injection
     // La lista delle dipendenze verra' fornita da Spring Boot
     // Non c'e' quindi bisogno di fare
     // this.collectorsRepository = new CollectorsRepository()
-    public CollectorsController(CollectorService collectorService) {
+    public CollectorsController(CollectorService collectorService, CollectionService collectionService) {
         this.collectorService = collectorService;
+        this.collectionService = collectionService;
     }
 
     
@@ -40,8 +45,14 @@ public class CollectorsController {
     }
 
     @GetMapping("/{collectorId}")
-    public ResponseEntity<Optional<Collector>> getCollectorById(@PathVariable("collectorId") Long collectorId) {
-        return ResponseEntity.ok(this.collectorService.getCollectorById(collectorId));
+    public ResponseEntity<Optional<Collector>> getCollectorById(@PathVariable("collectorId") Long id) {
+        return ResponseEntity.ok(this.collectorService.getCollectorById(id));
     }
+
+    @GetMapping("/{collectorId}/collections")
+    public ResponseEntity<List<Collection>> getCollectorsCollectionByCollectionId(@PathVariable("collectorId") Long id) {
+        return ResponseEntity.ok(this.collectionService.getCollectorCollections(id));
+    }
+
 
 }

@@ -1,5 +1,7 @@
 package org.univaq.collectors.controllers;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -59,7 +61,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Collector> register(@Valid @RequestBody Registration collector) {
 
-        Collector newCollector = new Collector(null, collector.getName(), collector.getSurname(), collector.getBirthday(),collector.getUsername(), collector.getEmail(), collector.getPassword());
+        Collector newCollector = new Collector(null, collector.getName(), collector.getSurname(), collector.getBirthday(),collector.getUsername(), collector.getEmail(), collector.getPassword(), List.of());
 
         Collector savedCollector = this.collectorsRepository.save(newCollector);
         
