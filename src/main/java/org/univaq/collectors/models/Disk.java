@@ -132,6 +132,8 @@ public class Disk {
     public void setDuplicate(Integer duplicate) {
         this.duplicate = duplicate;
     }
+
+    //aggiungere metodo ADD
 }
 
 
