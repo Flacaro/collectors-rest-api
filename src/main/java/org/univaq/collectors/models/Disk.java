@@ -132,11 +132,6 @@ public class Disk {
     public void setDuplicate(Integer duplicate) {
         this.duplicate = duplicate;
     }
-
-    public void addDisk(Disk disk){
-        Disk.add(disk);
-    } 
-
 }
 
 

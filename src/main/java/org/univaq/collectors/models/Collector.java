@@ -1,15 +1,17 @@
 package org.univaq.collectors.models;
-
-import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -28,7 +30,7 @@ public class Collector {
     private String surname;
 
     @JsonFormat(pattern="yyyy-MM-dd")
-    @Column(unique=true, nullable = false)
+    @Column(nullable = true)
     private LocalDate birthday;
 
     @Column(unique = true, nullable = false)
@@ -45,6 +47,9 @@ public class Collector {
     @Column(nullable = false)
     private String password;
 
+    // @OneToMany(mappedBy = "collectors", cascade = CascadeType.ALL, orphanRemoval = true)
+	// private List<Collection> collection = new ArrayList<>();
+
 
     public Collector(Long collectorId, String name, String surname, LocalDate birthday, String username, String email, String password) {
         this.collectorId = collectorId;
@@ -54,6 +59,7 @@ public class Collector {
         this.username = username;
         this.email = email;
         this.password = new BCryptPasswordEncoder().encode(password);
+        // this.collection = collection;
     }
 
     public Collector() {}
@@ -111,6 +117,23 @@ public class Collector {
         this.username = username;
     }
 
+    // public List<Collection> getCollection() {
+    //     return collection;
+    // }
+
+    // public void setCollection(List<Collection> collection) {
+    //     this.collection = collection;
+    // }
+
+    // public void addCollection(Collection collection) {
+    //     this.collection.add(collection);
+    //     collection.setCollectors(this);
+    // }
+
+    // public void removeCollection(Collection collection) {
+    //     this.collection.remove(collection);
+    //     collection.setCollectors(null);
+    // }
 
 
 }
