@@ -42,4 +42,14 @@ public class CollectorService {
     public Collector save(Collector collector) {
         return collectorsRepository.save(collector);
     }
+
+
+    public Optional<Collector> getCollectorById(Long collectorId) {
+        return this.collectorsRepository.findById(collectorId);
+    }
+
+
+    // public Optional<Collector> getCollector(Long collectorId) {
+    //     return collectorsRepository.findById(collectorId);
+    // }
 }
