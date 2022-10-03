@@ -133,6 +133,10 @@ public class Disk {
         this.duplicate = duplicate;
     }
 
+    public void addDisk(Disk disk){
+        Disk.add(disk);
+    } 
+
 }
 
 
