@@ -14,7 +14,6 @@ public class CollectionEntity {
     
     @Id
     @GeneratedValue
-    @Column(name = "collection_id")
     private Long id;
 
     @NotBlank
@@ -36,7 +35,7 @@ public class CollectionEntity {
     
 
 
-    public CollectionEntity(Long id, @NotBlank String name, @NotBlank String status, boolean shared, List<CollectorCollectionEntity> collectors) {
+    public CollectionEntity(Long id, String name, String status, boolean shared, List<CollectorCollectionEntity> collectors) {
         this.id = id;
         this.name = name;
         this.status = status;

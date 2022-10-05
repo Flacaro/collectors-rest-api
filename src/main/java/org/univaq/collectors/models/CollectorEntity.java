@@ -20,7 +20,6 @@ public class CollectorEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "collector_id")
     private Long id;
 
     @Column(nullable = true)

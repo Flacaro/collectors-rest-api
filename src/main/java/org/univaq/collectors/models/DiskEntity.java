@@ -1,9 +1,7 @@
 package org.univaq.collectors.models;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.util.Objects;
 
 
 @Entity(name = "disk")
@@ -45,15 +43,15 @@ public class DiskEntity {
     @Column(nullable = false)
     private Integer duplicate;
 
-    
+    @ManyToOne()
+    private CollectionEntity collection;
+
 
     public DiskEntity() {
     }
     
 
-    public DiskEntity(Long id, @NotBlank String title, @NotBlank String author, @NotBlank String label,
-            @NotBlank String diskType, @NotBlank String state, @NotBlank String format, @NotBlank Integer barcode,
-            @NotBlank Integer duplicate) {
+    public DiskEntity(Long id, String title, String author, String label, String diskType,  String state, String format, Integer barcode, Integer duplicate, CollectionEntity collection) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -63,6 +61,7 @@ public class DiskEntity {
         this.format = format;
         this.barcode = barcode;
         this.duplicate = duplicate;
+        this.collection = collection;
     }
 
 
@@ -138,86 +137,28 @@ public class DiskEntity {
         this.duplicate = duplicate;
     }
 
+    public CollectionEntity getCollection() {
+        return collection;
+    }
+
+    public void setCollection(CollectionEntity collection) {
+        this.collection = collection;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DiskEntity that = (DiskEntity) o;
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(author, that.author) && Objects.equals(label, that.label) && Objects.equals(diskType, that.diskType) && Objects.equals(state, that.state) && Objects.equals(format, that.format) && Objects.equals(barcode, that.barcode) && Objects.equals(duplicate, that.duplicate) && Objects.equals(collection, that.collection);
+    }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((title == null) ? 0 : title.hashCode());
-        result = prime * result + ((author == null) ? 0 : author.hashCode());
-        result = prime * result + ((label == null) ? 0 : label.hashCode());
-        result = prime * result + ((diskType == null) ? 0 : diskType.hashCode());
-        result = prime * result + ((state == null) ? 0 : state.hashCode());
-        result = prime * result + ((format == null) ? 0 : format.hashCode());
-        result = prime * result + ((barcode == null) ? 0 : barcode.hashCode());
-        result = prime * result + ((duplicate == null) ? 0 : duplicate.hashCode());
-        return result;
+        return Objects.hash(id, title, author, label, diskType, state, format, barcode, duplicate, collection);
     }
 
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DiskEntity other = (DiskEntity) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (title == null) {
-            if (other.title != null)
-                return false;
-        } else if (!title.equals(other.title))
-            return false;
-        if (author == null) {
-            if (other.author != null)
-                return false;
-        } else if (!author.equals(other.author))
-            return false;
-        if (label == null) {
-            if (other.label != null)
-                return false;
-        } else if (!label.equals(other.label))
-            return false;
-        if (diskType == null) {
-            if (other.diskType != null)
-                return false;
-        } else if (!diskType.equals(other.diskType))
-            return false;
-        if (state == null) {
-            if (other.state != null)
-                return false;
-        } else if (!state.equals(other.state))
-            return false;
-        if (format == null) {
-            if (other.format != null)
-                return false;
-        } else if (!format.equals(other.format))
-            return false;
-        if (barcode == null) {
-            if (other.barcode != null)
-                return false;
-        } else if (!barcode.equals(other.barcode))
-            return false;
-        if (duplicate == null) {
-            if (other.duplicate != null)
-                return false;
-        } else if (!duplicate.equals(other.duplicate))
-            return false;
-        return true;
-    }
-
-    
-
-    
-
-    //aggiungere metodo ADD
 }
 
 
