@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.univaq.collectors.repositories.CollectorsRepository;
 
 
-import org.univaq.collectors.models.Collector;
+import org.univaq.collectors.models.CollectorEntity;
 
 @Service
 public class CollectorService {
@@ -19,7 +19,7 @@ public class CollectorService {
     }
 
 
-    public List<Collector> getAll(int page, int size, Optional<String> optionalEmail) {
+    public List<CollectorEntity> getAll(int page, int size, Optional<String> optionalEmail) {
 
     // if(optionalEmail.isPresent()) {
     //     var collectorOptional = this.collectorsRepository.findByEmail(optionalEmail.get());
@@ -33,25 +33,15 @@ public class CollectorService {
         return optionalEmail
         .map(email -> this.collectorsRepository.findByEmail(email))
         .map(collectorOptional -> collectorOptional
-        .map(collector -> List.of(collector))
-        .orElseGet(() -> List.of())
+            .map(collector -> List.of(collector))
+            .orElseGet(() -> List.of())
         )
         .orElseGet(() -> this.collectorsRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
-    // public Collector save(Collector collector) {
-    //     return collectorsRepository.save(collector);
-    // }
-
-
-    public Optional<Collector> getCollectorById(Long collectorId) {
-        return this.collectorsRepository.findById(collectorId);
+    public Optional<CollectorEntity> getCollectorById(Long id) {
+        return this.collectorsRepository.findById(id);
     }
-
-    // public Optional<Collector> getCollectorsCollectionByCollectionId(Long collectionId) {
-    //     return this.collectorsRepository.findCollectorsCollectionByCollectionId(collectionId);
-    // }
-
 
     public void deleteCollector(Long collectorId) {
         this.collectorsRepository.deleteById(collectorId);

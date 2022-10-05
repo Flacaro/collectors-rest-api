@@ -5,8 +5,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
-@Entity(name = "tracks")
-public class Track {
+@Entity(name = "track")
+public class TrackEntity {
     
     @Id
     @GeneratedValue
@@ -37,7 +37,7 @@ public class Track {
 
 
     
-    public Track(Long id, @NotBlank String title, @NotBlank String artist, @NotBlank String album,
+    public TrackEntity(Long id, @NotBlank String title, @NotBlank String artist, @NotBlank String album,
             @NotBlank String band, @NotBlank String compositor, long time) {
         this.id = id;
         this.title = title;
@@ -48,7 +48,7 @@ public class Track {
         this.time = time;
     }
 
-    public Track() {
+    public TrackEntity() {
     }
 
     public Long getId() {
@@ -129,7 +129,7 @@ public class Track {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Track other = (Track) obj;
+        TrackEntity other = (TrackEntity) obj;
         if (id == null) {
             if (other.id != null)
                 return false;

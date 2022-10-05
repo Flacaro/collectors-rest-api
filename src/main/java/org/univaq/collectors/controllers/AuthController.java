@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.univaq.collectors.models.requests.Registration;
 import org.univaq.collectors.models.requests.Token;
-import org.univaq.collectors.models.Collector;
+import org.univaq.collectors.models.CollectorEntity;
 import org.univaq.collectors.models.requests.Login;
 import org.univaq.collectors.repositories.CollectorsRepository;
 import org.univaq.collectors.security.JwtUtil;
@@ -59,11 +59,11 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<Collector> register(@Valid @RequestBody Registration collector) {
+    public ResponseEntity<CollectorEntity> register(@Valid @RequestBody Registration collector) {
 
-        Collector newCollector = new Collector(null, collector.getName(), collector.getSurname(), collector.getBirthday(),collector.getUsername(), collector.getEmail(), collector.getPassword(), List.of());
+        CollectorEntity newCollector = new CollectorEntity(null, collector.getName(), collector.getSurname(), collector.getBirthday(),collector.getUsername(), collector.getEmail(), collector.getPassword(), List.of());
 
-        Collector savedCollector = this.collectorsRepository.save(newCollector);
+        CollectorEntity savedCollector = this.collectorsRepository.save(newCollector);
         
         return ResponseEntity.ok(savedCollector);
     }

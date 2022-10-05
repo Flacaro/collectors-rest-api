@@ -2,8 +2,6 @@ package org.univaq.collectors.models;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,11 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-@Entity(name = "collectors")
-public class Collector {
+@Entity(name = "collector")
+public class CollectorEntity {
 
     @Id
     @GeneratedValue
+    @Column(name = "collector_id")
     private Long id;
 
     @Column(nullable = true)
@@ -49,13 +48,15 @@ public class Collector {
     private String password;
 
 
-    @OneToMany(mappedBy = "collector", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Collection> collections = new ArrayList<>();
-
+    @OneToMany(
+            mappedBy = "collectors",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<CollectorCollectionEntity> collections = new ArrayList<>();
     
 
-    public Collector(Long id, String name, String surname, LocalDate birthday, @NotBlank String username,
-            @Email @NotBlank String email, @NotBlank String password, List<Collection> collections) {
+    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, @NotBlank String username,
+            @Email @NotBlank String email, @NotBlank String password, List<CollectorCollectionEntity> collections) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -67,7 +68,7 @@ public class Collector {
     }
 
 
-    public Collector() {
+    public CollectorEntity() {
     }
 
 
@@ -141,12 +142,12 @@ public class Collector {
     }
 
 
-    public List<Collection> getCollections() {
+    public List<CollectorCollectionEntity> getCollections() {
         return collections;
     }
 
 
-    public void setCollections(List<Collection> collections) {
+    public void setCollections(List<CollectorCollectionEntity> collections) {
         this.collections = collections;
     }
 
@@ -175,7 +176,7 @@ public class Collector {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Collector other = (Collector) obj;
+        CollectorEntity other = (CollectorEntity) obj;
         if (id == null) {
             if (other.id != null)
                 return false;

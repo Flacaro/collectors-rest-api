@@ -1,24 +1,20 @@
 package org.univaq.collectors.models;
-
-import java.util.Objects;
-
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-@Entity(name = "collections")
-public class Collection {
+@Entity(name = "collection")
+public class CollectionEntity {
     
     @Id
     @GeneratedValue
+    @Column(name = "collection_id")
     private Long id;
 
     @NotBlank
@@ -31,24 +27,26 @@ public class Collection {
 
     private boolean shared;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collector_id")
-    private Collector collector;
+
+    @OneToMany(
+            mappedBy = "collection",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<CollectorCollectionEntity> collectors = new ArrayList<>();
+    
 
 
-  
-
-    public Collection(Long id, @NotBlank String name, @NotBlank String status, boolean shared, Collector collector) {
+    public CollectionEntity(Long id, @NotBlank String name, @NotBlank String status, boolean shared, List<CollectorCollectionEntity> collectors) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.shared = shared;
-        this.collector = collector;
+        this.collectors = collectors;
     }
 
 
     
-    public Collection() {
+    public CollectionEntity() {
     }
 
 
@@ -85,20 +83,12 @@ public class Collection {
         this.shared = shared;
     }
 
-    public Collector getCollector() {
-        return collector;
+    public List<CollectorCollectionEntity> getCollectors() {
+        return collectors;
     }
 
-    public void setCollector(Collector collector) {
-        this.collector = collector;
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "Collection [id=" + id + ", name=" + name + ", status=" + status + ", shared=" + shared + ", collector="
-                + collector + "]";
+    public void setCollectors(List<CollectorCollectionEntity> collectors) {
+        this.collectors = collectors;
     }
 
 
@@ -111,7 +101,7 @@ public class Collection {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
         result = prime * result + (shared ? 1231 : 1237);
-        result = prime * result + ((collector == null) ? 0 : collector.hashCode());
+        result = prime * result + ((collectors == null) ? 0 : collectors.hashCode());
         return result;
     }
 
@@ -125,7 +115,7 @@ public class Collection {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Collection other = (Collection) obj;
+        CollectionEntity other = (CollectionEntity) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
@@ -143,14 +133,25 @@ public class Collection {
             return false;
         if (shared != other.shared)
             return false;
-        if (collector == null) {
-            if (other.collector != null)
+        if (collectors == null) {
+            if (other.collectors != null)
                 return false;
-        } else if (!collector.equals(other.collector))
+        } else if (!collectors.equals(other.collectors))
             return false;
         return true;
     }
 
+
+
+    @Override
+    public String toString() {
+        return "Collection [id=" + id + ", name=" + name + ", status=" + status + ", shared=" + shared + ", collectors="
+                + collectors + "]";
+    }
+
+    
+
+    
   
     
 

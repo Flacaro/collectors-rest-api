@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.univaq.collectors.models.Disk;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.DiskService;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class DiskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Disk>>getAll(
+    public ResponseEntity<List<DiskEntity>>getAll(
         @RequestParam(required = false, defaultValue = "0") Integer page,
         @RequestParam(required = false, defaultValue = "10") Integer size,
         @RequestParam() Optional<String> title

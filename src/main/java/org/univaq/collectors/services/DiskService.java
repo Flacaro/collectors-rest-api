@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.univaq.collectors.models.Disk;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.DisksRepository;
 
 @Service
@@ -16,7 +16,7 @@ public class DiskService {
         this.disksRepository = disksRepository;
     }
     
-    public List<Disk> getAll (int page, int size, Optional<String> optionalTitle){
+    public List<DiskEntity> getAll (int page, int size, Optional<String> optionalTitle){
        // if (optionalTitle.isPresent()){
         //   var diskOptional = disksRepository.findByTitle(optionalTitle.get());
         //  if (diskOptional.isEmpty()){

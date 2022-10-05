@@ -6,8 +6,8 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
 
-@Entity(name = "disks")
-public class Disk {
+@Entity(name = "disk")
+public class DiskEntity {
     
     @Id
     @GeneratedValue
@@ -47,11 +47,11 @@ public class Disk {
 
     
 
-    public Disk() {
+    public DiskEntity() {
     }
     
 
-    public Disk(Long id, @NotBlank String title, @NotBlank String author, @NotBlank String label,
+    public DiskEntity(Long id, @NotBlank String title, @NotBlank String author, @NotBlank String label,
             @NotBlank String diskType, @NotBlank String state, @NotBlank String format, @NotBlank Integer barcode,
             @NotBlank Integer duplicate) {
         this.id = id;
@@ -164,7 +164,7 @@ public class Disk {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Disk other = (Disk) obj;
+        DiskEntity other = (DiskEntity) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
