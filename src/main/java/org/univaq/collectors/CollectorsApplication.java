@@ -12,7 +12,7 @@ public class CollectorsApplication implements CommandLineRunner {
 	private DatabaseGenerator databaseGenerator;
 	@Override
 	public void run(String... args) throws Exception {
-		databaseGenerator.generateDatabase();
+		//databaseGenerator.generateDatabase();
 
 	}
 

@@ -28,11 +28,10 @@ public class CollectionEntity {
 
 
     @OneToMany(
-            mappedBy = "collection",
+            mappedBy = "collections",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<CollectorCollectionEntity> collectors = new ArrayList<>();
-    
 
 
     public CollectionEntity(Long id, String name, String status, boolean shared, List<CollectorCollectionEntity> collectors) {
@@ -88,6 +87,19 @@ public class CollectionEntity {
 
     public void setCollectors(List<CollectorCollectionEntity> collectors) {
         this.collectors = collectors;
+    }
+
+
+    public void addCollectionToCollector(CollectorEntity collector) {
+        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
+        collectors.add(collectorCollection);
+    
+    }
+
+
+    public void removeCollectionOfCollector(CollectorEntity collector) {
+        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
+        collectors.remove(collectorCollection);
     }
 
 

@@ -4,11 +4,7 @@ import java.util.Optional;
 // import org.slf4j.Logger;
 // import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorEntity;
 import org.univaq.collectors.services.CollectionService;
@@ -43,14 +39,28 @@ public class CollectorsController {
     }
 
     @GetMapping("/{collectorId}")
-    public ResponseEntity<Optional<CollectorEntity>> getCollectorById(@PathVariable("collectorId") Long id) {
-        return ResponseEntity.ok(this.collectorService.getCollectorById(id));
+    public ResponseEntity<CollectorEntity> getCollectorById(@PathVariable("collectorId") Long collectorId) {
+        return this.collectorService.getCollectorById(collectorId)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // @GetMapping("/{collectorId}/collections")
-    // public ResponseEntity<List<CollectionEntity>> getCollectorsCollectionByCollectionId(@PathVariable("collectorId") Long id) {
-    //     return ResponseEntity.ok(this.collectionService.getCollectorCollections(id));
-    // }
+    @GetMapping("/{collectorId}/collections")
+    public ResponseEntity<List<CollectionEntity>> getCollectorCollection(@PathVariable("collectorId") Long collectorId) {
+        var result = this.collectionService.getCollectionByCollectorId(collectorId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{collectorId}/collections")
+    public ResponseEntity<CollectionEntity> saveCollectorCollection(
+            @PathVariable("collectorId") Long collectorId,
+            @RequestBody CollectionEntity collection
+    ) {
+        var result = this.collectionService.save(collection, collectorId);
+
+        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
 
 }

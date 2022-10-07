@@ -63,8 +63,7 @@ public class DiskEntity {
         this.duplicate = duplicate;
         this.collection = collection;
     }
-
-
+    //aggiungere year al disco
     public Long getId() {
         return id;
     }

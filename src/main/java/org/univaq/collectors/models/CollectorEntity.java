@@ -45,17 +45,10 @@ public class CollectorEntity {
     @NotBlank
     @Column(nullable = false)
     private String password;
-
-
-    @OneToMany(
-            mappedBy = "collectors",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<CollectorCollectionEntity> collections = new ArrayList<>();
     
 
     public CollectorEntity(Long id, String name, String surname, LocalDate birthday, @NotBlank String username,
-            @Email @NotBlank String email, @NotBlank String password, List<CollectorCollectionEntity> collections) {
+            @Email @NotBlank String email, @NotBlank String password) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -63,7 +56,7 @@ public class CollectorEntity {
         this.username = username;
         this.email = email;
         this.password = new BCryptPasswordEncoder().encode(password);
-        this.collections = collections;
+
     }
 
 
@@ -74,12 +67,6 @@ public class CollectorEntity {
     public Long getId() {
         return id;
     }
-
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
 
     public String getName() {
         return name;
@@ -141,15 +128,6 @@ public class CollectorEntity {
     }
 
 
-    public List<CollectorCollectionEntity> getCollections() {
-        return collections;
-    }
-
-
-    public void setCollections(List<CollectorCollectionEntity> collections) {
-        this.collections = collections;
-    }
-
 
     @Override
     public int hashCode() {
@@ -162,7 +140,6 @@ public class CollectorEntity {
         result = prime * result + ((username == null) ? 0 : username.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((collections == null) ? 0 : collections.hashCode());
         return result;
     }
 
@@ -211,11 +188,7 @@ public class CollectorEntity {
                 return false;
         } else if (!password.equals(other.password))
             return false;
-        if (collections == null) {
-            if (other.collections != null)
-                return false;
-        } else if (!collections.equals(other.collections))
-            return false;
+      
         return true;
     } 
 
