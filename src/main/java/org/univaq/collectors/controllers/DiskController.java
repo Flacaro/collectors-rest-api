@@ -1,10 +1,7 @@
 package org.univaq.collectors.controllers;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.DiskService;
 
@@ -30,6 +27,7 @@ public class DiskController {
     ){
         return ResponseEntity.ok(this.diskService.getAll(page, size, title));
     }
+
 }
 
 

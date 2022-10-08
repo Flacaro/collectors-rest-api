@@ -61,7 +61,14 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<CollectorEntity> register(@Valid @RequestBody Registration collector) {
 
-        CollectorEntity newCollector = new CollectorEntity(null, collector.getName(), collector.getSurname(), collector.getBirthday(),collector.getUsername(), collector.getEmail(), collector.getPassword(), List.of());
+        CollectorEntity newCollector = new CollectorEntity(
+                null,
+                collector.getName(),
+                collector.getSurname(),
+                collector.getBirthday(),
+                collector.getUsername(),
+                collector.getEmail(),
+                collector.getPassword());
 
         CollectorEntity savedCollector = this.collectorsRepository.save(newCollector);
         

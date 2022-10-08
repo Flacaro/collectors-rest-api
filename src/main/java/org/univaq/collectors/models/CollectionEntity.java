@@ -1,6 +1,7 @@
 package org.univaq.collectors.models;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,30 +25,18 @@ public class CollectionEntity {
     @Column(nullable = false)
     private String status;
 
-    private boolean shared;
-
 
     @OneToMany(
-            mappedBy = "collection",
+            mappedBy = "collections",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<CollectorCollectionEntity> collectors = new ArrayList<>();
-    
 
 
-    public CollectionEntity(Long id, String name, String status, boolean shared, List<CollectorCollectionEntity> collectors) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
-        this.shared = shared;
-        this.collectors = collectors;
-    }
 
 
-    
     public CollectionEntity() {
     }
-
 
 
     public Long getId() {
@@ -74,84 +63,28 @@ public class CollectionEntity {
         this.status = status;
     }
 
-    public boolean isShared() {
-        return shared;
+    public void addCollectorCollection(CollectorEntity collector) {
+        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, false);
+        collectors.add(collectorCollection);
+//        collector.getCollections().add(collectorCollection);
     }
 
-    public void setShared(boolean shared) {
-        this.shared = shared;
-    }
-
-    public List<CollectorCollectionEntity> getCollectors() {
-        return collectors;
-    }
-
-    public void setCollectors(List<CollectorCollectionEntity> collectors) {
-        this.collectors = collectors;
+    public void removeCollector(CollectorEntity collector) {
+        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this);
+        collectors.remove(collectorCollection);
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CollectionEntity that = (CollectionEntity) o;
+        return id.equals(that.id) && Objects.equals(name, that.name) && Objects.equals(status, that.status) && Objects.equals(collectors, that.collectors);
+    }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((status == null) ? 0 : status.hashCode());
-        result = prime * result + (shared ? 1231 : 1237);
-        result = prime * result + ((collectors == null) ? 0 : collectors.hashCode());
-        return result;
+        return Objects.hash(id, name, status, collectors);
     }
-
-
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CollectionEntity other = (CollectionEntity) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (status == null) {
-            if (other.status != null)
-                return false;
-        } else if (!status.equals(other.status))
-            return false;
-        if (shared != other.shared)
-            return false;
-        if (collectors == null) {
-            if (other.collectors != null)
-                return false;
-        } else if (!collectors.equals(other.collectors))
-            return false;
-        return true;
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "Collection [id=" + id + ", name=" + name + ", status=" + status + ", shared=" + shared + ", collectors="
-                + collectors + "]";
-    }
-
-    
-
-    
-  
-    
-
 }

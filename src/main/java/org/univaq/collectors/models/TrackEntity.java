@@ -31,13 +31,13 @@ public class TrackEntity {
     private String compositor;
 
     @Column(nullable = false)
-    private long time;
+    private double time;
 
     @ManyToOne()
     private DiskEntity disk;
 
 
-    public TrackEntity(Long id, String title, String artist, String album, String band, String compositor, long time, DiskEntity disk) {
+    public TrackEntity(Long id, String title, String artist, String album, String band, String compositor, double time, DiskEntity disk) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -99,7 +99,7 @@ public class TrackEntity {
         this.compositor = compositor;
     }
 
-    public long getTime() {
+    public double getTime() {
         return time;
     }
 

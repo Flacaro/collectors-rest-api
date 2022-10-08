@@ -5,8 +5,13 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.univaq.collectors.models.CollectionEntity;
+import org.univaq.collectors.models.CollectorCollectionEntity;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
+import org.univaq.collectors.repositories.CollectorCollectionRepository;
+import org.univaq.collectors.repositories.CollectorsRepository;
 
 @Service
 public class CollectionService {
@@ -14,35 +19,43 @@ public class CollectionService {
     
     private final CollectionsRepository collectionsRepository;
 
-    public CollectionService(CollectionsRepository collectionsRepository) {
+    private final CollectorsRepository collectorsRepository;
+
+    private final CollectorCollectionRepository collectorCollectionRepository;
+
+    public CollectionService(
+            CollectionsRepository collectionsRepository,
+            CollectorCollectionRepository collectorCollectionRepository,
+            CollectorsRepository collectorsRepository
+    ) {
         this.collectionsRepository = collectionsRepository;
+        this.collectorCollectionRepository = collectorCollectionRepository;
+        this.collectorsRepository = collectorsRepository;
     }
 
-    public List<CollectionEntity> getAll(int page, int size, Optional<String> optionalName) {
-
-        return optionalName
-        .map(name -> this.collectionsRepository.findByName(name))
-        .map(collectionOptional -> collectionOptional
-            .map(collection -> List.of(collection))
-            .orElseGet(() -> List.of())
-        )
-        .orElseGet(() -> this.collectionsRepository.findAll(PageRequest.of(page, size)).toList());
-        
-    }
-    
-    public Optional<CollectionEntity> getCollectionById(Long id) {
-        return this.collectionsRepository.findById(id);
+    public List<CollectionEntity> getCollectionByCollectorId(Long collectorId) {
+        return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
+                .map(CollectorCollectionEntity::getCollections)
+                .toList();
     }
 
-    // public List<CollectionEntity> getCollectorCollections(int page, int size, Optional<Long> optionalId) {
-    //     return optionalId
-    //     .map(id -> this.collectionsRepository.findByCollectorId(id))
-    //     .map(collectionOptional -> collectionOptional
-    //         .map(collection -> List.of(collection))
-    //         .orElseGet(() -> List.of())
-    //     )
-    //     .orElseGet(() -> this.collectionsRepository.findAll(PageRequest.of(page, size)).toList());
-    // }
+    public Optional<CollectionEntity> saveCollectorCollection(CollectionEntity collection, Long collectorId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if(optionalCollector.isPresent()) {
+
+            var collector = optionalCollector.get();
+
+            var savedCollection = this.collectionsRepository.save(collection);
+
+            savedCollection.addCollectorCollection(collector);
+
+            this.collectionsRepository.flush();
+
+            return Optional.of(savedCollection);
+        }
+
+        return Optional.empty();
+    }
 
 }
 

@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.univaq.collectors.models.CollectionEntity;
+import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 
 
@@ -40,6 +43,7 @@ public class CollectorService {
     }
 
     public Optional<CollectorEntity> getCollectorById(Long id) {
+
         return this.collectorsRepository.findById(id);
     }
 
