@@ -1,7 +1,5 @@
 package org.univaq.collectors.controllers;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;

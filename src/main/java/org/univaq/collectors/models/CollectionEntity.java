@@ -64,7 +64,7 @@ public class CollectionEntity {
     }
 
     public void addCollectorCollection(CollectorEntity collector) {
-        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, false);
+        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
         collectors.add(collectorCollection);
 //        collector.getCollections().add(collectorCollection);
     }

@@ -42,8 +42,8 @@ public class CollectorService {
         .orElseGet(() -> this.collectorsRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
+    
     public Optional<CollectorEntity> getCollectorById(Long id) {
-
         return this.collectorsRepository.findById(id);
     }
 
