@@ -5,8 +5,11 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.univaq.collectors.models.CollectorCollectionEntity;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
+import org.univaq.collectors.repositories.CollectorCollectionRepository;
+import org.univaq.collectors.repositories.CollectorsRepository;
 import org.univaq.collectors.repositories.DisksRepository;
 
 @Service
@@ -14,14 +17,19 @@ public class DiskService {
 
     private final DisksRepository disksRepository;
     private final CollectionsRepository collectionsRepository;
+    private final CollectorsRepository collectorsRepository;
+    private final CollectorCollectionRepository collectorCollectionRepository;
 
     public DiskService(
         DisksRepository disksRepository,
-        CollectionsRepository collectionsRepository
+        CollectionsRepository collectionsRepository,
+        CollectorsRepository collectorsRepository,
+        CollectorCollectionRepository collectorCollectionRepository
         ) {
         this.disksRepository = disksRepository;
         this.collectionsRepository = collectionsRepository;
-    
+        this.collectorsRepository = collectorsRepository;
+        this.collectorCollectionRepository = collectorCollectionRepository;
     }
     
     public List<DiskEntity> getAll (int page, int size, Optional<String> optionalTitle){
@@ -39,21 +47,20 @@ public class DiskService {
         .orElseGet(() -> this.disksRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
-    public Optional<DiskEntity> saveDisk(DiskEntity newdisk, Long diskId) {
-        var optionalCollection = this.collectionsRepository.findById(diskId);
-        if (optionalCollection.isPresent()){
+    public Optional<DiskEntity> saveDisk(DiskEntity disk, Long collectionId, Long collectorId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()){
+            var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(optionalCollector.get().getId(), collectionId);
+            if (collectorCollection.isPresent()){
 
-            var collection = optionalCollection.get();
+                disk.setCollection(collectorCollection.get().getCollections());
+                var savedDisk = this.disksRepository.save(disk);
+                this.disksRepository.flush();
 
-            var savedDisk = this.disksRepository.save(newdisk);
+                return Optional.of(savedDisk);
+        } }
 
-            savedDisk.addDisk(newdisk);
-
-            this.disksRepository.flush();
-
-            return Optional.of(savedDisk);
-        }
         return Optional.empty();
-    }
 }
 
+}

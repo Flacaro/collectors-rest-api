@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorEntity;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
+import org.univaq.collectors.services.DiskService;
 
 
 @RestController
@@ -19,10 +21,12 @@ public class CollectorsController {
 
     private final CollectorService collectorService;
     private final CollectionService collectionService;
+    private final DiskService diskService;
 
-    public CollectorsController(CollectorService collectorService, CollectionService collectionService) {
+    public CollectorsController(CollectorService collectorService, CollectionService collectionService, DiskService diskService) {
         this.collectorService = collectorService;
         this.collectionService = collectionService;
+        this.diskService = diskService;
     }
 
     
@@ -50,16 +54,20 @@ public class CollectorsController {
 
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    //aggiungi nuovo disco in collection
+    @PostMapping("/{collectorId}/collections/{collectionId}/disks")
+    public ResponseEntity<DiskEntity> saveDisk(
+        @PathVariable("collectorId") Long collectorId,
+        @PathVariable("collectionId") Long collectionId,
+        @RequestBody DiskEntity disk
+        ){
+            this.diskService.saveDisk(disk, collectionId, collectorId);
 
-    @GetMapping("/{collectorId}/collections/{collectionId}")
-    public ResponseEntity<CollectionEntity> getCollectorCollectionById(
-            @PathVariable("collectorId") Long collectorId,
-            @PathVariable("collectionId") Long collectionId
-    ) {
-        var result = this.collectionService.getCollectorCollectionById(collectorId, collectionId);
+            return ResponseEntity.ok().build();
+        }
 
-        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//elimina disco da collezione 
+
 
 
 }
