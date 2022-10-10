@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
@@ -49,12 +50,16 @@ public class DiskService {
     public Optional<DiskEntity> saveDisk(DiskEntity disk, Long collectionId, Long collectorId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-            var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(optionalCollector.get().getId(), collectionId);
-            if (collectorCollection.isPresent()) {
+            var collector = optionalCollector.get();
+            var collectorCollectionOptional = this.collectorCollectionRepository
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
 
-                disk.setCollection(collectorCollection.get().getCollections());
+            if (collectorCollectionOptional.isPresent()) {
+                var collectorCollection = collectorCollectionOptional.get();
+
+                disk.setCollection(collectorCollection.getCollection());
+
                 var savedDisk = this.disksRepository.save(disk);
-                this.disksRepository.flush();
 
                 return Optional.of(savedDisk);
             }

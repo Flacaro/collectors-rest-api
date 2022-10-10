@@ -12,8 +12,6 @@ import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 
-import javax.swing.text.html.Option;
-
 @Service
 public class CollectionService {
 
@@ -47,7 +45,7 @@ public class CollectionService {
 
     public List<CollectionEntity> getCollectionByCollectorId(Long collectorId) {
         return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
-                .map(CollectorCollectionEntity::getCollections)
+                .map(CollectorCollectionEntity::getCollection)
                 .toList();
     }
 
@@ -59,6 +57,8 @@ public class CollectionService {
 
             var savedCollection = this.collectionsRepository.save(collection);
 
+            savedCollection.addCollectorCollection(optionalCollector.get());
+
             this.collectionsRepository.flush();
 
             return Optional.of(savedCollection);
@@ -69,7 +69,7 @@ public class CollectionService {
 
     public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
         return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
-                .map(CollectorCollectionEntity::getCollections)
+                .map(CollectorCollectionEntity::getCollection)
                 .filter(collection -> collection.getId().equals(collectionId))
                 .findFirst();
     }

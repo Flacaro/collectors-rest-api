@@ -12,10 +12,10 @@ public class CollectorCollectionEntity implements Serializable {
     private Long id;
 
     @ManyToOne
-    private CollectorEntity collectors;
+    private CollectorEntity collector;
 
     @ManyToOne
-    private CollectionEntity collections;
+    private CollectionEntity collection;
     
 
     private boolean isOwner;
@@ -23,15 +23,15 @@ public class CollectorCollectionEntity implements Serializable {
     public CollectorCollectionEntity() {
     }
 
-    public CollectorCollectionEntity(CollectorEntity collectors, CollectionEntity collection) {
-        this.collectors = collectors;
-        this.collections = collection;
+    public CollectorCollectionEntity(CollectorEntity collector, CollectionEntity collection) {
+        this.collector = collector;
+        this.collection = collection;
     }
 
 
-    public CollectorCollectionEntity(CollectorEntity collectors, CollectionEntity collection, boolean isOwner) {
-        this.collectors = collectors;
-        this.collections = collection;
+    public CollectorCollectionEntity(CollectorEntity collector, CollectionEntity collection, boolean isOwner) {
+        this.collector = collector;
+        this.collection = collection;
         this.isOwner = isOwner;
     }
 
@@ -40,24 +40,24 @@ public class CollectorCollectionEntity implements Serializable {
         this.id = id;
     }
 
-    public CollectorEntity getCollectors() {
-        return collectors;
+    public CollectorEntity getCollector() {
+        return collector;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setCollectors(CollectorEntity collectors) {
-        this.collectors = collectors;
+    public void setCollector(CollectorEntity collectors) {
+        this.collector = collectors;
     }
 
-    public CollectionEntity getCollections() {
-        return collections;
+    public CollectionEntity getCollection() {
+        return collection;
     }
 
-    public void setCollections(CollectionEntity collections) {
-        this.collections = collections;
+    public void setCollection(CollectionEntity collections) {
+        this.collection = collections;
     }
 
     public boolean isOwner() {

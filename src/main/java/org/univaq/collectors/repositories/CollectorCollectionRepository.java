@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public interface CollectorCollectionRepository extends CrudRepository<CollectorCollectionEntity, Long> {
 
-    @Query("select c from collector_collection c where c.collectors.id = ?1")
+    @Query("select c from collector_collection c where c.collector.id = ?1")
     List<CollectorCollectionEntity> getCollectionByCollectorId(Long collectorId);
 
-    @Query("select c from collector_collection c where c.collectors.id = ?1 and c.collections.id=?2" )
+    @Query("select c from collector_collection c where c.collector.id = ?1 and c.collection.id=?2" )
     Optional<CollectorCollectionEntity> findCollectionByIdAndCollectorById (Long collectorId, Long collectionId);
 
 }

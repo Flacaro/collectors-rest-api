@@ -27,7 +27,7 @@ public class CollectionEntity {
 
 
     @OneToMany(
-            mappedBy = "collections",
+            mappedBy = "collection",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<CollectorCollectionEntity> collectors = new ArrayList<>();

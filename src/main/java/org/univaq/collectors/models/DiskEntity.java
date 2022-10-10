@@ -1,4 +1,6 @@
 package org.univaq.collectors.models;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.Objects;
@@ -31,11 +33,9 @@ public class DiskEntity {
     @Column(nullable = false)
     private String format;
 
-    @NotBlank
-    @Column(nullable = true)
+    @Column()
     private Integer barcode;
 
-    @NotBlank
     @Column(nullable = false)
     private Integer duplicate;
 
