@@ -51,5 +51,15 @@ public class CollectorsController {
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{collectorId}/collections/{collectionId}")
+    public ResponseEntity<CollectionEntity> getCollectorCollectionById(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId
+    ) {
+        var result = this.collectionService.getCollectorCollectionById(collectorId, collectionId);
+
+        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
 }

@@ -66,5 +66,12 @@ public class CollectionService {
         return Optional.empty();
     }
 
+    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
+        return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
+                .map(CollectorCollectionEntity::getCollections)
+                .filter(collection -> collection.getId().equals(collectionId))
+                .findFirst();
+    }
+
 }
 
