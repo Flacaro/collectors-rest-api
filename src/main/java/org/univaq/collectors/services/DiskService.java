@@ -6,14 +6,22 @@ import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.univaq.collectors.models.DiskEntity;
+import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.DisksRepository;
 
 @Service
 public class DiskService {
 
     private final DisksRepository disksRepository;
-    public DiskService(DisksRepository disksRepository) {
+    private final CollectionsRepository collectionsRepository;
+
+    public DiskService(
+        DisksRepository disksRepository,
+        CollectionsRepository collectionsRepository
+        ) {
         this.disksRepository = disksRepository;
+        this.collectionsRepository = collectionsRepository;
+    
     }
     
     public List<DiskEntity> getAll (int page, int size, Optional<String> optionalTitle){
@@ -31,7 +39,21 @@ public class DiskService {
         .orElseGet(() -> this.disksRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
+    public Optional<DiskEntity> saveDisk(DiskEntity newdisk, Long diskId) {
+        var optionalCollection = this.collectionsRepository.findById(diskId);
+        if (optionalCollection.isPresent()){
 
+            var collection = optionalCollection.get();
+
+            var savedDisk = this.disksRepository.save(newdisk);
+
+            savedDisk.addDisk(newdisk);
+
+            this.disksRepository.flush();
+
+            return Optional.of(savedDisk);
+        }
+        return Optional.empty();
+    }
 }
-
 
