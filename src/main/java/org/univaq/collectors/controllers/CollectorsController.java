@@ -51,12 +51,33 @@ public class CollectorsController {
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+
     @GetMapping("/{collectorId}/collections/{collectionId}")
     public ResponseEntity<CollectionEntity> getCollectorCollectionById(
             @PathVariable("collectorId") Long collectorId,
             @PathVariable("collectionId") Long collectionId
     ) {
         var result = this.collectionService.getCollectorCollectionById(collectorId, collectionId);
+
+        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{collectorId}/collections/{collectionId}")
+    public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId
+    ) {
+            this.collectionService.deleteCollectorCollectionById(collectorId, collectionId);
+            return ResponseEntity.ok().build();
+        }
+
+    @PutMapping("/{collectorId}/collections/{collectionId}")
+    public ResponseEntity<CollectionEntity> updateCollectorCollectionById(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId,
+            @RequestBody CollectionEntity collection
+    ) {
+        var result = this.collectionService.updateCollectorCollectionById(collectorId, collectionId, collection);
 
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }

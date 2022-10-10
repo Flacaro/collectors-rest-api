@@ -31,7 +31,6 @@ public class DiskService {
         .orElseGet(() -> this.disksRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
-
 }
 
 

@@ -144,6 +144,7 @@ public class DiskEntity {
         this.collection = collection;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

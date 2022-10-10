@@ -115,6 +115,7 @@ public class TrackEntity {
         this.disk = disk;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
