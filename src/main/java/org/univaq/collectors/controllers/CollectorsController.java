@@ -1,14 +1,16 @@
 package org.univaq.collectors.controllers;
-import java.util.List;
-import java.util.Optional;
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorEntity;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
+import org.univaq.collectors.services.DiskService;
+
+import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -19,18 +21,20 @@ public class CollectorsController {
 
     private final CollectorService collectorService;
     private final CollectionService collectionService;
+    private final DiskService diskService;
 
-    public CollectorsController(CollectorService collectorService, CollectionService collectionService) {
+    public CollectorsController(CollectorService collectorService, CollectionService collectionService, DiskService diskService) {
         this.collectorService = collectorService;
         this.collectionService = collectionService;
+        this.diskService = diskService;
     }
 
-    
+
     @GetMapping
     public ResponseEntity<List<CollectorEntity>> getAll(
-        @RequestParam(required = false, defaultValue = "0") Integer page, 
-        @RequestParam(required = false, defaultValue = "10") Integer size,
-        @RequestParam() Optional<String> email
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size,
+            @RequestParam() Optional<String> email
     ) {
         return ResponseEntity.ok(this.collectorService.getAll(page, size, email));
     }
@@ -51,6 +55,17 @@ public class CollectorsController {
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    //aggiungi nuovo disco in collection
+    @PostMapping("/{collectorId}/collections/{collectionId}/disks")
+    public ResponseEntity<DiskEntity> saveDisk(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId,
+            @RequestBody DiskEntity disk
+    ) {
+        var optionalDisk = this.diskService.saveDisk(disk, collectionId, collectorId);
+        return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
     @GetMapping("/{collectorId}/collections/{collectionId}")
     public ResponseEntity<CollectionEntity> getCollectorCollectionById(
@@ -58,18 +73,18 @@ public class CollectorsController {
             @PathVariable("collectionId") Long collectionId
     ) {
         var result = this.collectionService.getCollectorCollectionById(collectorId, collectionId);
-
-        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok().build();
     }
+
 
     @DeleteMapping("/{collectorId}/collections/{collectionId}")
     public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
             @PathVariable("collectorId") Long collectorId,
             @PathVariable("collectionId") Long collectionId
     ) {
-            this.collectionService.deleteCollectorCollectionById(collectorId, collectionId);
-            return ResponseEntity.ok().build();
-        }
+        this.collectionService.deleteCollectorCollectionById(collectorId, collectionId);
+        return ResponseEntity.ok().build();
+    }
 
     @PutMapping("/{collectorId}/collections/{collectionId}")
     public ResponseEntity<CollectionEntity> updateCollectorCollectionById(

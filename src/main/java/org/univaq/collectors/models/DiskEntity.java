@@ -25,10 +25,6 @@ public class DiskEntity {
 
     @NotBlank
     @Column(nullable = false)
-    private String diskType;
-
-    @NotBlank
-    @Column(nullable = false)
     private String state;
 
     @NotBlank
@@ -51,12 +47,11 @@ public class DiskEntity {
     }
     
 
-    public DiskEntity(Long id, String title, String author, String label, String diskType,  String state, String format, Integer barcode, Integer duplicate, CollectionEntity collection) {
+    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate, CollectionEntity collection) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.label = label;
-        this.diskType = diskType;
         this.state = state;
         this.format = format;
         this.barcode = barcode;
@@ -94,14 +89,6 @@ public class DiskEntity {
 
     public void setLabel(String label) {
         this.label = label;
-    }
-
-    public String getDiskType() {
-        return diskType;
-    }
-
-    public void setDiskType(String diskType) {
-        this.diskType = diskType;
     }
 
     public String getState() {
@@ -150,12 +137,12 @@ public class DiskEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DiskEntity that = (DiskEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(author, that.author) && Objects.equals(label, that.label) && Objects.equals(diskType, that.diskType) && Objects.equals(state, that.state) && Objects.equals(format, that.format) && Objects.equals(barcode, that.barcode) && Objects.equals(duplicate, that.duplicate) && Objects.equals(collection, that.collection);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(author, that.author) && Objects.equals(label, that.label) && Objects.equals(state, that.state) && Objects.equals(format, that.format) && Objects.equals(barcode, that.barcode) && Objects.equals(duplicate, that.duplicate) && Objects.equals(collection, that.collection);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, label, diskType, state, format, barcode, duplicate, collection);
+        return Objects.hash(id, title, author, label, state, format, barcode, duplicate, collection);
     }
 
 
