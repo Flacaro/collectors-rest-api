@@ -66,6 +66,27 @@ public class CollectorsController {
         return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    //elimina disco dalla colezione 
+    @DeleteMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
+    public ResponseEntity<DiskEntity> deleteDiskById(
+        @PathVariable ("collectorId") Long collectorId,
+        @PathVariable ("collectionId") Long collectionId,
+        @PathVariable ("diskId") Long diskId
+    ){
+         this.diskService.deleteDiskById( collectionId, collectorId, diskId);
+        return ResponseEntity.ok().build();
+    }
+
+    //visualizza disco specifico
+    @GetMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
+    public ResponseEntity<Optional<DiskEntity>> getDiskId(
+        @PathVariable ("collectorId") Long collectorId,
+        @PathVariable ("collectionId") Long collectionId,
+        @PathVariable ("diskId") Long diskId
+    ){
+        var result = this.diskService.getDiskId(collectionId, collectorId, diskId);
+        return ResponseEntity.ok(result);
+    }
 
     @GetMapping("/{collectorId}/collections/{collectionId}")
     public ResponseEntity<CollectionEntity> getCollectorCollectionById(
