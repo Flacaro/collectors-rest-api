@@ -40,10 +40,11 @@ public class CollectorsController {
     }
 
     @GetMapping("/{collectorId}/collections")
-    public ResponseEntity<List<CollectionEntity>> getCollectorCollection(@PathVariable("collectorId") Long collectorId) {
-        var result = this.collectionService.getCollectionByCollectorId(collectorId);
+    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(@PathVariable("collectorId") Long collectorId) {
+        var result = this.collectionService.getCollectionsByCollectorId(collectorId);
         return ResponseEntity.ok(result);
     }
+
 
     @PostMapping("/{collectorId}/collections")
     public ResponseEntity<CollectionEntity> saveCollectorCollection(
@@ -68,12 +69,12 @@ public class CollectorsController {
 
 
     @GetMapping("/{collectorId}/collections/{collectionId}")
-    public ResponseEntity<CollectionEntity> getCollectorCollectionById(
+    public ResponseEntity<Optional<CollectionEntity>> getCollectorCollectionById(
             @PathVariable("collectorId") Long collectorId,
             @PathVariable("collectionId") Long collectionId
     ) {
         var result = this.collectionService.getCollectorCollectionById(collectorId, collectionId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(result);
     }
 
 

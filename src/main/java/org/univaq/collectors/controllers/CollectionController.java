@@ -10,7 +10,7 @@ import org.univaq.collectors.services.CollectionService;
 
 
 @RestController
-@RequestMapping("/collections")
+@RequestMapping("public/collections")
 public class CollectionController {
 
     private final CollectionService collectionService;
@@ -28,7 +28,6 @@ public class CollectionController {
      ) {
             return ResponseEntity.ok(this.collectionService.getAll(page, size, name));
      }
-
 
 
     

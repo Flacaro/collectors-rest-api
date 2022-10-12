@@ -59,9 +59,9 @@ public class CollectionEntity {
         return status;
     }
 
-    public String setStatus(String status) {
+    public void setStatus(String status) {
         this.status = status;
-        return status;
+
     }
 
     public void addCollectorCollection(CollectorEntity collector) {
@@ -70,14 +70,13 @@ public class CollectionEntity {
 //        collector.getCollections().add(collectorCollection);
     }
 
+
     //update a collection of collector
-//    public void updateCollectorCollection(CollectorEntity collector, String status) {
-//        CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
-//        var collection = collectorCollection.getCollections();
-//        collection.setName(collection.getName());
-//        collection.setStatus(status);
-//        collection.addCollectorCollection(collector);
-//    }
+    public void updateCollectorCollection(String name, String status) {
+        CollectionEntity collectorCollection = new CollectionEntity();
+        collectorCollection.setName(name);
+        collectorCollection.setStatus(status);
+    }
 
 
     @Override

@@ -43,17 +43,30 @@ public class CollectionService {
     }
 
 
-    public List<CollectionEntity> getCollectionByCollectorId(Long collectorId) {
+    public List<CollectionEntity> getCollectionsByCollectorId(Long collectorId) {
         return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
                 .map(CollectorCollectionEntity::getCollection)
                 .toList();
     }
 
+    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            var optionalCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            if (optionalCollection.isPresent() && optionalCollection.get().getCollection().getId().equals(collectionId)) {
+                return this.collectionsRepository.findById(collectionId);
+            }
+        }
+        return Optional.empty();
+        }
+
+
+
+    //controllo se l'id dell'utente e' quello dell'utente loggato
     public Optional<CollectionEntity> saveCollectorCollection(CollectionEntity collection, Long collectorId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-
-            //var collector = optionalCollector.get();
 
             var savedCollection = this.collectionsRepository.save(collection);
 
@@ -67,12 +80,14 @@ public class CollectionService {
         return Optional.empty();
     }
 
-    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
-        return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
-                .map(CollectorCollectionEntity::getCollection)
-                .filter(collection -> collection.getId().equals(collectionId))
-                .findFirst();
-    }
+    //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
+    // che corrispondono al predicato specificato.
+//    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
+//        return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
+//                .map(CollectorCollectionEntity::getCollection)
+//                .filter(collection -> collection.getId().equals(collectionId))
+//                .findFirst();
+//    }
 
     public void deleteCollectorCollectionById(Long collectorId, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
@@ -90,12 +105,12 @@ public class CollectionService {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
             var collector = optionalCollector.get();
-            var optionalCollection = this.collectionsRepository.findById(collectionId);
-            if (optionalCollection.isPresent()) {
-                var collectionToUpdate = optionalCollection.get();
-                collectionToUpdate.setName(collection.getName());
-                collectionToUpdate.setStatus(collection.getStatus());
+            var collectorCollectionOptional = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (collectorCollectionOptional.isPresent() && collectorCollectionOptional.get().getCollection().getId().equals(collectionId)) {
+                var collectionToUpdate = this.collectionsRepository.findById(collection.getId()).get();
+                collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getStatus());
                 return Optional.of(this.collectionsRepository.save(collectionToUpdate));
+
             }
         }
         return Optional.empty();
@@ -105,7 +120,6 @@ public class CollectionService {
 
 }
 
-    //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
-    // che corrispondono al predicato specificato.
+
 
 
