@@ -1,5 +1,6 @@
 package org.univaq.collectors.services;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
+
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
@@ -34,32 +36,41 @@ public class CollectionService {
 
     public List<CollectionEntity> getAll(int page, int size, Optional<String> optionalname) {
         return optionalname
-                .map(name -> this.collectionsRepository.findByName(name))
+                .map(this.collectionsRepository::findByName)
                 .map(collectionOptional -> collectionOptional
-                        .map(collection -> List.of(collection))
-                        .orElseGet(() -> List.of())
+                        .map(List::of)
+                        .orElseGet(List::of)
                 )
                 .orElseGet(() -> this.collectionsRepository.findAll(PageRequest.of(page, size)).toList());
     }
 
 
+    //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
+    // che corrispondono al predicato specificato.
     public List<CollectionEntity> getCollectionsByCollectorId(Long collectorId) {
-        return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
-                .map(CollectorCollectionEntity::getCollection)
-                .toList();
+        var collector = this.collectorsRepository.findById(collectorId);
+        if (collector.isPresent()) {
+            var collectionList = this.collectorCollectionRepository.getCollectionByCollectorId(collectorId);
+            return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
+        }
+        return List.of();
+
     }
 
-    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
+    public Optional<CollectionEntity> getCollectorCollectionById( Long collectorId, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
             var collector = optionalCollector.get();
-            var optionalCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
-            if (optionalCollection.isPresent() && optionalCollection.get().getCollection().getId().equals(collectionId)) {
-                return this.collectionsRepository.findById(collectionId);
+            var collectorCollectionOptional = this.collectorCollectionRepository
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (collectorCollectionOptional.isPresent()) {
+                var collectorCollection = collectorCollectionOptional.get();
+                return Optional.of(collectorCollection.getCollection());
             }
         }
         return Optional.empty();
-        }
+    }
+
 
 
 
@@ -80,14 +91,6 @@ public class CollectionService {
         return Optional.empty();
     }
 
-    //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
-    // che corrispondono al predicato specificato.
-//    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
-//        return this.collectorCollectionRepository.getCollectionByCollectorId(collectorId).stream()
-//                .map(CollectorCollectionEntity::getCollection)
-//                .filter(collection -> collection.getId().equals(collectionId))
-//                .findFirst();
-//    }
 
     public void deleteCollectorCollectionById(Long collectorId, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);

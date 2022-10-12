@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.univaq.collectors.models.CollectionEntity;
-import org.univaq.collectors.models.CollectorCollectionEntity;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;

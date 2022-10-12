@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.univaq.collectors.models.CollectionEntity;
-import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 
 
@@ -23,23 +20,18 @@ public class CollectorService {
 
 
     public List<CollectorEntity> getAll(int page, int size, Optional<String> optionalEmail) {
-
-    // if(optionalEmail.isPresent()) {
-    //     var collectorOptional = this.collectorsRepository.findByEmail(optionalEmail.get());
-    //     if(collectorOptional.isPresent()) {
-    //       return List.of(collectorOptional.get());
-    //     }
-    // } else {
-    //     return this.collectorsRepository.findAll(PageRequest.of(page, size)).toList();
-    // }
-
         return optionalEmail
-        .map(email -> this.collectorsRepository.findByEmail(email))
+        .map(this.collectorsRepository::findByEmail)
         .map(collectorOptional -> collectorOptional
-            .map(collector -> List.of(collector))
-            .orElseGet(() -> List.of())
+            .map(List::of)
+            .orElseGet(List::of)
         )
         .orElseGet(() -> this.collectorsRepository.findAll(PageRequest.of(page, size)).toList());
+    }
+
+    public CollectorEntity getCollectorByEmail(String email) {
+        var collector = this.collectorsRepository.findByEmail(email);
+        return collector.orElse(null);
     }
 
 

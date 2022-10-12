@@ -1,4 +1,4 @@
-package org.univaq.collectors.controllers;
+package org.univaq.collectors.controllers.Public;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/collectors")
+@RequestMapping("public/collectors")
 public class CollectorsController {
 
     //private final Logger logger = LoggerFactory.getLogger(CollectorsController.class);
@@ -39,22 +39,22 @@ public class CollectorsController {
         return ResponseEntity.ok(this.collectorService.getAll(page, size, email));
     }
 
-    @GetMapping("/{collectorId}/collections")
-    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(@PathVariable("collectorId") Long collectorId) {
-        var result = this.collectionService.getCollectionsByCollectorId(collectorId);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/{collectorId}/collections")
+//    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(@PathVariable("collectorId") Long collectorId) {
+//        var result = this.collectionService.getCollectionsByCollectorId(collectorId);
+//        return ResponseEntity.ok(result);
+//    }
 
 
-    @PostMapping("/{collectorId}/collections")
-    public ResponseEntity<CollectionEntity> saveCollectorCollection(
-            @PathVariable("collectorId") Long collectorId,
-            @RequestBody CollectionEntity collection
-    ) {
-        var result = this.collectionService.saveCollectorCollection(collection, collectorId);
-
-        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//    @PostMapping("/{collectorId}/collections")
+//    public ResponseEntity<CollectionEntity> saveCollectorCollection(
+//            @PathVariable("collectorId") Long collectorId,
+//            @RequestBody CollectionEntity collection
+//    ) {
+//        var result = this.collectionService.saveCollectorCollection(collection, collectorId);
+//
+//        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
     //aggiungi nuovo disco in collection
     @PostMapping("/{collectorId}/collections/{collectionId}/disks")

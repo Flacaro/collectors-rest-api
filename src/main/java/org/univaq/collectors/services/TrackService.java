@@ -2,7 +2,6 @@ package org.univaq.collectors.services;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.models.TrackEntity;
 import org.univaq.collectors.repositories.TracksRepository;
 

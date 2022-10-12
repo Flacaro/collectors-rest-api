@@ -1,4 +1,4 @@
-package org.univaq.collectors.controllers;
+package org.univaq.collectors.controllers.Public;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

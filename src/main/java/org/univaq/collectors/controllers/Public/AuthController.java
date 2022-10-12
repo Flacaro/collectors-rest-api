@@ -1,4 +1,4 @@
-package org.univaq.collectors.controllers;
+package org.univaq.collectors.controllers.Public;
 
 import javax.validation.Valid;
 

@@ -1,4 +1,4 @@
-package org.univaq.collectors.controllers;
+package org.univaq.collectors.controllers.Public;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +28,8 @@ public class CollectionController {
      ) {
             return ResponseEntity.ok(this.collectionService.getAll(page, size, name));
      }
+
+
 
 
     
