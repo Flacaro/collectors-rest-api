@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("public/collectors")
-public class CollectorsController {
+public class CollectorController {
 
     //private final Logger logger = LoggerFactory.getLogger(CollectorsController.class);
 
@@ -23,7 +23,7 @@ public class CollectorsController {
     private final CollectionService collectionService;
     private final DiskService diskService;
 
-    public CollectorsController(CollectorService collectorService, CollectionService collectionService, DiskService diskService) {
+    public CollectorController(CollectorService collectorService, CollectionService collectionService, DiskService diskService) {
         this.collectorService = collectorService;
         this.collectionService = collectionService;
         this.diskService = diskService;
@@ -39,11 +39,11 @@ public class CollectorsController {
         return ResponseEntity.ok(this.collectorService.getAll(page, size, email));
     }
 
-//    @GetMapping("/{collectorId}/collections")
-//    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(@PathVariable("collectorId") Long collectorId) {
-//        var result = this.collectionService.getCollectionsByCollectorId(collectorId);
-//        return ResponseEntity.ok(result);
-//    }
+    @GetMapping("/{collectorId}/collections")
+    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(@PathVariable("collectorId") Long collectorId) {
+        var result = this.collectionService.getPublicCollectionsByCollectorId(collectorId);
+        return ResponseEntity.ok(result);
+    }
 
 
 //    @PostMapping("/{collectorId}/collections")
@@ -57,26 +57,26 @@ public class CollectorsController {
 //    }
 
     //aggiungi nuovo disco in collection
-    @PostMapping("/{collectorId}/collections/{collectionId}/disks")
-    public ResponseEntity<DiskEntity> saveDisk(
-            @PathVariable("collectorId") Long collectorId,
-            @PathVariable("collectionId") Long collectionId,
-            @RequestBody DiskEntity disk
-    ) {
-        var optionalDisk = this.diskService.saveDisk(disk, collectionId, collectorId);
-        return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//    @PostMapping("/{collectorId}/collections/{collectionId}/disks")
+//    public ResponseEntity<DiskEntity> saveDisk(
+//            @PathVariable("collectorId") Long collectorId,
+//            @PathVariable("collectionId") Long collectionId,
+//            @RequestBody DiskEntity disk
+//    ) {
+//        var optionalDisk = this.diskService.saveDisk(disk, collectionId, collectorId);
+//        return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
     //elimina disco dalla colezione 
-    @DeleteMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
-    public ResponseEntity<DiskEntity> deleteDiskById(
-        @PathVariable ("collectorId") Long collectorId,
-        @PathVariable ("collectionId") Long collectionId,
-        @PathVariable ("diskId") Long diskId
-    ){
-         this.diskService.deleteDiskById( collectionId, collectorId, diskId);
-        return ResponseEntity.ok().build();
-    }
+//    @DeleteMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
+//    public ResponseEntity<DiskEntity> deleteDiskById(
+//        @PathVariable ("collectorId") Long collectorId,
+//        @PathVariable ("collectionId") Long collectionId,
+//        @PathVariable ("diskId") Long diskId
+//    ){
+//         this.diskService.deleteDiskById( collectionId, collectorId, diskId);
+//        return ResponseEntity.ok().build();
+//    }
 
     //visualizza disco specifico
     @GetMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
@@ -99,25 +99,25 @@ public class CollectorsController {
     }
 
 
-    @DeleteMapping("/{collectorId}/collections/{collectionId}")
-    public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
-            @PathVariable("collectorId") Long collectorId,
-            @PathVariable("collectionId") Long collectionId
-    ) {
-        this.collectionService.deleteCollectorCollectionById(collectorId, collectionId);
-        return ResponseEntity.ok().build();
-    }
+//    @DeleteMapping("/{collectorId}/collections/{collectionId}")
+//    public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
+//            @PathVariable("collectorId") Long collectorId,
+//            @PathVariable("collectionId") Long collectionId
+//    ) {
+//        this.collectionService.deleteCollectorCollectionById(collectorId, collectionId);
+//        return ResponseEntity.ok().build();
+//    }
 
-    @PutMapping("/{collectorId}/collections/{collectionId}")
-    public ResponseEntity<CollectionEntity> updateCollectorCollectionById(
-            @PathVariable("collectorId") Long collectorId,
-            @PathVariable("collectionId") Long collectionId,
-            @RequestBody CollectionEntity collection
-    ) {
-        var result = this.collectionService.updateCollectorCollectionById(collectorId, collectionId, collection);
-
-        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//    @PutMapping("/{collectorId}/collections/{collectionId}")
+//    public ResponseEntity<CollectionEntity> updateCollectorCollectionById(
+//            @PathVariable("collectorId") Long collectorId,
+//            @PathVariable("collectionId") Long collectionId,
+//            @RequestBody CollectionEntity collection
+//    ) {
+//        var result = this.collectionService.updateCollectorCollectionById(collectorId, collectionId, collection);
+//
+//        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
 
 }

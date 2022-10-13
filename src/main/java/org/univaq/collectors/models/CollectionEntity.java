@@ -1,4 +1,7 @@
 package org.univaq.collectors.models;
+import net.bytebuddy.implementation.bind.annotation.Default;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +27,9 @@ public class CollectionEntity {
     @NotBlank
     @Column(nullable = false)
     private String status;
+
+    @Column(nullable = false)
+    private boolean isPublic;
 
 
     @OneToMany(
@@ -64,6 +70,14 @@ public class CollectionEntity {
 
     }
 
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
+    }
+
     public void addCollectorCollection(CollectorEntity collector) {
         CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
         collectors.add(collectorCollection);
@@ -78,17 +92,16 @@ public class CollectionEntity {
         collectorCollection.setStatus(status);
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectionEntity that = (CollectionEntity) o;
-        return id.equals(that.id) && Objects.equals(name, that.name) && Objects.equals(status, that.status) && Objects.equals(collectors, that.collectors);
+        return isPublic == that.isPublic && id.equals(that.id) && name.equals(that.name) && status.equals(that.status) && collectors.equals(that.collectors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, collectors);
+        return Objects.hash(id, name, status, isPublic, collectors);
     }
 }

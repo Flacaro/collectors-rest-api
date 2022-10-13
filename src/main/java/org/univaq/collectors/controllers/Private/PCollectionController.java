@@ -25,22 +25,21 @@ public class PCollectionController {
 
     //prendo tutte le collezioni dell'utente loggato
     @GetMapping
-    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(Principal principal) {
+    public ResponseEntity<List<CollectionEntity>> getPersonalCollections(Principal principal) {
         var collector = this.collectorService.getCollectorByEmail(principal.getName());
-        var result = this.collectionService.getCollectionsByCollectorId(collector.getId());
+        var result = this.collectionService.getPersonalCollections(collector.getId());
         return ResponseEntity.ok(result);
 
     }
 
-    @PostMapping("/{collectionId}")
+    @PostMapping
     public ResponseEntity<CollectionEntity> saveCollectorCollection(
-            @PathVariable("collectionId") Long collectionId,
             @RequestBody CollectionEntity collection,
             Principal principal
     ) {
         var collector = this.collectorService.getCollectorByEmail(principal.getName());
-        var result = this.collectionService.saveCollectorCollection(collection, collector.getId()).get();
-        return ResponseEntity.ok(result);
+        var result = this.collectionService.saveCollectorCollection(collection, collector.getId());
+        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
 

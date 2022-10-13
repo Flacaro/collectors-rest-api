@@ -1,6 +1,7 @@
 package org.univaq.collectors.services;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,19 +43,37 @@ public class CollectionService {
                         .orElseGet(List::of)
                 )
                 .orElseGet(() -> this.collectionsRepository.findAll(PageRequest.of(page, size)).toList());
+
     }
 
 
     //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
     // che corrispondono al predicato specificato.
-    public List<CollectionEntity> getCollectionsByCollectorId(Long collectorId) {
+    public List<CollectionEntity> getPublicCollectionsByCollectorId(Long collectorId) {
+        List<CollectionEntity> publicCollections = new ArrayList<>();
         var collector = this.collectorsRepository.findById(collectorId);
         if (collector.isPresent()) {
-            var collectionList = this.collectorCollectionRepository.getCollectionByCollectorId(collectorId);
-            return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
+                var publicCollectorCollections = this.collectorCollectionRepository.getPublicCollectionsByCollectorId(collectorId);
+                for (var publicCollectorCollection : publicCollectorCollections) {
+                    var collectionEntity = this.collectionsRepository.findById(publicCollectorCollection.getCollection().getId());
+                    if (collectionEntity.isPresent()) {
+                        publicCollections.add(collectionEntity.get());
+                    }
+                }
+
+                return publicCollections;
+            }
+        return List.of();
+    }
+
+
+    public List<CollectionEntity> getPersonalCollections(Long collectorId) {
+        var collector = this.collectorsRepository.findById(collectorId);
+        if (collector.isPresent()) {
+            var collectionList = this.collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
+                return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
         }
         return List.of();
-
     }
 
     public Optional<CollectionEntity> getCollectorCollectionById( Long collectorId, Long collectionId) {

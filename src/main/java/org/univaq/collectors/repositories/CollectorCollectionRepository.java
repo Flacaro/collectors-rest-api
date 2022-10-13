@@ -12,9 +12,11 @@ import java.util.Optional;
 public interface CollectorCollectionRepository extends JpaRepository<CollectionEntity, Long> {
 
     @Query("select c from collector_collection c where c.collector.id = ?1")
-    List<CollectorCollectionEntity> getCollectionByCollectorId(Long collectorId);
+    List<CollectorCollectionEntity> getCollectionsByCollectorId(Long collectorId);
 
     @Query("select c from collector_collection c where c.collector.id = ?1 and c.collection.id=?2" )
     Optional<CollectorCollectionEntity> findCollectionByIdAndCollectorById (Long collectorId, Long collectionId);
 
+    @Query("select c from collector_collection c where c.collector.id = ?1 and c.collection.isPublic = true")
+    List<CollectorCollectionEntity> getPublicCollectionsByCollectorId(Long collectorId);
 }

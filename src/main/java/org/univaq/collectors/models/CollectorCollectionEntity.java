@@ -1,5 +1,6 @@
 package org.univaq.collectors.models;
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.*;
 
@@ -19,6 +20,7 @@ public class CollectorCollectionEntity implements Serializable {
     
 
     private boolean isOwner;
+
     
     public CollectorCollectionEntity() {
     }
@@ -66,5 +68,19 @@ public class CollectorCollectionEntity implements Serializable {
 
     public void setOwner(boolean owner) {
         isOwner = owner;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CollectorCollectionEntity that = (CollectorCollectionEntity) o;
+        return isOwner == that.isOwner && id.equals(that.id) && collector.equals(that.collector) && collection.equals(that.collection);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, collector, collection, isOwner);
     }
 }
