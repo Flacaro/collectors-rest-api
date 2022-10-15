@@ -46,15 +46,6 @@ public class CollectorController {
     }
 
 
-//    @PostMapping("/{collectorId}/collections")
-//    public ResponseEntity<CollectionEntity> saveCollectorCollection(
-//            @PathVariable("collectorId") Long collectorId,
-//            @RequestBody CollectionEntity collection
-//    ) {
-//        var result = this.collectionService.saveCollectorCollection(collection, collectorId);
-//
-//        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-//    }
 
     //aggiungi nuovo disco in collection
 //    @PostMapping("/{collectorId}/collections/{collectionId}/disks")
@@ -98,26 +89,6 @@ public class CollectorController {
         return ResponseEntity.ok(result);
     }
 
-
-//    @DeleteMapping("/{collectorId}/collections/{collectionId}")
-//    public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
-//            @PathVariable("collectorId") Long collectorId,
-//            @PathVariable("collectionId") Long collectionId
-//    ) {
-//        this.collectionService.deleteCollectorCollectionById(collectorId, collectionId);
-//        return ResponseEntity.ok().build();
-//    }
-
-//    @PutMapping("/{collectorId}/collections/{collectionId}")
-//    public ResponseEntity<CollectionEntity> updateCollectorCollectionById(
-//            @PathVariable("collectorId") Long collectorId,
-//            @PathVariable("collectionId") Long collectionId,
-//            @RequestBody CollectionEntity collection
-//    ) {
-//        var result = this.collectionService.updateCollectorCollectionById(collectorId, collectionId, collection);
-//
-//        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-//    }
 
 
 }

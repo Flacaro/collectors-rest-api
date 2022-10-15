@@ -19,4 +19,5 @@ public interface CollectorCollectionRepository extends JpaRepository<CollectionE
 
     @Query("select c from collector_collection c where c.collector.id = ?1 and c.collection.isPublic = true")
     List<CollectorCollectionEntity> getPublicCollectionsByCollectorId(Long collectorId);
+
 }

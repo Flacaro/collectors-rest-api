@@ -41,5 +41,29 @@ public class PCollectionController {
         var result = this.collectionService.saveCollectorCollection(collection, collector.getId());
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+
+    @DeleteMapping("/{collectionId}")
+    public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
+            @PathVariable("collectionId") Long collectionId,
+            Principal principal
+    ) {
+        var collector = this.collectorService.getCollectorByEmail(principal.getName());
+        this.collectionService.deleteCollectorCollectionById(collector.getId(), collectionId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{collectionId}")
+    public ResponseEntity<CollectionEntity> updateCollectorCollectionById(
+            @PathVariable("collectionId") Long collectionId,
+            @RequestBody CollectionEntity collection,
+            Principal principal
+    ) {
+        var collector = this.collectorService.getCollectorByEmail(principal.getName());
+        var result = this.collectionService.updateCollectorCollectionById(collector.getId(), collectionId, collection);
+        return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
 }
 

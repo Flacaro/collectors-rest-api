@@ -86,10 +86,11 @@ public class CollectionEntity {
 
 
     //update a collection of collector
-    public void updateCollectorCollection(String name, String status) {
+    public void updateCollectorCollection(String name, String status, boolean isPublic) {
         CollectionEntity collectorCollection = new CollectionEntity();
         collectorCollection.setName(name);
         collectorCollection.setStatus(status);
+        collectorCollection.setPublic(isPublic);
     }
 
     @Override

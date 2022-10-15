@@ -35,15 +35,16 @@ public class CollectionService {
         this.collectorsRepository = collectorsRepository;
     }
 
-    public List<CollectionEntity> getAll(int page, int size, Optional<String> optionalname) {
-        return optionalname
-                .map(this.collectionsRepository::findByName)
-                .map(collectionOptional -> collectionOptional
-                        .map(List::of)
-                        .orElseGet(List::of)
-                )
-                .orElseGet(() -> this.collectionsRepository.findAll(PageRequest.of(page, size)).toList());
+    public List<CollectionEntity> getAll(Optional<String> optionalname) {
+        //aggiungere page e size ma come?
+        var optionalName = optionalname.orElse("");
+        if (optionalName.isEmpty()) {
+            return this.collectionsRepository.getPublicCollections();
 
+        } else {
+            return this.collectionsRepository.getPublicCollectionsByName();
+
+        }
     }
 
 
@@ -114,7 +115,6 @@ public class CollectionService {
     public void deleteCollectorCollectionById(Long collectorId, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-            var collector = optionalCollector.get();
             var optionalCollection = this.collectionsRepository.findById(collectionId);
             if (optionalCollection.isPresent()) {
                 var collection = optionalCollection.get();
@@ -126,11 +126,10 @@ public class CollectionService {
     public Optional<CollectionEntity> updateCollectorCollectionById(Long collectorId, Long collectionId, CollectionEntity collection) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-            var collector = optionalCollector.get();
-            var collectorCollectionOptional = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            var collectorCollectionOptional = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
             if (collectorCollectionOptional.isPresent() && collectorCollectionOptional.get().getCollection().getId().equals(collectionId)) {
                 var collectionToUpdate = this.collectionsRepository.findById(collection.getId()).get();
-                collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getStatus());
+                collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getStatus(), collection.isPublic());
                 return Optional.of(this.collectionsRepository.save(collectionToUpdate));
 
             }

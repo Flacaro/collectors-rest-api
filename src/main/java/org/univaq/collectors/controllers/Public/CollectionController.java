@@ -22,11 +22,11 @@ public class CollectionController {
    
      @GetMapping
      public ResponseEntity<List<CollectionEntity>> getAll(
-         @RequestParam(required = false, defaultValue = "0") Integer page,
-         @RequestParam(required = false, defaultValue = "10") Integer size,
+//         @RequestParam(required = false, defaultValue = "0") Integer page,
+//         @RequestParam(required = false, defaultValue = "10") Integer size,
          @RequestParam() Optional<String> name
      ) {
-            return ResponseEntity.ok(this.collectionService.getAll(page, size, name));
+            return ResponseEntity.ok(this.collectionService.getAll(name));
      }
 
 
