@@ -34,7 +34,7 @@ public class CollectionService {
         this.collectorCollectionRepository = collectorCollectionRepository;
         this.collectorsRepository = collectorsRepository;
     }
-
+//lista collezioni pubbliche
     public List<CollectionEntity> getAll(Optional<String> optionalname) {
         //aggiungere page e size ma come?
         var optionalName = optionalname.orElse("");
@@ -77,6 +77,8 @@ public class CollectionService {
         return List.of();
     }
 
+
+//restituisce una collezione specifica del collezinista
     public Optional<CollectionEntity> getCollectorCollectionById( Long collectorId, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {

@@ -25,10 +25,10 @@ public class PCollectionController {
 
     //prendo tutte le collezioni dell'utente loggato
     @GetMapping
-    public ResponseEntity<List<CollectionEntity>> getPersonalCollections(Principal principal) {
-        var collector = this.collectorService.getCollectorByEmail(principal.getName());
-        var result = this.collectionService.getPersonalCollections(collector.getId());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<List<CollectionEntity>> getPersonalCollections(Principal principal) { //dal tokan prendo l'utente loggato principal
+        var collector = this.collectorService.getCollectorByEmail(principal.getName()); //servizio che prende collezionista dal email
+        var result = this.collectionService.getPersonalCollections(collector.getId()); //collezioni mie personali tramite query
+        return ResponseEntity.ok(result); //ritorna collezioni mie
 
     }
 

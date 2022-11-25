@@ -69,7 +69,7 @@ public class CollectionEntity {
         this.status = status;
 
     }
-
+//prendo collezioni pubbliche prima controllo
     public boolean isPublic() {
         return isPublic;
     }

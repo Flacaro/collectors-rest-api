@@ -22,4 +22,6 @@ public interface CollectionsRepository extends PagingAndSortingRepository<Collec
     @Query("select c from collection c where c.name like %?1% and c.isPublic = true")
     public List<CollectionEntity> getPublicCollectionsByName();
 
+
+
 }
