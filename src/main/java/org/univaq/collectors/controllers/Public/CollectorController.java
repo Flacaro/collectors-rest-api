@@ -40,43 +40,21 @@ public class CollectorController {
     }
 
     @GetMapping("/{collectorId}/collections")
-    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(@PathVariable("collectorId") Long collectorId) {
+    public ResponseEntity<List<CollectionEntity>> getCollectorCollections(
+            @PathVariable("collectorId") Long collectorId
+    ) {
         var result = this.collectionService.getPublicCollectionsByCollectorId(collectorId);
         return ResponseEntity.ok(result);
     }
 
 
-
-    //aggiungi nuovo disco in collection
-    @PostMapping("/{collectorId}/collections/{collectionId}/disks")
-    public ResponseEntity<DiskEntity> saveDisk(
-            @PathVariable("collectorId") Long collectorId,
-           @PathVariable("collectionId") Long collectionId,
-            @RequestBody DiskEntity disk
-   ) {
-        var optionalDisk = this.diskService.saveDisk(disk, collectionId, collectorId);
-       return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-   }
-
-    //elimina disco dalla colezione 
-//    @DeleteMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
-//    public ResponseEntity<DiskEntity> deleteDiskById(
-//        @PathVariable ("collectorId") Long collectorId,
-//        @PathVariable ("collectionId") Long collectionId,
-//        @PathVariable ("diskId") Long diskId
-//    ){
-//         this.diskService.deleteDiskById( collectionId, collectorId, diskId);
-//        return ResponseEntity.ok().build();
-//    }
-
-    //visualizza disco specifico
     @GetMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
-    public ResponseEntity<Optional<DiskEntity>> getDiskId(
+    public ResponseEntity<Optional<DiskEntity>> getDiskFromPublicCollection(
         @PathVariable ("collectorId") Long collectorId,
         @PathVariable ("collectionId") Long collectionId,
         @PathVariable ("diskId") Long diskId
     ){
-        var result = this.diskService.getDiskId(collectionId, collectorId, diskId);
+        var result = this.diskService.getDiskByIdFromPublicCollection(collectionId, collectorId, diskId);
         return ResponseEntity.ok(result);
     }
 

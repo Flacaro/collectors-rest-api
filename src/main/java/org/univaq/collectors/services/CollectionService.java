@@ -6,14 +6,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
 
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
+import org.univaq.collectors.repositories.DisksRepository;
 
 @Service
 public class CollectionService {
@@ -25,14 +28,19 @@ public class CollectionService {
 
     private final CollectorCollectionRepository collectorCollectionRepository;
 
+    private final DisksRepository disksRepository;
+
     public CollectionService(
             CollectionsRepository collectionsRepository,
             CollectorCollectionRepository collectorCollectionRepository,
-            CollectorsRepository collectorsRepository
+            CollectorsRepository collectorsRepository,
+            DisksRepository disksRepository
+
     ) {
         this.collectionsRepository = collectionsRepository;
         this.collectorCollectionRepository = collectorCollectionRepository;
         this.collectorsRepository = collectorsRepository;
+        this.disksRepository = disksRepository;
     }
 //lista collezioni pubbliche
     public List<CollectionEntity> getAll(Optional<String> optionalname) {
@@ -66,6 +74,7 @@ public class CollectionService {
             }
         return List.of();
     }
+
 
 
     public List<CollectionEntity> getPersonalCollections(Long collectorId) {
@@ -112,6 +121,21 @@ public class CollectionService {
 
         return Optional.empty();
     }
+
+    public List<DiskEntity> getPublicDisks(Long collectionId) {
+           var optionalCollection = this.collectionsRepository.findById(collectionId);
+           if (optionalCollection.isPresent()) {
+                var collection = optionalCollection.get();
+                if (collection.isPublic()) {
+                    var optionalDisk = this.disksRepository.findDisksFromCollectionId(collectionId);
+                    if (optionalDisk.isPresent()) {
+                        return optionalDisk.get();
+                    }
+                }
+            }
+            return List.of();
+        }
+
 
 
     public void deleteCollectorCollectionById(Long collectorId, Long collectionId) {

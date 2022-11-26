@@ -70,19 +70,19 @@ public class DiskService {
 
         return Optional.empty();
     }
-//elimina disco da collezione se collezione è mia
 
+//elimina disco dalla collezione privata
     public void deleteDiskById(Long collectionId, Long collectorId, Long diskId) {
-        var optionalCollector = this.collectorsRepository.findById(collectorId);   //trova id del collezionista
-        if (optionalCollector.isPresent()) { //se id è presente
-            var collector = optionalCollector.get(); //prendi id
+        var optionalCollector = this.collectorsRepository.findById(collectorId);   //trovo il collezionista
+        if (optionalCollector.isPresent()) { //se il collezionista e' presente
+            var collector = optionalCollector.get(); //prendo il collezionista
             var collectorCollectionOptional = this.collectorCollectionRepository
-                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId); //trova id della collezione che ha id collezionista
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId); //trovo la collezione del collezionista
 
-            if (collectorCollectionOptional.isPresent()) {//se id collezione è presente
+            if (collectorCollectionOptional.isPresent()) { //se la collezione e' presente
                 var collectorCollection = collectorCollectionOptional.get();
 
-                var optionalDisk = this.disksRepository.findById(diskId);
+                var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                 if (optionalDisk.isPresent()) {
                     var disk = optionalDisk.get();
                     this.disksRepository.delete(disk);
@@ -91,39 +91,39 @@ public class DiskService {
             }
         }
     }
-//prendo un disco della collezione se è pubblca (da fare anche privato): loggo vedo disco messo da te
-    public Optional<DiskEntity> getDiskId(Long collectionId, Long collectorId, Long diskId) {
+
+    public Optional<DiskEntity> getDiskByIdFromPublicCollection(Long collectionId, Long collectorId, Long diskId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);   //trova id del collezionista
         if (optionalCollector.isPresent()) { //se id è presente
-            var collector = optionalCollector.get(); //prendi id
+            var collector = optionalCollector.get(); //collezionista
             var collectorCollectionOptional = this.collectorCollectionRepository
-                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId); //trova id della collezione che ha id collezionista
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId); //trova la collezione dall'id del collezionista
 
-            if (collectorCollectionOptional.isPresent()) {//se id collezione è presente
+            if (collectorCollectionOptional.isPresent()) { //se la collezione è presente
                 var collectorCollection = collectorCollectionOptional.get();
-
-                var optionalDisk = this.disksRepository.findById(diskId);
-                if (optionalDisk.isPresent()) {
-                    var disk = optionalDisk.get(); //preso id del disco 
-                    return Optional.of(disk);
+                var collection = collectorCollection.getCollection(); //prendi la collezione
+                if (collection.isPublic()) {
+                    var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                    if (optionalDisk.isPresent()) {
+                        var disk = optionalDisk.get(); //disco
+                        return Optional.of(disk);
+                    }
                 }
-                //collectorId tolgo come input e prendo dal principal
-                //URL disk controller pubblico
-
             }
         }
         return Optional.empty();
     }
-   //prendo dischi personali collezione particolare: privato
-    public List<DiskEntity> getPersonalDisks(Long collectionId) {
+
+    public List<DiskEntity> getPersonalDisksFromCollection(Long collectionId) {
         var collection = this.collectionsRepository.findById(collectionId);
         if (collection.isPresent()) {
-            var diskList = this.disksRepository.findDiskByIdFromCollectionId(collectionId);
-                return diskList.stream().map(DiskEntity::getDisk).toList();
+            var diskList = this.disksRepository.findDisksFromCollectionId(collectionId);
+            if (diskList.isPresent()) {
+                return diskList.get();
+            }
         }
         return List.of();
     }
-    //fare metodo per prendere tutti dischi senza vedere collezione
 
 
 }

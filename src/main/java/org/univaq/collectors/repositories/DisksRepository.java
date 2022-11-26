@@ -1,6 +1,7 @@
 package org.univaq.collectors.repositories;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,9 @@ import org.univaq.collectors.models.DiskEntity;
 public interface DisksRepository extends PagingAndSortingRepository<DiskEntity, Long>, JpaRepository<DiskEntity, Long> {
     public Optional<DiskEntity> findByTitle (String title);
 
-    @Query("SELECT d from disk d where d.collection.id = ?1 ")
-    public Optional<DiskEntity> findDiskByIdFromCollectionId(Long collectionId);
+    @Query("SELECT d FROM disk d WHERE d.collection.id = ?1")
+    public Optional<List<DiskEntity>> findDisksFromCollectionId(Long collectionId);
+
+    @Query("SELECT d FROM disk d WHERE d.collection.id = ?1 AND d.id = ?2")
+    public Optional<DiskEntity> findDiskByIdFromCollectionId(Long collectionId, Long diskId);
 }

@@ -1,12 +1,15 @@
 package org.univaq.collectors.controllers.Public;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.univaq.collectors.models.CollectionEntity;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.CollectionService;
+import org.univaq.collectors.services.DiskService;
 
 
 @RestController
@@ -29,8 +32,15 @@ public class CollectionController {
             return ResponseEntity.ok(this.collectionService.getAll(name));
      }
 
+     @GetMapping("/{collectionId}/disks")
+        public ResponseEntity<List<DiskEntity>> getDisksOfPublicCollection(
+                @PathVariable("collectionId") Long collectionId
+        ) {
+            var result = this.collectionService.getPublicDisks(collectionId);
+            return ResponseEntity.ok(result);
+
+        }
 
 
 
-    
 }

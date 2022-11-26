@@ -131,8 +131,6 @@ public class DiskEntity {
         this.collection = collection;
     }
 
-    public DiskEntity getDisk(){return this;} //ritorna disco
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
