@@ -1,4 +1,6 @@
 package org.univaq.collectors.models;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -16,6 +18,7 @@ public class CollectorCollectionEntity implements Serializable {
     private CollectorEntity collector;
 
     @ManyToOne
+    @JsonBackReference
     private CollectionEntity collection;
     
 

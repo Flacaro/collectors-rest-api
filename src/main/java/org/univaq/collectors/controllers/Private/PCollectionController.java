@@ -64,6 +64,15 @@ public class PCollectionController {
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{collectionId}/share")
+    public ResponseEntity<CollectionEntity> shareCollectorCollectionById(
+            @PathVariable("collectionId") Long collectionId,
+            @RequestBody List<Long> collectorIds
+    ) {
+        var result = this.collectionService.shareCollection(collectorIds, collectionId);
+        return ResponseEntity.ok(result);
+    }
+    //[1]
 
 
 }

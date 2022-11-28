@@ -1,4 +1,5 @@
 package org.univaq.collectors.models;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import net.bytebuddy.implementation.bind.annotation.Default;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -36,6 +37,7 @@ public class CollectionEntity {
             mappedBy = "collection",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @JsonManagedReference
     private List<CollectorCollectionEntity> collectors = new ArrayList<>();
 
 
@@ -78,6 +80,13 @@ public class CollectionEntity {
         isPublic = aPublic;
     }
 
+    public List<CollectorCollectionEntity> getCollectors() {
+        return collectors;
+    }
+
+    public void setCollectors(List<CollectorCollectionEntity> collectors) {
+        this.collectors = collectors;
+    }
     public void addCollectorCollection(CollectorEntity collector) {
         CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
         collectors.add(collectorCollection);

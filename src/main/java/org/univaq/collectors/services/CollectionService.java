@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
 
+import org.univaq.collectors.models.CollectorEntity;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
@@ -161,6 +162,26 @@ public class CollectionService {
             }
         }
         return Optional.empty();
+    }
+
+    //prendo la lista di id dei collezionisti
+    public CollectionEntity shareCollection (List<Long> collectorsIds, Long collectionId) {
+        List<CollectorEntity> collectors = new ArrayList<>();
+        //lista di id degli utenti con cui voglio condividere la collection
+        for (var id : collectorsIds) {
+            collectors.add(collectorsRepository.findById(id).get());
+        }
+        CollectionEntity collections = collectionsRepository.findById(collectionId).get();
+        //lista delle persone che ora sono nella collection
+        var collectorCollection = collections.getCollectors();
+        List<CollectorCollectionEntity> collectorsCollection= new ArrayList<>();
+        for (var collector : collectors) {
+            collectorsCollection.add(new CollectorCollectionEntity(collector, collections, false));
+        }
+        //concatenare le due liste di collectorCollection
+        collectorCollection.addAll(collectorsCollection);
+        collections.setCollectors(collectorCollection);
+        return collectionsRepository.save(collections);
     }
 
 
