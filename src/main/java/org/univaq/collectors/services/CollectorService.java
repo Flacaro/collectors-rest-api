@@ -34,6 +34,13 @@ public class CollectorService {
         return collector.orElse(null);
     }
 
+    public CollectorEntity findByUsername(String username) {
+        var collector = this.collectorsRepository.findByUsername(username);
+        return collector.orElse(null);
+    }
 
-    
+
+
+
+
 }

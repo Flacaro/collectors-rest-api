@@ -10,6 +10,7 @@ public interface CollectorsRepository extends PagingAndSortingRepository<Collect
     // findBy<field name>
     public Optional<CollectorEntity> findByEmail(String email);
 
+    public Optional<CollectorEntity> findByUsername(String username);
 
     
 }
