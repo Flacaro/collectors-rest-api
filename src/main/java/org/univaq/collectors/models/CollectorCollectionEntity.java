@@ -75,6 +75,16 @@ public class CollectorCollectionEntity implements Serializable {
 
 
     @Override
+    public String toString() {
+        return "CollectorCollectionEntity{" +
+                "id=" + id +
+                ", collectorId=" + collector.getId() +
+                ", collectionId=" + collection.getId() +
+                ", isOwner=" + isOwner +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
