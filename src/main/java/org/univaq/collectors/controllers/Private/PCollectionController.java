@@ -1,6 +1,7 @@
 package org.univaq.collectors.controllers.Private;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.services.CollectionService;
@@ -73,7 +74,20 @@ public class PCollectionController {
         var result = this.collectionService.shareCollection(collectorIds, collectionId);
         return ResponseEntity.ok(result);
     }
-    //[1]
+
+    @PostMapping("/{collectionId}/unshare")
+    public ResponseEntity<CollectionEntity> unshareCollectorCollectionById(
+            @PathVariable("collectionId") Long collectionId,
+            @RequestBody List<Long> collectorIds,
+            Authentication authentication
+    ) {
+        var result = this.collectionService.unshareCollection(
+                collectorIds,
+                collectionId,
+                authentication
+        );
+        return ResponseEntity.ok(result);
+    }
 
 
 }

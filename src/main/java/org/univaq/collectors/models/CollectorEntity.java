@@ -10,20 +10,23 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity(name = "collector")
+@Table(
+        indexes = {
+                @Index(name = "collector_email_index", columnList = "email", unique = true),
+                @Index(name = "collector_username_index", columnList = "username", unique = true)
+        }
+)
 public class CollectorEntity {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = true)
     private String name;
 
-    @Column(nullable = true)
     private String surname;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
-    @Column(nullable = true)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
     @Column(unique = true, nullable = false)
@@ -32,7 +35,7 @@ public class CollectorEntity {
 
     @Email
     @NotBlank
-    @Column(unique=true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
 
@@ -117,6 +120,18 @@ public class CollectorEntity {
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return "CollectorEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", birthday=" + birthday +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -20,4 +20,8 @@ public interface CollectorCollectionRepository extends JpaRepository<CollectionE
     @Query("select c from collector_collection c where c.collector.id = ?1 and c.collection.isPublic = true")
     List<CollectorCollectionEntity> getPublicCollectionsByCollectorId(Long collectorId);
 
+
+    @Query("select cc from collector_collection cc where cc.collector.id = ?1 and cc.collection.id = ?2 and cc.isOwner = true")
+    Optional<CollectorCollectionEntity> hasCollectionAndIsOwner(Long collectorId, Long collectionId);
+
 }

@@ -1,5 +1,6 @@
 package org.univaq.collectors.models;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import io.jsonwebtoken.lang.Assert;
 import net.bytebuddy.implementation.bind.annotation.Default;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
@@ -41,7 +42,12 @@ public class CollectionEntity {
     private List<CollectorCollectionEntity> collectors = new ArrayList<>(); //lista di collezionisti con cui condivido la collezione
 
 
-
+    public CollectionEntity(Long id, String name, String status, boolean isPublic) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.isPublic = isPublic;
+    }
 
     public CollectionEntity() {
     }
@@ -90,7 +96,6 @@ public class CollectionEntity {
     public void addCollectorCollection(CollectorEntity collector) {
         CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
         collectors.add(collectorCollection);
-//        collector.getCollections().add(collectorCollection);
     }
 
 
@@ -100,6 +105,17 @@ public class CollectionEntity {
         collectorCollection.setName(name);
         collectorCollection.setStatus(status);
         collectorCollection.setPublic(isPublic);
+    }
+
+    @Override
+    public String toString() {
+        return "CollectionEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", status='" + status + '\'' +
+                ", isPublic=" + isPublic +
+                ", collectors=" + collectors +
+                '}';
     }
 
     @Override
