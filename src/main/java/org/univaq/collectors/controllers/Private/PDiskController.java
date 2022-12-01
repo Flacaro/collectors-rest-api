@@ -64,7 +64,5 @@ public class PDiskController {
         return ResponseEntity.ok().build();
     }
 }
-
-
-//salva aggiorna
+//update disco: aggiorna dati disco
 

@@ -64,6 +64,7 @@ public class PCollectionController {
         return result.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    //lista di utenti che condivido la collezione: aggiungo utente
     @PostMapping("/{collectionId}/share")
     public ResponseEntity<CollectionEntity> shareCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
