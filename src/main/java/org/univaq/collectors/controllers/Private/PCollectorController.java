@@ -19,7 +19,7 @@ public class PCollectorController {
     public PCollectorController(CollectorService collectorService) {
         this.collectorService = collectorService;
     }
-
+//mostra profilo
     @GetMapping("/profile")
     public ResponseEntity<CollectorEntity> getCollector(
             Principal principal

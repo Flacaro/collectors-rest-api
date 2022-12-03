@@ -2,6 +2,7 @@ package org.univaq.collectors.controllers.Private;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.DiskEntity;
@@ -26,7 +27,7 @@ public class PDiskController {
         this.collectionService = collectionService;
         this.collectorService = collectorService;
     }
-
+//ritorna lista di dischi data una collezione
     @GetMapping
     public ResponseEntity<List<DiskEntity>> getDisksOfCollection(
             @PathVariable("collectionId") Long collectionId,
@@ -54,7 +55,7 @@ public class PDiskController {
     }
 
     @DeleteMapping("/{diskId}")
-    public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
+    public ResponseEntity<DiskEntity> deleteCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
             @PathVariable("diskId") Long diskId,
             Principal principal
@@ -63,8 +64,19 @@ public class PDiskController {
         this.diskService.deleteDiskById(collector.getId(), collectionId, diskId);
         return ResponseEntity.ok().build();
     }
+
+
+    @GetMapping("/{diskId}")
+    public ResponseEntity<DiskEntity> getDiskOfCollection(
+            @PathVariable("collectionId") Long collectionId,
+            @PathVariable("diskId") Long diskId,
+            Authentication authentication
+    ) {
+        var disk = this.diskService.getPersonalDiskByIdFromCollectionId(diskId, collectionId, authentication);
+
+        return ResponseEntity.of(disk);
+    }
 }
+//update disco: aggiorna dati disco
 
-
-//salva aggiorna
 

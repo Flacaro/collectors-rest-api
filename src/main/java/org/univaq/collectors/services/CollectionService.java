@@ -186,7 +186,7 @@ public class CollectionService {
         var collectorsInCollection = collection.getCollectors();
         //lista dei collezionisti che voglio aggiungere alla collection
         List<CollectorCollectionEntity> collectorsCollection = new ArrayList<>();
-        if(optionalAuthenticateCollector.isPresent()) {
+        if (optionalAuthenticateCollector.isPresent()) {
             var authenticateCollector = optionalAuthenticateCollector.get();
             collectorCollectionRepository.hasCollectionAndIsOwner(
                     authenticateCollector.getId(),
@@ -195,20 +195,20 @@ public class CollectionService {
                     () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection")
             );
 
-        List<CollectorEntity> collectorsAlreadyInCollection = new ArrayList<>();
-        for (var collectorInCollection : collectorsInCollection) {
-            var collector = collectorInCollection.getCollector();
-            collectorsAlreadyInCollection.add(collector);
-        }
-
-        for (var collector : collectors) {
-            //devo controllare se nella lista dei collezionisti che voglio aggiungere c'e' gia' un collezionista che e' gia' presente nella collection
-            if(!collectorsAlreadyInCollection.contains(collector)) {
-            collectorsCollection.add(
-                    new CollectorCollectionEntity(collector, collection, false)
-            );
+            List<CollectorEntity> collectorsAlreadyInCollection = new ArrayList<>();
+            for (var collectorInCollection : collectorsInCollection) {
+                var collector = collectorInCollection.getCollector();
+                collectorsAlreadyInCollection.add(collector);
             }
-        }
+
+            for (var collector : collectors) {
+                //devo controllare se nella lista dei collezionisti che voglio aggiungere c'e' gia' un collezionista che e' gia' presente nella collection
+                if (!collectorsAlreadyInCollection.contains(collector)) {
+                    collectorsCollection.add(
+                            new CollectorCollectionEntity(collector, collection, false)
+                    );
+                }
+            }
         }
         //concatenare le due liste di collectorCollection
         collectorsInCollection.addAll(collectorsCollection);
@@ -233,11 +233,11 @@ public class CollectionService {
 
         var optionalAuthenticateCollector = collectorsRepository.findByEmail(authentication.getName());
 
-        if(optionalAuthenticateCollector.isEmpty()) {
+        if (optionalAuthenticateCollector.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
         }
 
-        var authenticateCollector = optionalAuthenticateCollector.get();
+        var authenticateCollector = optionalAuthenticateCollector.get(); //prende l'email del collezionista
         // Punto 3)
         var collectorOwner = collectorCollectionRepository.hasCollectionAndIsOwner(authenticateCollector.getId(), collectionId);
 
@@ -264,20 +264,17 @@ public class CollectionService {
                 if (collector.getId().equals(authenticateCollector.getId()) && collectorInCollection.isOwner()) {
                     //rimuovo la collection
                     collectionsRepository.delete(collection);
-                }
-                else if (collectorsToRemove.contains(collector) && !collectorInCollection.isOwner()) {
+                } else if (collectorsToRemove.contains(collector) && !collectorInCollection.isOwner()) {
                     //rimuovo il collezionista dalla lista dei collezionisti che condividono la collection
                     collectorCollectionList.remove(collectorInCollection);
-                }
-
-                else {
+                } else {
                     collectorCollectionList.removeIf(
                             collectorCollection -> collectorsToRemove.contains(collector)
                     );
 
                 }
 
-                }
+            }
 
             collection.setCollectors(collectorCollectionList);
             // Non bisogna assegnare la nuova lista ma mutare quella esistente!
@@ -285,8 +282,9 @@ public class CollectionService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
-}
+
     }
+}
 
 
 

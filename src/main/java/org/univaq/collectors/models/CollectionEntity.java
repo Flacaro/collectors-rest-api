@@ -38,8 +38,8 @@ public class CollectionEntity {
             mappedBy = "collection",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    @JsonManagedReference
-    private List<CollectorCollectionEntity> collectors = new ArrayList<>();
+    @JsonManagedReference  //-> dico a json che una collezione molti a molti
+    private List<CollectorCollectionEntity> collectors = new ArrayList<>(); //lista di collezionisti con cui condivido la collezione
 
 
     public CollectionEntity(Long id, String name, String status, boolean isPublic) {
