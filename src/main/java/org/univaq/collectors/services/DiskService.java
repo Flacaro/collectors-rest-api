@@ -92,6 +92,7 @@ public class DiskService {
         }
     }
 
+
     public Optional<DiskEntity> getDiskByIdFromPublicCollection(Long collectionId, Long collectorId, Long diskId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);   //trova id del collezionista
         if (optionalCollector.isPresent()) { //se id è presente

@@ -68,9 +68,10 @@ public class PCollectionController {
     @PostMapping("/{collectionId}/share")
     public ResponseEntity<CollectionEntity> shareCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
-            @RequestBody List<Long> collectorIds
+            @RequestBody List<Long> collectorIds,
+            Authentication authentication
     ) {
-        var result = this.collectionService.shareCollection(collectorIds, collectionId);
+        var result = this.collectionService.shareCollection(collectorIds, collectionId,authentication);
         return ResponseEntity.ok(result);
     }
 
@@ -80,11 +81,7 @@ public class PCollectionController {
             @RequestBody List<Long> collectorIds,
             Authentication authentication
     ) {
-        var result = this.collectionService.unshareCollection(
-                collectorIds,
-                collectionId,
-                authentication
-        );
+        var result = this.collectionService.unshareCollection(collectorIds, collectionId, authentication);
         return ResponseEntity.ok(result);
     }
 
