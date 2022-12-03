@@ -214,7 +214,7 @@ public class CollectionService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
         }
 
-        var authenticateCollector = optionalAuthenticateCollector.get();
+        var authenticateCollector = optionalAuthenticateCollector.get(); //prende l'email del collezionista
         // Punto 3)
         collectorCollectionRepository.hasCollectionAndIsOwner(
                 authenticateCollector.getId(),
@@ -252,6 +252,8 @@ public class CollectionService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
+
+
 
     }
 

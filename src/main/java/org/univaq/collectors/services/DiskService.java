@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
 import org.univaq.collectors.models.DiskEntity;
@@ -114,6 +117,8 @@ public class DiskService {
         return Optional.empty();
     }
 
+
+//prendi i dischi personali dalla collezione
     public List<DiskEntity> getPersonalDisksFromCollection(Long collectionId) {
         var collection = this.collectionsRepository.findById(collectionId);
         if (collection.isPresent()) {
@@ -124,6 +129,28 @@ public class DiskService {
         }
         return List.of();
     }
-
-
+    //metodo per prendere disco da collezione passato id disco e collezione è mia  ;
+    public Optional<DiskEntity> getPersonalDiskByIdFromCollectionId(Long diskId, Long collectionId, Authentication authentication ) {
+        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName()); //trova utente per email
+        if (optionalCollector.isPresent()) { //se utente è presente prendilo get
+            var collector = optionalCollector.get();
+            //collezionista = owner collezione
+            collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
+            ).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection")
+            );
+        }
+        //prendo disco da id collezione
+        var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+        if (optionalDisk.isPresent()) {
+            var disk = optionalDisk.get();
+            disksRepository.findById(diskId).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
+            );
+        }
+        return optionalDisk;
+    }
 }
+
+
+
