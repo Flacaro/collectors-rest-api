@@ -74,9 +74,6 @@ public class TrackService {
                     () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection")
             );//tramite tabella prendo che la collezione associata al collezionista
 
-            //prendi collezione
-            //var collectorCollectionOptional = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collectionId);
-            //if (collectorCollectionOptional.isPresent()) {
                 var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId); //vedo se IdDisco sta nella collezione-> posso farlo così opp. con metodo Personal
                 if (optionalDisk.isPresent()) {
                     var disk = optionalDisk.get();  //se è presente il Idisco nella collezione prendo disco e modifico
@@ -84,11 +81,32 @@ public class TrackService {
                     track.setDisk(disk);
 
                     return Optional.of(this.trackRepository.save(track));
-                   // var savedTrack = this.trackRepository.save(track);
-
-                   // return Optional.of(savedTrack);
                 }
             }
         return Optional.of(track);
     }
+    //elimina traccia
+     public void deleteTrack(Long trackId, Long diskId, Long collectionId, Authentication authentication) {
+        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName()); //trovo utente dal email fornito il nome
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
+            ).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection")
+            );
+        }
+        var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+        if (optionalDisk.isPresent()) {
+            //var disk = optionalDisk.get();
+            var optionTrack = this.trackRepository.findById(trackId);
+            if (optionTrack.isPresent()) {
+                var track = optionTrack.get();
+                this.trackRepository.delete(track);
+            }
+        }
+    }
+
+    //fare update
+
+
 }

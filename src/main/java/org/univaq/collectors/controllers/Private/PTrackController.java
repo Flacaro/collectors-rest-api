@@ -54,4 +54,17 @@ public class PTrackController {
         var optionalTrack = this.trackService.saveTrack(track, diskId, collectionId, authentication);
         return optionalTrack.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+     @DeleteMapping("/{trackId}")
+    public ResponseEntity<TrackEntity> deleteTrackById(
+            @PathVariable("collectionId") Long collectionId,
+            @PathVariable("diskId") Long diskId,
+            @PathVariable ("trackId") Long trackId,
+            Authentication authentication
+    ){
+        this.trackService.deleteTrack (trackId, diskId, collectionId, authentication);
+        return ResponseEntity.ok().build();
+    }
+
+
 }
