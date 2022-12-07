@@ -190,6 +190,123 @@ class CollectionServiceTest {
 
 
     // testi con 3 utenti e un array di collectionId > 1
+    @Test
+    @Transactional
+    void should_unshareCollectorsFromCollection_when_collectorIsOwnerAndWantToDeleteAListOfUserExeptHim() {
+        var savedCollectors = collectorsRepository.findByEmail("mario@rossi.com").orElseThrow();
+        var savedCollectors2 = collectorsRepository.findByEmail("maria@bianchi.com").orElseThrow();
+        var savedCollectors3 = collectorsRepository.findByEmail("daniele@neri.com").orElseThrow();
+
+        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+
+        var collectors = new ArrayList<CollectorCollectionEntity>();
+        collectors.add(new CollectorCollectionEntity(savedCollectors, savedCollection, true));
+        collectors.add(new CollectorCollectionEntity(savedCollectors2, savedCollection, false));
+        collectors.add(new CollectorCollectionEntity(savedCollectors3, savedCollection, false));
+
+        savedCollection.setCollectionsCollectors(collectors);
+
+        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+
+        assertNotNull(collectionWithCollectors);
+
+        assertEquals(3, collectionWithCollectors.getCollectionsCollectors().size());
+
+
+        when(authentication.getName()).thenReturn(savedCollectors.getEmail());
+
+        assertDoesNotThrow(
+                () -> sut.unshareCollection(
+                        List.of(savedCollectors2.getId(), savedCollectors3.getId()),
+                        collectionWithCollectors.getId(),
+                        authentication
+                )
+        );
+
+        var collection = this.collectionsRepository.findById(savedCollection.getId());
+
+        assertTrue(collection.isPresent());
+
+    }
+
+    @Test
+    @Transactional
+    void should_unshareCollectorsFromCollection_when_collectorIsOwnerAndWantToDeleteAListOfUserWithOwner() {
+        var savedCollectors = collectorsRepository.findByEmail("mario@rossi.com").orElseThrow();
+        var savedCollectors2 = collectorsRepository.findByEmail("maria@bianchi.com").orElseThrow();
+        var savedCollectors3 = collectorsRepository.findByEmail("daniele@neri.com").orElseThrow();
+
+        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+
+        var collectors = new ArrayList<CollectorCollectionEntity>();
+        collectors.add(new CollectorCollectionEntity(savedCollectors, savedCollection, true));
+        collectors.add(new CollectorCollectionEntity(savedCollectors2, savedCollection, false));
+        collectors.add(new CollectorCollectionEntity(savedCollectors3, savedCollection, false));
+
+        savedCollection.setCollectionsCollectors(collectors);
+
+        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+
+        assertNotNull(collectionWithCollectors);
+
+        assertEquals(3, collectionWithCollectors.getCollectionsCollectors().size());
+
+
+        when(authentication.getName()).thenReturn(savedCollectors.getEmail());
+
+        assertDoesNotThrow(
+                () -> sut.unshareCollection(
+                        List.of(savedCollectors.getId(), savedCollectors2.getId(), savedCollectors3.getId()),
+                        collectionWithCollectors.getId(),
+                        authentication
+                )
+        );
+
+        var collection = this.collectionsRepository.findById(savedCollection.getId());
+
+        assertFalse(collection.isPresent());
+
+    }
+
+    @Test
+    @Transactional
+    void should_unshareCollectorsFromCollection_when_collectorIsNotOwnerAndWantToDeleteAListOfUser() {
+        var savedCollectors = collectorsRepository.findByEmail("mario@rossi.com").orElseThrow();
+        var savedCollectors2 = collectorsRepository.findByEmail("maria@bianchi.com").orElseThrow();
+        var savedCollectors3 = collectorsRepository.findByEmail("daniele@neri.com").orElseThrow();
+
+        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+
+        var collectors = new ArrayList<CollectorCollectionEntity>();
+        collectors.add(new CollectorCollectionEntity(savedCollectors, savedCollection, true));
+        collectors.add(new CollectorCollectionEntity(savedCollectors2, savedCollection, false));
+        collectors.add(new CollectorCollectionEntity(savedCollectors3, savedCollection, false));
+
+        savedCollection.setCollectionsCollectors(collectors);
+
+        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+
+        assertNotNull(collectionWithCollectors);
+
+        assertEquals(3, collectionWithCollectors.getCollectionsCollectors().size());
+
+
+        when(authentication.getName()).thenReturn(savedCollectors2.getEmail());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> sut.unshareCollection(
+                        List.of(savedCollectors.getId(), savedCollectors2.getId(), savedCollectors3.getId()),
+                        collectionWithCollectors.getId(),
+                        authentication
+                )
+        );
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+
+    }
+
+
 
 
 }

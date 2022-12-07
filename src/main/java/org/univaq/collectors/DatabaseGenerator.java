@@ -35,7 +35,7 @@ public class DatabaseGenerator {
                 null,
                 "mario",
                 "rossi",
-                LocalDate.of(1990, 1, 1),
+                LocalDate.of(1995, 6, 26),
                 "mario",
                 "mario@rossi.com",
                 "secret"
@@ -43,18 +43,32 @@ public class DatabaseGenerator {
 
         CollectorEntity chiaraBianchi = new CollectorEntity(
                 null,
-                "chiara",
+                "maria",
                 "bianchi",
-                LocalDate.of(1990, 1, 1),
-                "chiara",
+                LocalDate.of(1998, 5, 3),
+                "maria",
                 "maria@bianchi.com",
                 "secret"
         );
 
+        CollectorEntity danieleNeri = new CollectorEntity(
+                null,
+                "daniele",
+                "neri",
+                LocalDate.of(1997, 4, 20),
+                "daniele",
+                "daniele@neri.com",
+                "secret"
+        );
 
         var chiaraBianchiOptional = authService.register(chiaraBianchi);
         chiaraBianchiOptional.ifPresent(
                 cb -> logger.info("Chiara Bianchi: {}", cb)
+        );
+
+        var danieleNeriOptional = authService.register(danieleNeri);
+        danieleNeriOptional.ifPresent(
+                cb -> logger.info("Daniele Neri: {}", cb)
         );
 
         var marioRossiOptional = authService.register(marioRossi);
@@ -74,6 +88,7 @@ public class DatabaseGenerator {
         } else {
             logger.warn("Collector not created");
         }
+
 
         return Optional.empty();
     }

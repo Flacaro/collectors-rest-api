@@ -32,6 +32,19 @@ public class Examples {
 
     }
 
+    public static CollectorEntity collectorExample3() {
+        return new CollectorEntity(
+                null,
+                "Daniele",
+                "Neri",
+                LocalDate.of(1990, 1, 1),
+                "Daniele",
+                "daniele@neri.com",
+                "secret"
+        );
+
+    }
+
 
     public static CollectionEntity collectionExample() {
         return new CollectionEntity(
