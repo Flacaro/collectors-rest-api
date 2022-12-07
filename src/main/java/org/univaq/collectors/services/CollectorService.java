@@ -3,7 +3,11 @@ package org.univaq.collectors.services;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.univaq.collectors.models.CollectionEntity;
+import org.univaq.collectors.models.CollectorCollectionEntity;
+import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 
 
@@ -13,9 +17,11 @@ import org.univaq.collectors.models.CollectorEntity;
 public class CollectorService {
     
     private final CollectorsRepository collectorsRepository;
+    private final CollectorCollectionRepository collectorCollectionRepository;
 
-    public CollectorService(CollectorsRepository collectorsRepository) {
+    public CollectorService(CollectorsRepository collectorsRepository, CollectorCollectionRepository collectorCollectionRepository) {
         this.collectorsRepository = collectorsRepository;
+        this.collectorCollectionRepository = collectorCollectionRepository;
     }
 
 
@@ -39,7 +45,14 @@ public class CollectorService {
         return collector.orElse(null);
     }
 
-
+    public List<CollectionEntity> getPersonalCollections(Long collectorId, Authentication authentication) {
+        var collector = collectorsRepository.findByEmail(authentication.getName());
+        if (collector.isPresent()) {
+            var collectionList = this.collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
+            return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
+        }
+        return List.of();
+    }
 
 
 

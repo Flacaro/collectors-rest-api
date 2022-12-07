@@ -2,8 +2,8 @@ package org.univaq.collectors.services;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
@@ -72,16 +72,6 @@ public class CollectionService {
             }
 
             return publicCollections;
-        }
-        return List.of();
-    }
-
-
-    public List<CollectionEntity> getPersonalCollections(Long collectorId) {
-        var collector = this.collectorsRepository.findById(collectorId);
-        if (collector.isPresent()) {
-            var collectionList = this.collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
-            return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
         }
         return List.of();
     }
@@ -180,110 +170,137 @@ public class CollectionService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
 
+        //prendo la collection
         var collection = collectionOptional.get();
-
-        //lista delle persone che ora sono nella collection
-        var collectorsInCollection = collection.getCollectors();
-        //lista dei collezionisti che voglio aggiungere alla collection
-        List<CollectorCollectionEntity> collectorsCollection = new ArrayList<>();
+        var listCollectorCollection = collection.getCollectionsCollectors();
+        //lista dei collezionisti che sono gia nella collection
+        var collectorsInCollection = listCollectorCollection.stream().map(CollectorCollectionEntity::getCollector).toList();
         if (optionalAuthenticateCollector.isPresent()) {
+            //prendo il collezionista loggato
             var authenticateCollector = optionalAuthenticateCollector.get();
-            collectorCollectionRepository.hasCollectionAndIsOwner(
-                    authenticateCollector.getId(),
-                    collectionId
-            ).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection")
-            );
-
-            List<CollectorEntity> collectorsAlreadyInCollection = new ArrayList<>();
-            for (var collectorInCollection : collectorsInCollection) {
-                var collector = collectorInCollection.getCollector();
-                collectorsAlreadyInCollection.add(collector);
-            }
-
-            for (var collector : collectors) {
-                //devo controllare se nella lista dei collezionisti che voglio aggiungere c'e' gia' un collezionista che e' gia' presente nella collection
-                if (!collectorsAlreadyInCollection.contains(collector)) {
-                    collectorsCollection.add(
-                            new CollectorCollectionEntity(collector, collection, false)
-                    );
-                }
-            }
-        }
-        //concatenare le due liste di collectorCollection
-        collectorsInCollection.addAll(collectorsCollection);
-        collection.setCollectors(collectorsInCollection);
-
-        return collectionsRepository.save(collection);
-    }
-
-
-
-
-
-    /*
-        1) La lista deve contenere almeno un collezionista (owner)
-        2) Solamente l'owner può aggiungere altri collezionisti
-        3) Solamente l'owner può rimuovere altri collezionisti
-     */
-
-    //aggiungere che un collezionista si puo' eliminare dalla collezione
-    //se sono l'owner la collezione deve essere eliminata con tutti gli utenti che la condividono
-    public CollectionEntity unshareCollection(List<Long> collectorsIds, Long collectionId, Authentication authentication) {
-
-        var optionalAuthenticateCollector = collectorsRepository.findByEmail(authentication.getName());
-
-        if (optionalAuthenticateCollector.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
-        }
-
-        var authenticateCollector = optionalAuthenticateCollector.get(); //prende l'email del collezionista
-        // Punto 3)
-        var collectorOwner = collectorCollectionRepository.hasCollectionAndIsOwner(authenticateCollector.getId(), collectionId);
-
-        //lista dei collezionisti che voglio rimuovere dalla lista dello share
-        List<CollectorEntity> collectorsToRemove = new ArrayList<>();
-        for (var id : collectorsIds) {
-            var collectorById = collectorsRepository.findById(id);
-            collectorById.ifPresentOrElse(
-                    collectorsToRemove::add,
-                    () -> {
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+            //controllo se l'utente loggato e' il proprietario della collection
+            var owner = collectorCollectionRepository.hasCollectionAndIsOwner(authenticateCollector.getId(), collectionId);
+            if (owner.isPresent()) {
+                if (authenticateCollector.getId().equals(owner.get().getCollector().getId()) && owner.get().getCollection().getId().equals(collectionId)) {
+                    //controllo se la collection e' gia' condivisa con gli utenti che voglio aggiungere
+                    for (var collector : collectors) {
+                        if (!collectorsInCollection.contains(collector)) {
+                            listCollectorCollection.add(new CollectorCollectionEntity(collector, collection, false));
+                        } else {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Collection already shared with this collector");
+                        }
                     }
-            );
-        }
-        var optionalCollection = collectionsRepository.findById(collectionId);
-
-        if (optionalCollection.isPresent()) {
-            var collection = optionalCollection.get();
-            //lista dei collezionisti che sono gia nella lista dello share
-            var collectorCollectionList = collection.getCollectors();
-            for (var collectorInCollection : collectorCollectionList) {
-                var collector = collectorInCollection.getCollector();
-                //se il collezionista che voglio rimuovere e' presente nella lista dei collezionisti che condividono la collection
-                if (collector.getId().equals(authenticateCollector.getId()) && collectorInCollection.isOwner()) {
-                    //rimuovo la collection
-                    collectionsRepository.delete(collection);
-                } else if (collectorsToRemove.contains(collector) && !collectorInCollection.isOwner()) {
-                    //rimuovo il collezionista dalla lista dei collezionisti che condividono la collection
-                    collectorCollectionList.remove(collectorInCollection);
-                } else {
-                    collectorCollectionList.removeIf(
-                            collectorCollection -> collectorsToRemove.contains(collector)
-                    );
-
+                    collection.setCollectionsCollectors(listCollectorCollection);
+                    return collectionsRepository.save(collection);
                 }
-
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
             }
 
-            collection.setCollectors(collectorCollectionList);
-            // Non bisogna assegnare la nuova lista ma mutare quella esistente!
-            return this.collectionsRepository.save(collection);
+        }
+        return collection;
+    }
+
+
+    public void unshareCollection(List<Long> collectorsIds, Long collectionId, Authentication authentication) {
+
+        // 4. Controllo la lunghezza della lista di collezionisti da rimuovere, se è 0 -> 400
+        if (collectorsIds.size() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must specify at least one collector ID");
+        }
+
+        // 1. Prendere dal DB l'utente autenticato
+        var optionalAuthenticateCollector = this.collectorsRepository.findByEmail(authentication.getName());
+
+        var loggedCollector = optionalAuthenticateCollector.orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found")
+        );
+
+        // 2. Trovare se esiste la collection con l'id specificato
+        var collection = this.collectionsRepository.findById(collectionId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
+        );
+
+        // 3. Controllo che l'utente sia presente nella collection, se non esiste -> 403
+        collection.getCollectionsCollectors().stream()
+                .filter(cc -> cc.getCollector().getId().equals(loggedCollector.getId()))
+                .findFirst()
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not in this collection")
+                );
+
+        // 5. Se la lunghezza della lista degli ID e' uguale a 1 && l'ID e' uguale a quello dell'utente autenticato
+        //    && l'utente autenticato non e' l'owner della collection lo rimuovo dalla collection
+        if (collectorsIds.size() == 1) {
+            var collectorId = collectorsIds.get(0);
+
+            // se l'ID da rimuovere non e' presente nella lista allora -> 404
+            var collectorCollection = collection.getCollectionsCollectors().stream()
+                    .filter(cc -> cc.getCollector().getId().equals(collectorId))
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found in collection")
+                    );
+
+            if (collectorCollection.isOwner()) {
+                // elimino la collection
+                this.collectionsRepository.delete(collection);
+                return;
+            } else {
+                // rimuovo il collector dalla collection
+                collection.getCollectionsCollectors().remove(collectorCollection);
+                this.collectionsRepository.save(collection);
+                return;
+            }
+        }
+
+        // 6. Se la lunghezza della lista degli ID e' maggiore di 1 devo controllare che l'utente autentica sia l'owner della collection
+        //    se non lo e' -> 403. Altrimenti controllo che l'intera lista di collezionisti da rimuovere sia presente nella collection,
+        //    se lo e' -> rimuovo i collezionisti, altrimenti -> 404 (si potrebbe rimuovere solamente quelli presenti nella collection)
+
+        // Controllo che la lista di collezionisti da rimuovere sia presente nella collection
+        var collectorsToRemove = collection.getCollectionsCollectors().stream()
+                .filter(cc -> collectorsIds.contains(cc.getCollector().getId()))
+                .toList();
+
+        if (collectorsToRemove.size() != collectorsIds.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Some collectors are not in this collection");
+        }
+
+        // Controllo se nella lista di collezionisti da rimuovere l'utente autenticato e' presente
+        var isLoggedUserInCollectorsToRemove = collectorsToRemove.stream()
+                .anyMatch(cc -> cc.getCollector().getId().equals(loggedCollector.getId()));
+
+        var isLoggedUserOwner = this.isCollectorOwnerOfCollection(loggedCollector, collection);
+
+        if(isLoggedUserOwner) {
+            if(isLoggedUserInCollectorsToRemove) {
+                this.collectionsRepository.delete(collection);
+            } else {
+                collection.getCollectionsCollectors().removeAll(collectorsToRemove);
+                this.collectionsRepository.save(collection);
+            }
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
         }
 
     }
+
+
+    private Optional<CollectorCollectionEntity> isCollectorInCollection(CollectorEntity collector, CollectionEntity collection) {
+        return collection.getCollectionsCollectors().stream()
+                .filter(cc -> cc.getCollector().getId().equals(collector.getId()))
+                .findFirst();
+    }
+
+    private boolean isCollectorOwnerOfCollection(CollectorEntity collector, CollectionEntity collection) {
+        return collection.getCollectionsCollectors().stream()
+                .filter(cc -> cc.getCollector().getId().equals(collector.getId()))
+                .findFirst()
+                .map(CollectorCollectionEntity::isOwner)
+                .orElse(false);
+    }
+
 }
 
 

@@ -1,6 +1,8 @@
 package org.univaq.collectors.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
@@ -8,6 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 
 @Entity(name = "collector")
 @Table(
@@ -27,6 +30,7 @@ public class CollectorEntity {
     private String surname;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate birthday;
 
     @Column(unique = true, nullable = false)
@@ -119,6 +123,7 @@ public class CollectorEntity {
     public void setPassword(String password) {
         this.password = password;
     }
+
 
     @Override
     public String toString() {

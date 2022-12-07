@@ -3,6 +3,7 @@ package org.univaq.collectors.controllers.Private;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
@@ -20,17 +21,6 @@ public class PCollectionController {
     public PCollectionController(CollectorService collectorService, CollectionService collectionService) {
         this.collectorService = collectorService;
         this.collectionService = collectionService;
-    }
-
-
-
-    //prendo tutte le collezioni dell'utente loggato
-    @GetMapping
-    public ResponseEntity<List<CollectionEntity>> getPersonalCollections(Principal principal) { //dal tokan prendo l'utente loggato principal
-        var collector = this.collectorService.getCollectorByEmail(principal.getName()); //servizio che prende collezionista dal email
-        var result = this.collectionService.getPersonalCollections(collector.getId()); //collezioni mie personali tramite query
-        return ResponseEntity.ok(result); //ritorna collezioni mie
-
     }
 
     @PostMapping
@@ -82,8 +72,8 @@ public class PCollectionController {
             @RequestBody List<Long> collectorIds,
             Authentication authentication
     ) {
-        var result = this.collectionService.unshareCollection(collectorIds, collectionId, authentication);
-        return ResponseEntity.ok(result);
+        this.collectionService.unshareCollection(collectorIds, collectionId, authentication);
+        return ResponseEntity.ok().build();
     }
 
 
