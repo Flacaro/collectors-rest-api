@@ -99,10 +99,9 @@ public class CollectionEntity {
 
     //update a collection of collector
     public void updateCollectorCollection(String name, String status, boolean isPublic) {
-        CollectionEntity collectorCollection = new CollectionEntity();
-        collectorCollection.setName(name);
-        collectorCollection.setStatus(status);
-        collectorCollection.setPublic(isPublic);
+        this.name = name;
+        this.status = status;
+        this.isPublic = isPublic;
     }
 
     @Override

@@ -35,12 +35,10 @@ public class PDiskController {
     ) {
         var collector = this.collectorService.getCollectorByEmail(principal.getName()); //servizio che prende collezionista dal email
         var collection = this.collectionService.getCollectorCollectionById(collector.getId(), collectionId); //collezioni mie personali tramite query
-        if (collection.isPresent()) {
-            var result = this.diskService.getPersonalDisksFromCollection(collection.get().getId());
+            var result = this.diskService.getPersonalDisksFromCollection(collection.getId());
             return ResponseEntity.ok(result);
         }
-        return ResponseEntity.notFound().build();
-    }
+
 
     @PostMapping
     public ResponseEntity<DiskEntity> saveDisk(

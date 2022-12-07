@@ -3,7 +3,6 @@ package org.univaq.collectors.services;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
@@ -43,9 +42,8 @@ public class CollectionService {
         this.disksRepository = disksRepository;
     }
 
-    //lista collezioni pubbliche
     public List<CollectionEntity> getAll(Optional<String> optionalname) {
-        //aggiungere page e size ma come?
+        //aggiungere page e size
         var optionalName = optionalname.orElse("");
         if (optionalName.isEmpty()) {
             return this.collectionsRepository.getPublicCollections();
@@ -66,9 +64,7 @@ public class CollectionService {
             var publicCollectorCollections = this.collectorCollectionRepository.getPublicCollectionsByCollectorId(collectorId);
             for (var publicCollectorCollection : publicCollectorCollections) {
                 var collectionEntity = this.collectionsRepository.findById(publicCollectorCollection.getCollection().getId());
-                if (collectionEntity.isPresent()) {
-                    publicCollections.add(collectionEntity.get());
-                }
+                collectionEntity.ifPresent(publicCollections::add);
             }
 
             return publicCollections;
@@ -78,7 +74,7 @@ public class CollectionService {
 
 
     //restituisce una collezione specifica del collezinista
-    public Optional<CollectionEntity> getCollectorCollectionById(Long collectorId, Long collectionId) {
+    public CollectionEntity getCollectorCollectionById(Long collectorId, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
             var collector = optionalCollector.get();
@@ -86,15 +82,15 @@ public class CollectionService {
                     .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
             if (collectorCollectionOptional.isPresent()) {
                 var collectorCollection = collectorCollectionOptional.get();
-                return Optional.of(collectorCollection.getCollection());
+                return collectorCollection.getCollection();
             }
         }
-        return Optional.empty();
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
     }
 
 
     //controllo se l'id dell'utente e' quello dell'utente loggato
-    public Optional<CollectionEntity> saveCollectorCollection(CollectionEntity collection, Long collectorId) {
+    public CollectionEntity saveCollectorCollection(CollectionEntity collection, Long collectorId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
 
@@ -103,26 +99,28 @@ public class CollectionService {
             savedCollection.addCollectorCollection(optionalCollector.get());
 
             this.collectionsRepository.flush();
-
-            return Optional.of(savedCollection);
+            return savedCollection;
         }
-
-        return Optional.empty();
+         else {
+             throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+        }
     }
 
-    public List<DiskEntity> getPublicDisks(Long collectionId) {
-        var optionalCollection = this.collectionsRepository.findById(collectionId);
-        if (optionalCollection.isPresent()) {
-            var collection = optionalCollection.get();
-            if (collection.isPublic()) {
-                var optionalDisk = this.disksRepository.findDisksFromCollectionId(collectionId);
-                if (optionalDisk.isPresent()) {
-                    return optionalDisk.get();
-                }
-            }
-        }
-        return List.of();
-    }
+
+    //perche sta qua?
+//    public List<DiskEntity> getPublicDisks(Long collectionId) {
+//        var optionalCollection = this.collectionsRepository.findById(collectionId);
+//        if (optionalCollection.isPresent()) {
+//            var collection = optionalCollection.get();
+//            if (collection.isPublic()) {
+//                var optionalDisk = this.disksRepository.findDisksFromCollectionId(collectionId);
+//                if (optionalDisk.isPresent()) {
+//                    return optionalDisk.get();
+//                }
+//            }
+//        }
+//        return List.of();
+//    }
 
 
     public void deleteCollectorCollectionById(Long collectorId, Long collectionId) {
@@ -136,19 +134,26 @@ public class CollectionService {
         }
     }
 
-    public Optional<CollectionEntity> updateCollectorCollectionById(Long collectorId, Long collectionId, CollectionEntity collection) {
-        var optionalCollector = this.collectorsRepository.findById(collectorId);
+    public void updateCollectorCollectionById(Authentication authentication, Long collectionId, CollectionEntity collection) {
+        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
         if (optionalCollector.isPresent()) {
-            var collectorCollectionOptional = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            var collector = optionalCollector.get();
+            var collectorCollectionOptional = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collectionId);
             if (collectorCollectionOptional.isPresent() && collectorCollectionOptional.get().getCollection().getId().equals(collectionId)) {
-                var collectionToUpdate = this.collectionsRepository.findById(collection.getId()).get();
-                collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getStatus(), collection.isPublic());
-                return Optional.of(this.collectionsRepository.save(collectionToUpdate));
-
-            }
+                var collectorCollection = collectorCollectionOptional.get();
+                if (collectorCollection.isOwner()) {
+                    var collectionToUpdate = collectorCollection.getCollection();
+                    collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getStatus(), collection.isPublic());
+                    this.collectionsRepository.save(collectionToUpdate);
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
+                    }
+            } else  {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
         }
-        return Optional.empty();
     }
+
 
     //prendo la lista di id dei collezionisti
     public CollectionEntity shareCollection(List<Long> collectorsIds, Long collectionId, Authentication authentication) {
