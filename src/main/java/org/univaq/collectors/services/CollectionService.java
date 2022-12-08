@@ -13,9 +13,11 @@ import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 import org.univaq.collectors.repositories.DisksRepository;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CollectionService {
@@ -292,19 +294,16 @@ public class CollectionService {
     }
 
 
-    private Optional<CollectorCollectionEntity> isCollectorInCollection(CollectorEntity collector, CollectionEntity collection) {
-        return collection.getCollectionsCollectors().stream()
-                .filter(cc -> cc.getCollector().getId().equals(collector.getId()))
-                .findFirst();
-    }
-
-    private boolean isCollectorOwnerOfCollection(CollectorEntity collector, CollectionEntity collection) {
+    public boolean isCollectorOwnerOfCollection(CollectorEntity collector, CollectionEntity collection) {
         return collection.getCollectionsCollectors().stream()
                 .filter(cc -> cc.getCollector().getId().equals(collector.getId()))
                 .findFirst()
                 .map(CollectorCollectionEntity::isOwner)
                 .orElse(false);
     }
+
+
+
 
 }
 

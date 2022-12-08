@@ -1,6 +1,5 @@
 package org.univaq.collectors.models;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.*;
 import org.univaq.collectors.UserView;
 
 import java.util.ArrayList;
@@ -10,6 +9,10 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @Entity(name = "collection")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class CollectionEntity {
 
     @JsonView(UserView.Public.class)
@@ -39,6 +42,7 @@ public class CollectionEntity {
             orphanRemoval = true)
     @JsonManagedReference  //-> dico a json che una collezione molti a molti
     private List<CollectorCollectionEntity> collectionsCollectors = new ArrayList<>(); //lista di collezionisti con cui condivido la collezione
+
 
 
     public CollectionEntity(Long id, String name, String status, boolean isPublic) {
@@ -92,10 +96,13 @@ public class CollectionEntity {
     public void setCollectionsCollectors(List<CollectorCollectionEntity> collectors) {
         this.collectionsCollectors = collectors;
     }
+
     public void addCollectorCollection(CollectorEntity collector) {
         CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
         collectionsCollectors.add(collectorCollection);
     }
+
+
 
     //update a collection of collector
     public void updateCollectorCollection(String name, String status, boolean isPublic) {
@@ -114,12 +121,13 @@ public class CollectionEntity {
                 '}';
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectionEntity that = (CollectionEntity) o;
-        return isPublic == that.isPublic && id.equals(that.id) && name.equals(that.name) && status.equals(that.status) && collectionsCollectors.equals(that.collectionsCollectors);
+        return isPublic == that.isPublic && id.equals(that.id) && Objects.equals(name, that.name) && Objects.equals(status, that.status) && Objects.equals(collectionsCollectors, that.collectionsCollectors);
     }
 
     @Override

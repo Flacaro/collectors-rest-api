@@ -44,7 +44,8 @@ public class AuthController {
                 collector.getBirthday(),
                 collector.getUsername(),
                 collector.getEmail(),
-                collector.getPassword()
+                collector.getPassword(),
+                null
         );
 
         // 409 --> Conflict, quindi qualche vincolo non è rispettato

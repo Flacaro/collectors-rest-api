@@ -421,6 +421,214 @@ class CollectionServiceTest {
         assertTrue(collection.isPresent());
     }
 
+//    @Test
+//    @Transactional
+//    void should_addCollectionToFavouritesList_when_collectorIsOwnerOfCollectionAndWantToAddToFavouritesList() {
+//        var savedCollectors = collectorsRepository.findByEmail("mario@rossi.com").orElseThrow();
+//
+//        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+//
+//        var collectors = new ArrayList<CollectorCollectionEntity>();
+//        collectors.add(new CollectorCollectionEntity(savedCollectors, savedCollection, true));
+//
+//
+//        savedCollection.setCollectionsCollectors(collectors);
+//
+//        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+//
+//        assertNotNull(collectionWithCollectors);
+//
+//        assertEquals(1, collectionWithCollectors.getCollectionsCollectors().size());
+//
+//        var collectionOptional = this.collectionsRepository.findById(savedCollection.getId());
+//
+//        assertTrue(collectionOptional.isPresent());
+//
+//        var collection = collectionOptional.get();
+//
+//
+//        when(authentication.getName()).thenReturn(savedCollectors.getEmail());
+//
+//        assertDoesNotThrow(
+//                () -> sut.addCollectionInFavouritesList(
+//                        savedCollectors.getId(),
+//                        collection.getId()
+//                )
+//        );
+//
+//        assertTrue(collectorsRepository.findById(savedCollectors.getId()).get().getFavouritesCollections().contains(collection));
+//    }
+//
+//    @Test
+//    @Transactional
+//    void should_addCollectionToFavouritesList_when_collectorIsNotOwnerOfCollectionAndWantToAddToFavouritesList() {
+//        var mario = collectorsRepository.findByEmail("mario@rossi.com").orElseThrow();
+//        var maria = collectorsRepository.findByEmail("maria@bianchi.com").orElseThrow();
+//
+//        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+//
+//        var collectors = new ArrayList<CollectorCollectionEntity>();
+//        collectors.add(new CollectorCollectionEntity(maria, savedCollection, false));
+//
+//
+//        savedCollection.setCollectionsCollectors(collectors);
+//
+//        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+//
+//        assertNotNull(collectionWithCollectors);
+//
+//        assertEquals(1, collectionWithCollectors.getCollectionsCollectors().size());
+//
+//        var collectionOptional = this.collectionsRepository.findById(savedCollection.getId());
+//
+//        assertTrue(collectionOptional.isPresent());
+//
+//        var collection = collectionOptional.get();
+//
+//        assertTrue(collection.isPublic());
+//
+//        when(authentication.getName()).thenReturn(maria.getEmail());
+//
+//        assertDoesNotThrow(
+//                () -> sut.addCollectionInFavouritesList(
+//                        maria.getId(),
+//                        collection.getId()
+//                )
+//        );
+//
+//        assertTrue(collectorsRepository.findById(maria.getId()).get().getFavouritesCollections().contains(collection));
+//    }
+//
+//    @Test
+//    @Transactional
+//    void should_addCollectionToFavouritesList_when_collectorIsOwnerOfCollectionAndCollectionIsAlreadyInFavouritesList() {
+//        var savedCollectors = collectorsRepository.findByEmail("mario@rossi.com").orElseThrow();
+//
+//
+//        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+//
+//        var collectors = new ArrayList<CollectorCollectionEntity>();
+//        collectors.add(new CollectorCollectionEntity(savedCollectors, savedCollection, true));
+//
+//
+//        savedCollection.setCollectionsCollectors(collectors);
+//
+//        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+//
+//        assertNotNull(collectionWithCollectors);
+//
+//        assertEquals(1, collectionWithCollectors.getCollectionsCollectors().size());
+//
+//        var collectionOptional = this.collectionsRepository.findById(savedCollection.getId());
+//
+//        assertTrue(collectionOptional.isPresent());
+//
+//        var collection = collectionOptional.get();
+//
+//        savedCollectors.addFavouritesCollection(collection);
+//
+//        assertTrue(savedCollectors.getFavouritesCollections().contains(collection));
+//
+//        when(authentication.getName()).thenReturn(savedCollectors.getEmail());
+//
+//        ResponseStatusException exception = assertThrows(
+//                ResponseStatusException.class,
+//                () -> sut.addCollectionInFavouritesList(
+//                        savedCollectors.getId(),
+//                        collection.getId()
+//                )
+//        );
+//
+//        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+//    }
+//
+//
+//    @Test
+//    @Transactional
+//    void should_addCollectionToFavouritesList_when_collectorIsNotOwnerOfCollectionAndCollectionIsAlreadyInFavouritesList() {
+//        var maria = collectorsRepository.findByEmail("maria@bianchi.com").orElseThrow();
+//
+//
+//        var savedCollection = this.collectionsRepository.save(Examples.collectionExample());
+//
+//        var collectors = new ArrayList<CollectorCollectionEntity>();
+//        collectors.add(new CollectorCollectionEntity(maria, savedCollection, false));
+//
+//
+//        savedCollection.setCollectionsCollectors(collectors);
+//
+//        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+//
+//        assertNotNull(collectionWithCollectors);
+//
+//        assertEquals(1, collectionWithCollectors.getCollectionsCollectors().size());
+//
+//        var collectionOptional = this.collectionsRepository.findById(savedCollection.getId());
+//
+//        assertTrue(collectionOptional.isPresent());
+//
+//        var collection = collectionOptional.get();
+//
+//        assertTrue(collection.isPublic());
+//
+//        maria.addFavouritesCollection(collection);
+//
+//        assertTrue(maria.getFavouritesCollections().contains(collection));
+//
+//        when(authentication.getName()).thenReturn(maria.getEmail());
+//
+//        ResponseStatusException exception = assertThrows(
+//                ResponseStatusException.class,
+//                () -> sut.addCollectionInFavouritesList(
+//                        maria.getId(),
+//                        collection.getId()
+//                )
+//        );
+//
+//        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+//    }
+//
+//    @Test
+//    @Transactional
+//    void should_addCollectionToFavouritesList_when_collectorIsNotOwnerOfCollectionAndCollectionIsNotPublic() {
+//        var maria = collectorsRepository.findByEmail("maria@bianchi.com").orElseThrow();
+//
+//
+//        var savedCollection = this.collectionsRepository.save(Examples.collectionExample2());
+//
+//        var collectors = new ArrayList<CollectorCollectionEntity>();
+//        collectors.add(new CollectorCollectionEntity(maria, savedCollection, false));
+//
+//
+//        savedCollection.setCollectionsCollectors(collectors);
+//
+//        var collectionWithCollectors = this.collectionsRepository.save(savedCollection);
+//
+//        assertNotNull(collectionWithCollectors);
+//
+//        assertEquals(1, collectionWithCollectors.getCollectionsCollectors().size());
+//
+//        var collectionOptional = this.collectionsRepository.findById(savedCollection.getId());
+//
+//        assertTrue(collectionOptional.isPresent());
+//
+//        var collection = collectionOptional.get();
+//
+//        assertFalse(collection.isPublic());
+//
+//        when(authentication.getName()).thenReturn(maria.getEmail());
+//
+//        ResponseStatusException exception = assertThrows(
+//                ResponseStatusException.class,
+//                () -> sut.addCollectionInFavouritesList(
+//                        maria.getId(),
+//                        collection.getId()
+//                )
+//        );
+//
+//        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+//    }
+
 
 
 }

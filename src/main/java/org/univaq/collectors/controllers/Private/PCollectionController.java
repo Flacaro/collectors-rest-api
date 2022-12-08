@@ -1,6 +1,7 @@
 package org.univaq.collectors.controllers.Private;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +57,7 @@ public class PCollectionController {
     }
 
 
-    @PostMapping(produces = "application/json")
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveCollectorCollection(
             @RequestBody CollectionEntity collection,
             Authentication authentication,
@@ -64,6 +65,7 @@ public class PCollectionController {
     ) {
         var collector = this.collectorService.getCollectorByEmail(authentication.getName());
         var result = this.collectionService.saveCollectorCollection(collection, collector.getId());
+
         try {
             // Aggiungendo il query parameter alla richiesta, ?view=private
             // si ottiene la vista privata, altrimenti la pubblica
@@ -81,6 +83,8 @@ public class PCollectionController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
 
 
     @DeleteMapping("/{collectionId}")
@@ -122,8 +126,6 @@ public class PCollectionController {
         this.collectionService.unshareCollection(collectorIds, collectionId, authentication);
         return ResponseEntity.ok().build();
     }
-
-    //fare like
 
 
 }

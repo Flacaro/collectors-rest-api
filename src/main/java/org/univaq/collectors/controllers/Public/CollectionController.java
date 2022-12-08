@@ -32,14 +32,14 @@ public class CollectionController {
             return ResponseEntity.ok(this.collectionService.getAll(name));
      }
 
-     @GetMapping("/{collectionId}/disks")
-        public ResponseEntity<List<DiskEntity>> getDisksOfPublicCollection(
-                @PathVariable("collectionId") Long collectionId
-        ) {
-            var result = this.collectionService.getPublicDisks(collectionId);
-            return ResponseEntity.ok(result);
-
-        }
+//     @GetMapping("/{collectionId}/disks")
+//        public ResponseEntity<List<DiskEntity>> getDisksOfPublicCollection(
+//                @PathVariable("collectionId") Long collectionId
+//        ) {
+//            var result = this.collectionService.getPublicDisks(collectionId);
+//            return ResponseEntity.ok(result);
+//
+//        }
 
 
 

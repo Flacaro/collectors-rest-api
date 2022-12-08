@@ -21,7 +21,6 @@ public class CollectorCollectionEntity implements Serializable {
     @ManyToOne
     @JsonBackReference
     private CollectionEntity collection;
-    
 
     private boolean isOwner;
 

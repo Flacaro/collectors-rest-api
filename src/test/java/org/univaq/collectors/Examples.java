@@ -15,7 +15,8 @@ public class Examples {
                 LocalDate.of(1990, 1, 1),
                 "mario1",
                 "mario@rossi.com",
-                "secret"
+                "secret",
+                null
         );
     }
 
@@ -27,7 +28,8 @@ public class Examples {
                 LocalDate.of(1990, 1, 1),
                 "Rosa",
                 "rosa@bianchi.com",
-                "secret"
+                "secret",
+                null
         );
 
     }
@@ -40,7 +42,8 @@ public class Examples {
                 LocalDate.of(1990, 1, 1),
                 "Daniele",
                 "daniele@neri.com",
-                "secret"
+                "secret",
+                null
         );
 
     }
@@ -52,6 +55,15 @@ public class Examples {
                 "collezione 1",
                 "buono",
                 true
+        );
+    }
+
+    public static CollectionEntity collectionExample2() {
+        return new CollectionEntity(
+                null,
+                "collezione 2",
+                "ottimo",
+                false
         );
     }
 

@@ -7,9 +7,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.univaq.collectors.models.CollectorEntity;
 import org.univaq.collectors.security.AuthService;
+import org.univaq.collectors.services.CollectionService;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class DatabaseGenerator {
@@ -24,13 +25,13 @@ public class DatabaseGenerator {
     public void initializeDatabase() {
         logger.info("\u001B[31m--------------------INIZIO GENERAZIONE--------------------\u001B[0m");
 
-        createCollector();
+        var collectors = createCollector();
 
         logger.info("\u001B[31m--------------------FINE GENERAZIONE----------------------\u001B[0m");
     }
 
 
-    private Optional<CollectorEntity> createCollector() {
+    private List<CollectorEntity> createCollector() {
         CollectorEntity marioRossi = new CollectorEntity(
                 null,
                 "mario",
@@ -38,17 +39,19 @@ public class DatabaseGenerator {
                 LocalDate.of(1995, 6, 26),
                 "mario",
                 "mario@rossi.com",
-                "secret"
+                "secret",
+                null
         );
 
-        CollectorEntity chiaraBianchi = new CollectorEntity(
+        CollectorEntity mariaBianchi = new CollectorEntity(
                 null,
                 "maria",
                 "bianchi",
                 LocalDate.of(1998, 5, 3),
                 "maria",
                 "maria@bianchi.com",
-                "secret"
+                "secret",
+                null
         );
 
         CollectorEntity danieleNeri = new CollectorEntity(
@@ -58,10 +61,11 @@ public class DatabaseGenerator {
                 LocalDate.of(1997, 4, 20),
                 "daniele",
                 "daniele@neri.com",
-                "secret"
+                "secret",
+                null
         );
 
-        var chiaraBianchiOptional = authService.register(chiaraBianchi);
+        var chiaraBianchiOptional = authService.register(mariaBianchi);
         chiaraBianchiOptional.ifPresent(
                 cb -> logger.info("Chiara Bianchi: {}", cb)
         );
@@ -80,8 +84,6 @@ public class DatabaseGenerator {
 
                 // log token in rosso
                 logger.info("\u001B[31mToken Mario Rossi : " + token.getToken() + "\u001B[0m");
-
-                return marioRossiOptional;
             } catch(BadCredentialsException e) {
                 logger.error("Bad credentials");
             }
@@ -89,9 +91,10 @@ public class DatabaseGenerator {
             logger.warn("Collector not created");
         }
 
-
-        return Optional.empty();
+        return List.of(marioRossi, mariaBianchi, danieleNeri);
     }
+
+
 
 
 }
