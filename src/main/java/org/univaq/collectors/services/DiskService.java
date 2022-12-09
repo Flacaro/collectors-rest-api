@@ -36,7 +36,8 @@ public class DiskService {
         this.collectorsRepository = collectorsRepository;
         this.collectorCollectionRepository = collectorCollectionRepository;
     }
-//prendi tutti dischi pubblici
+
+    //prendi tutti dischi pubblici
     //inserire se collezione da cui prendi dischi è pubblica o private se privata non mostrare: richiamto in diskCOntroller
     public List<DiskEntity> getAll(int page, int size, Optional<String> optionalTitle) {
         // if (optionalTitle.isPresent()){
@@ -75,7 +76,7 @@ public class DiskService {
         return Optional.empty();
     }
 
-//elimina disco dalla collezione privata
+    //elimina disco dalla collezione privata
     public void deleteDiskById(Long collectionId, Long collectorId, Long diskId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);   //trovo il collezionista
         if (optionalCollector.isPresent()) { //se il collezionista e' presente
@@ -119,18 +120,31 @@ public class DiskService {
         return Optional.empty();
     }
 
-
-//prendi i dischi personali dalla collezione
-    public List<DiskEntity> getPersonalDisksFromCollection(Long collectionId) {
-        var collection = this.collectionsRepository.findById(collectionId);
-        if (collection.isPresent()) {
-            var diskList = this.disksRepository.findDisksFromCollectionId(collectionId);
-            if (diskList.isPresent()) {
-                return diskList.get();
+    //prendi i dischi personali dalla collezione
+    public List<DiskEntity> getPersonalDisksFromCollection(Long collectionId, Authentication authentication) {
+        var optionalcollector = collectorsRepository.findByEmail(authentication.getName());
+        if (optionalcollector.isPresent()) {
+            var collector = optionalcollector.get();
+            var optionalCollectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (optionalCollectorCollection.isPresent()) {
+                var collectorCollection = optionalCollectorCollection.get();
+                var isOwner = collectorCollection.isOwner();
+                if (isOwner) {
+                    var diskList = this.disksRepository.findDisksFromCollectionId(collectionId);
+                    if (diskList.isPresent()) {
+                        return diskList.get();
+                    } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk List not found");
+                } else
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
             }
-        }
-        return List.of();
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
     }
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+}
+
+
     //metodo per prendere disco da collezione passato id disco e collezione è mia  ;
     public Optional<DiskEntity> getPersonalDiskByIdFromCollectionId(Long diskId, Long collectionId, Authentication authentication ) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName()); //trova utente per email
@@ -173,6 +187,7 @@ public class DiskService {
             updateDisk.setFormat(disk.getFormat());
             updateDisk.setBarcode(disk.getBarcode());
             updateDisk.setDuplicate(disk.getDuplicate());
+            updateDisk.setYear(disk.getYear());
             return new ResponseEntity<>(disksRepository.saveAndFlush(updateDisk), HttpStatus.OK);
         }
         else
