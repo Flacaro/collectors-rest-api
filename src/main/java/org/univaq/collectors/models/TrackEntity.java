@@ -1,4 +1,7 @@
 package org.univaq.collectors.models;
+import com.fasterxml.jackson.annotation.JsonView;
+import org.univaq.collectors.UserView;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.Objects;
@@ -6,33 +9,41 @@ import java.util.Objects;
 @Entity(name = "track")
 public class TrackEntity {
 
+    @JsonView(UserView.Public.class)
     @Id
     @GeneratedValue
     private Long id;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String title;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String artist;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String album;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String band;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String compositor;
 
+    @JsonView(UserView.Public.class)
     @Column(nullable = false)
     private double time;
 
+    @JsonView(UserView.Private.class)
     @ManyToOne()
     private DiskEntity disk;
 

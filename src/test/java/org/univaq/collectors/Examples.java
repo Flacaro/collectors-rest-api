@@ -49,7 +49,7 @@ public class Examples {
     }
 
 
-    public static CollectionEntity collectionExample() {
+ public static CollectionEntity collectionExample() {
         return new CollectionEntity(
                 null,
                 "collezione 1",

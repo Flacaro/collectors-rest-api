@@ -1,5 +1,7 @@
 package org.univaq.collectors.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import org.univaq.collectors.UserView;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -8,37 +10,46 @@ import java.util.Objects;
 
 @Entity(name = "disk")
 public class DiskEntity {
-    
+
+    @JsonView(UserView.Public.class)
     @Id
     @GeneratedValue
     private Long id;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String title;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String author;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String label;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String state;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String format;
 
+    @JsonView(UserView.Public.class)
     @Column()
     private Integer barcode;
 
+    @JsonView(UserView.Public.class)
     @Column(nullable = false)
     private Integer duplicate;
 
+    @JsonView(UserView.Private.class)
     @ManyToOne()
     private CollectionEntity collection;
 
