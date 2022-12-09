@@ -15,5 +15,8 @@ public interface TracksRepository extends PagingAndSortingRepository<TrackEntity
     @Query("SELECT d FROM track d WHERE d.disk.id = ?1")
     public Optional<List<TrackEntity>> findTrackFromDiskId(Long diskId);
 
+    @Query("SELECT d FROM track d WHERE d.disk.id = ?1 AND d.id = ?2")
+    public Optional<TrackEntity> findTrackFromDiskIdAndTrackId(Long diskId, Long trackId);
+
 }
 //devo aggiungere anche collectionId

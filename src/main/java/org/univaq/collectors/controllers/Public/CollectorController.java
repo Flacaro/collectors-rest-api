@@ -1,8 +1,10 @@
 package org.univaq.collectors.controllers.Public;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.CollectorEntity;
 import org.univaq.collectors.models.DiskEntity;
@@ -97,7 +99,7 @@ public class CollectorController {
         @PathVariable ("collectionId") Long collectionId,
         @PathVariable ("diskId") Long diskId
     ){
-        var result = this.diskService.getDiskByIdFromPublicCollection(collectionId, collectorId, diskId);
+        var result = this.diskService.getDiskByIdFromPublicCollectionOfACollector(collectorId, collectionId, diskId);
         return ResponseEntity.ok(result);
     }
 
@@ -133,7 +135,35 @@ public class CollectorController {
             @PathVariable("diskId") Long diskId,
             @RequestParam(required = false) String view
     ) {
-        var result = this.trackService.getTracksFromPublicCollection(collectorId, collectionId, diskId);
+        var result = this.trackService.getTracksFromPublicCollectionOfCollector(collectorId, collectionId, diskId);
+        try {
+            // Aggiungendo il query parameter alla richiesta, ?view=private
+            // si ottiene la vista privata, altrimenti la pubblica
+            if ("private".equals(view)) {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
+                );
+            } else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
+                );
+            }
+
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping(value ="/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
+    public ResponseEntity<String> getPublicTrack(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId,
+            @PathVariable("diskId") Long diskId,
+            @PathVariable("trackId") Long trackId,
+            @RequestParam(required = false) String view
+    ) {
+        var optionalTrack = this.trackService.getTrackFromPublicCollectionOfCollector(collectorId, collectionId, diskId, trackId);
+        var result = optionalTrack.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         try {
             // Aggiungendo il query parameter alla richiesta, ?view=private
             // si ottiene la vista privata, altrimenti la pubblica

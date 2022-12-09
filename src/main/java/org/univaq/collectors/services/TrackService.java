@@ -157,19 +157,18 @@ public class TrackService {
         return Optional.empty();
     }
 
-    public List<TrackEntity> getTracksFromPublicCollection(Long collectorId, Long collectionId, Long diskId) {
+    public Optional<List<TrackEntity>> getTracksFromPublicCollectionOfCollector(Long collectorId, Long collectionId, Long diskId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-            var collector = optionalCollector.get();
             var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
             if (collectorCollection.isPresent()) {
                 var collection = collectorCollection.get();
                 if (collection.getCollection().isPublic()) {
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (optionalDisk.isPresent()) {
-                        var optionalTrack = this.trackRepository.findTrackFromDiskId(diskId);
-                        if (optionalTrack.isPresent()) {
-                            return optionalTrack.get();
+                        var optionalTracks = this.trackRepository.findTrackFromDiskId(diskId);
+                        if (optionalTracks.isPresent()) {
+                            return optionalTracks;
                         }
                     } else {
                         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not found");
@@ -180,6 +179,87 @@ public class TrackService {
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
             }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    }
+
+
+    public Optional<TrackEntity> getTrackFromPublicCollectionOfCollector(Long collectorId, Long collectionId, Long diskId, Long trackId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            if (collectorCollection.isPresent()) {
+                var collection = collectorCollection.get();
+                if (collection.getCollection().isPublic()) {
+                    var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                    if (optionalDisk.isPresent()) {
+                        var optionalTrack = this.trackRepository.findTrackFromDiskId(diskId);
+                        if (optionalTrack.isPresent()) {
+                            var tracks = optionalTrack.get();
+                            for (TrackEntity t : tracks) {
+                                if (t.getId().equals(trackId)) {
+                                    return Optional.of(t);
+                                }
+                            }
+                        }
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not found");
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    }
+
+
+
+    public Optional<List<TrackEntity>> getTracksFromPublicCollection(Long collectionId, Long diskId) {
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()) {
+            var collection = optionalCollection.get();
+            if (collection.isPublic()) {
+                var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                if (optionalDisk.isPresent()) {
+                    var optionalTracks = this.trackRepository.findTrackFromDiskId(diskId);
+                    if (optionalTracks.isPresent()) {
+                        return optionalTracks;
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not found");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    }
+
+
+    public Optional<TrackEntity> getTrackFromPublicCollection(Long collectionId, Long diskId, Long trackId) {
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()) {
+            var collection = optionalCollection.get();
+            if (collection.isPublic()) {
+                var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                if (optionalDisk.isPresent()) {
+                    var optionalTrack = this.trackRepository.findTrackFromDiskIdAndTrackId(diskId, trackId);
+                    if (optionalTrack.isPresent()) {
+                        return optionalTrack;
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not found");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
