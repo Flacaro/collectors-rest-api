@@ -1,9 +1,11 @@
 package org.univaq.collectors.controllers.Private;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.services.CollectionService;
@@ -31,7 +33,8 @@ public class PCollectionController {
             Authentication authentication,
             @RequestParam(required = false) String view
     ) {
-        var result = this.collectionService.saveCollectorCollection(collection, authentication);
+        var optionalCollection = this.collectionService.saveCollectorCollection(collection, authentication);
+        var result = optionalCollection.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         try {
             if ("private".equals(view)) {
@@ -49,6 +52,7 @@ public class PCollectionController {
         }
     }
 
+    //vedere perche non elimina la collection se e' nei preferiti
     @DeleteMapping("/{collectionId}")
     public ResponseEntity<CollectionEntity> deleteCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
@@ -65,7 +69,8 @@ public class PCollectionController {
             Authentication authentication,
             @RequestParam(required = false) String view
     ) {
-        var result = this.collectionService.updateCollectorCollectionById(authentication, collectionId, collection);
+        var optionalCollection = this.collectionService.updateCollectorCollectionById(authentication, collectionId, collection);
+        var result = optionalCollection.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         try {
             // Aggiungendo il query parameter alla richiesta, ?view=private
             // si ottiene la vista privata, altrimenti la pubblica
@@ -90,7 +95,8 @@ public class PCollectionController {
             @RequestBody List<Long> collectorIds,
             Authentication authentication
     ) {
-        var result = this.collectionService.shareCollection(collectorIds, collectionId,authentication);
+        var optionalCollection = this.collectionService.shareCollection(collectorIds, collectionId,authentication);
+        var result = optionalCollection.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return ResponseEntity.ok(result);
     }
 

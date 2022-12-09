@@ -39,18 +39,29 @@ public class DiskService {
 //prendi tutti dischi pubblici
     //inserire se collezione da cui prendi dischi è pubblica o private se privata non mostrare: richiamto in diskCOntroller
     public List<DiskEntity> getAll(int page, int size, Optional<String> optionalTitle) {
-        // if (optionalTitle.isPresent()){
-        //   var diskOptional = disksRepository.findByTitle(optionalTitle.get());
-        //  if (diskOptional.isEmpty()){
-        //      return List.of(diskOptional.get());
-        //    }
         return optionalTitle
-                .map(title -> this.disksRepository.findByTitle(title))
+                .map(this.disksRepository::findByTitle)
                 .map(diskOptional -> diskOptional
-                        .map(disk -> List.of(disk))
-                        .orElseGet(() -> List.of())
+                        .map(List::of)
+                        .orElseGet(List::of)
                 )
                 .orElseGet(() -> this.disksRepository.findAll(PageRequest.of(page, size)).toList());
+    }
+
+    public Optional<List<DiskEntity>> getDisksFromPublicCollection(Long collectionId) {
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()) {
+            var collection = optionalCollection.get();
+            if (collection.isPublic()) {
+                var disks = this.disksRepository.findDisksFromCollectionId(collection.getId());
+                if(disks.isPresent()){
+                    return disks;
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     //salvo disco
@@ -97,26 +108,41 @@ public class DiskService {
     }
 
 
-    public Optional<DiskEntity> getDiskByIdFromPublicCollection(Long collectionId, Long collectorId, Long diskId) {
-        var optionalCollector = this.collectorsRepository.findById(collectorId);   //trova id del collezionista
-        if (optionalCollector.isPresent()) { //se id è presente
-            var collector = optionalCollector.get(); //collezionista
-            var collectorCollectionOptional = this.collectorCollectionRepository
-                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId); //trova la collezione dall'id del collezionista
+    public Optional<DiskEntity> getDiskByIdFromPublicCollection(Long collectionId, Long diskId) {
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()) {
+            var collection = optionalCollection.get();
+            if (collection.isPublic()) {
+                var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                if (optionalDisk.isPresent()) {
+                    return optionalDisk;
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
 
-            if (collectorCollectionOptional.isPresent()) { //se la collezione è presente
+    public Optional<DiskEntity> getDiskByIdFromPublicCollectionOfACollector(Long collectorId,Long collectionId, Long diskId){
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()){
+            var collector = optionalCollector.get();
+            var collectorCollectionOptional = this.collectorCollectionRepository
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (collectorCollectionOptional.isPresent()){
                 var collectorCollection = collectorCollectionOptional.get();
-                var collection = collectorCollection.getCollection(); //prendi la collezione
-                if (collection.isPublic()) {
+                if (collectorCollection.getCollection().isPublic()){
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
-                    if (optionalDisk.isPresent()) {
-                        var disk = optionalDisk.get(); //disco
-                        return Optional.of(disk);
+                    if (optionalDisk.isPresent()){
+                        return optionalDisk;
                     }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
                 }
             }
         }
-        return Optional.empty();
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 
 
