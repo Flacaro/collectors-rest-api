@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.persistence.*;
 
@@ -20,7 +21,6 @@ public class CollectorCollectionEntity implements Serializable {
     @ManyToOne
     @JsonBackReference
     private CollectionEntity collection;
-    
 
     private boolean isOwner;
 
@@ -72,7 +72,6 @@ public class CollectorCollectionEntity implements Serializable {
     public void setOwner(boolean owner) {
         isOwner = owner;
     }
-
 
     @Override
     public String toString() {

@@ -1,52 +1,68 @@
 package org.univaq.collectors.models;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import io.jsonwebtoken.lang.Assert;
-import net.bytebuddy.implementation.bind.annotation.Default;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import com.fasterxml.jackson.annotation.*;
+import org.univaq.collectors.UserView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @Entity(name = "collection")
+@Table(
+        indexes = {
+                @Index(name = "collection_name_index", columnList = "name"),
+                @Index(name = "collector_type_index", columnList = "type")
+        }
+)
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class CollectionEntity {
-    
+
+    @JsonView(UserView.Public.class)
     @Id
     @GeneratedValue
     private Long id;
 
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String name;
 
+    //ma status che e'?
+    @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
     private String status;
 
+    //il tipo della collection: rock, pop ecc.
+    @JsonView(UserView.Public.class)
+    @Column(nullable = false)
+    private String type;
+
+    @JsonView(UserView.Public.class)
     @Column(nullable = false)
     private boolean isPublic;
 
 
+    @JsonView(UserView.Private.class)
     @OneToMany(
             mappedBy = "collection",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JsonManagedReference  //-> dico a json che una collezione molti a molti
-    private List<CollectorCollectionEntity> collectors = new ArrayList<>(); //lista di collezionisti con cui condivido la collezione
+    private List<CollectorCollectionEntity> collectionsCollectors = new ArrayList<>(); //lista di collezionisti con cui condivido la collezione
 
 
-    public CollectionEntity(Long id, String name, String status, boolean isPublic) {
+
+    public CollectionEntity(Long id, String name, String status, boolean isPublic, String type) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.isPublic = isPublic;
+        this.type = type;
     }
 
     public CollectionEntity() {
@@ -86,25 +102,34 @@ public class CollectionEntity {
         isPublic = aPublic;
     }
 
-    public List<CollectorCollectionEntity> getCollectors() {
-        return collectors;
+    public List<CollectorCollectionEntity> getCollectionsCollectors() {
+        return collectionsCollectors;
     }
 
-    public void setCollectors(List<CollectorCollectionEntity> collectors) {
-        this.collectors = collectors;
+    public void setCollectionsCollectors(List<CollectorCollectionEntity> collectors) {
+        this.collectionsCollectors = collectors;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public void addCollectorCollection(CollectorEntity collector) {
         CollectorCollectionEntity collectorCollection = new CollectorCollectionEntity(collector, this, true);
-        collectors.add(collectorCollection);
+        collectionsCollectors.add(collectorCollection);
     }
+
 
 
     //update a collection of collector
     public void updateCollectorCollection(String name, String status, boolean isPublic) {
-        CollectionEntity collectorCollection = new CollectionEntity();
-        collectorCollection.setName(name);
-        collectorCollection.setStatus(status);
-        collectorCollection.setPublic(isPublic);
+        this.name = name;
+        this.status = status;
+        this.isPublic = isPublic;
     }
 
     @Override
@@ -114,20 +139,21 @@ public class CollectionEntity {
                 ", name='" + name + '\'' +
                 ", status='" + status + '\'' +
                 ", isPublic=" + isPublic +
-                ", collectors=" + collectors +
+                ", type=" + type +
                 '}';
     }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectionEntity that = (CollectionEntity) o;
-        return isPublic == that.isPublic && id.equals(that.id) && name.equals(that.name) && status.equals(that.status) && collectors.equals(that.collectors);
+        return isPublic == that.isPublic && id.equals(that.id) && Objects.equals(name, that.name) && Objects.equals(status, that.status) && Objects.equals(collectionsCollectors, that.collectionsCollectors) && Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, isPublic, collectors);
+        return Objects.hash(id, name, status, isPublic, collectionsCollectors, type);
     }
 }
