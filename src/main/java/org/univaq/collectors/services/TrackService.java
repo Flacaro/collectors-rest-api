@@ -40,11 +40,11 @@ public class TrackService {
                 )
                 .orElseGet(() -> this.trackRepository.findAll(PageRequest.of(page, size)).toList());
     }
-//manca authentication
+
     //ritorna tracce dato un disco
     public List<TrackEntity> getPersonalTracksFromDisk(Long diskId, Long collectionId, Authentication authentication) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
-        if (optionalCollector.isPresent()){
+        if (optionalCollector.isPresent()) {
             //controlla se è l'ower
             var collector = optionalCollector.get();
             collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
@@ -53,12 +53,12 @@ public class TrackService {
             );
         }
         var disk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
-            if (disk.isPresent()) {
-                var trackList = this.trackRepository.findTrackFromDiskId(diskId);
-                if (trackList.isPresent()) {
-                    return trackList.get();
-                }
+        if (disk.isPresent()) {
+            var trackList = this.trackRepository.findTrackFromDiskId(diskId);
+            if (trackList.isPresent()) {
+                return trackList.get();
             }
+        }
 
         return List.of();
     }
@@ -74,19 +74,20 @@ public class TrackService {
                     () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection")
             );//tramite tabella prendo che la collezione associata al collezionista
 
-                var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId); //vedo se IdDisco sta nella collezione-> posso farlo così opp. con metodo Personal
-                if (optionalDisk.isPresent()) {
-                    var disk = optionalDisk.get();  //se è presente il Idisco nella collezione prendo disco e modifico
-                    //aggiungi traccia a disco
-                    track.setDisk(disk);
+            var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId); //vedo se IdDisco sta nella collezione-> posso farlo così opp. con metodo Personal
+            if (optionalDisk.isPresent()) {
+                var disk = optionalDisk.get();  //se è presente il Idisco nella collezione prendo disco e modifico
+                //aggiungi traccia a disco
+                track.setDisk(disk);
 
-                    return Optional.of(this.trackRepository.save(track));
-                }
+                return Optional.of(this.trackRepository.save(track));
             }
+        }
         return Optional.of(track);
     }
+
     //elimina traccia
-     public void deleteTrack(Long trackId, Long diskId, Long collectionId, Authentication authentication) {
+    public void deleteTrack(Long trackId, Long diskId, Long collectionId, Authentication authentication) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName()); //trovo utente dal email fornito il nome
         if (optionalCollector.isPresent()) {
             var collector = optionalCollector.get();
@@ -106,7 +107,53 @@ public class TrackService {
         }
     }
 
-    //fare update
+    //aggionamento traccia
+    public ResponseEntity<TrackEntity> updateTrack(TrackEntity track, Long trackId, Long diskId, Long collectionId, Authentication authentication) {
+        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            //collezionista = ower
+            collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
+            ).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not owner of this collection")
+            );
+        }
+        var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+        if (optionalDisk.isPresent()) {
+            var optionalTrack = this.trackRepository.findById(trackId);
+            if (optionalTrack.isPresent()) {
+                var updateTrack = optionalTrack.get();
+                updateTrack.setTitle(track.getTitle());
+                updateTrack.setArtist(track.getArtist());
+                updateTrack.setAlbum(track.getAlbum());
+                updateTrack.setBand(track.getBand());
+                updateTrack.setCompositor(track.getCompositor());
+                return new ResponseEntity<>(trackRepository.saveAndFlush(updateTrack), HttpStatus.OK);
 
+            } else
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
+    public Optional<TrackEntity> getPersonalTrackByIdFromDiskId(Long trackId, Long diskId, Long collectionId, Authentication authentication) {
+        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            //collezionista = ower
+            collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
+            ).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not owner of this collection")
+            );
+        }
+        var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+        if (optionalDisk.isPresent()) {
+                var optionalTrack = this.trackRepository.findById(trackId);
+                if (optionalTrack.isPresent()) {
+                    return optionalTrack;
+                }
+
+            }
+        return Optional.empty();
+    }
 }

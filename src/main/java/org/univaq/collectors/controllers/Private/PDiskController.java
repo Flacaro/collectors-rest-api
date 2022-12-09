@@ -76,7 +76,15 @@ public class PDiskController {
 
         return ResponseEntity.of(disk);
     }
+
+    @PutMapping("/{diskId}")
+    public ResponseEntity<DiskEntity> uptadeDiskById(
+            @RequestBody DiskEntity disk,
+            @PathVariable ("diskId")  Long diskId,
+            @PathVariable ("collectionId") Long collectionId,
+            Authentication authentication
+    ) {
+        this.diskService.updateDisk(disk, diskId, collectionId, authentication);
+        return ResponseEntity.ok().build();
+    }
 }
-//update disco: aggiorna dati disco
-
-

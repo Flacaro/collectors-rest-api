@@ -115,7 +115,6 @@ public class TrackEntity {
         this.disk = disk;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -128,4 +127,5 @@ public class TrackEntity {
     public int hashCode() {
         return Objects.hash(id, title, artist, album, band, compositor, time, disk);
     }
+
 }

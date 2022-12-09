@@ -2,6 +2,7 @@ package org.univaq.collectors.controllers.Private;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.models.TrackEntity;
@@ -11,9 +12,6 @@ import org.univaq.collectors.services.DiskService;
 import org.univaq.collectors.services.TrackService;
 import org.springframework.security.core.Authentication;
 
-
-
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -55,7 +53,7 @@ public class PTrackController {
         return optionalTrack.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-     @DeleteMapping("/{trackId}")
+    @DeleteMapping("/{trackId}")
     public ResponseEntity<TrackEntity> deleteTrackById(
             @PathVariable("collectionId") Long collectionId,
             @PathVariable("diskId") Long diskId,
@@ -66,5 +64,27 @@ public class PTrackController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{trackId}")
+    public ResponseEntity<TrackEntity> updateTrackById(
+            @RequestBody TrackEntity track, //contiene dati ma non rappresenta una traccia nel db trackDTo
+            @PathVariable ("trackId") Long trackId,
+            @PathVariable ("diskId") Long diskId,
+            @PathVariable ("collectionId") Long collectionId,
+            Authentication authentication
+    ){
+        this.trackService.updateTrack(track, trackId, diskId, collectionId, authentication);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{trackId}")
+    public ResponseEntity<TrackEntity> getTrackById(
+            @PathVariable("trackId") Long trackId,
+            @PathVariable("diskId") Long diskId,
+            @PathVariable ("collectionId") Long collectionId,
+            Authentication authentication
+    ){
+        var track =this.trackService.getPersonalTrackByIdFromDiskId(trackId, diskId, collectionId, authentication);
+        return ResponseEntity.of(track);
+    }
 
 }

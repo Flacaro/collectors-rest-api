@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -150,7 +151,32 @@ public class DiskService {
         }
         return optionalDisk;
     }
-}
 
+    public ResponseEntity<DiskEntity> updateDisk (DiskEntity disk, Long diskId, Long collectionId, Authentication authentication){
+        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            //collezionista = ower
+            collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
+            ).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not owner of this collection")
+            );
+        }
+        var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+        if (optionalDisk.isPresent()){
+            var updateDisk = optionalDisk.get();
+            updateDisk.setTitle(disk.getTitle());
+            updateDisk.setAuthor(disk.getAuthor());
+            updateDisk.setLabel(disk.getLabel());
+            updateDisk.setState(disk.getState());
+            updateDisk.setFormat(disk.getFormat());
+            updateDisk.setBarcode(disk.getBarcode());
+            updateDisk.setDuplicate(disk.getDuplicate());
+            return new ResponseEntity<>(disksRepository.saveAndFlush(updateDisk), HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+}
 
 
