@@ -54,7 +54,8 @@ public class Examples {
                 null,
                 "collezione 1",
                 "buono",
-                true
+                true,
+                "Pop"
         );
     }
 
@@ -63,7 +64,8 @@ public class Examples {
                 null,
                 "collezione 2",
                 "ottimo",
-                false
+                false,
+                "rock"
         );
     }
 

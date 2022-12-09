@@ -36,14 +36,8 @@ public class CollectorService {
     }
 
 
-    public List<CollectorEntity> getAll(int page, int size, Optional<String> optionalEmail) {
-        return optionalEmail
-        .map(this.collectorsRepository::findByEmail)
-        .map(collectorOptional -> collectorOptional
-            .map(List::of)
-            .orElseGet(List::of)
-        )
-        .orElseGet(() -> this.collectorsRepository.findAll(PageRequest.of(page, size)).toList());
+    public List<CollectorEntity> getAllCollectors(int page, int size) {
+        return this.collectorsRepository.findAll(PageRequest.of(page, size)).toList();
     }
 
     public CollectorEntity getCollectorByEmail(String email) {
@@ -56,22 +50,31 @@ public class CollectorService {
         return collector.orElse(null);
     }
 
-    public List<CollectionEntity> getPersonalCollections(Long collectorId, Authentication authentication) {
+    public CollectionEntity getPublicCollectorCollectionById(Long collectorId, Long collectionId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            if (collectorCollection.isPresent()) {
+                var collection = collectorCollection.get().getCollection();
+                if (collection.isPublic()) {
+                    return collection;
+                } else {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection is not public");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found for this collector");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    }
+
+    public List<CollectionEntity> getPersonalCollections(Authentication authentication) {
         var collector = collectorsRepository.findByEmail(authentication.getName());
         if (collector.isPresent()) {
-            var collectionList = this.collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
+            var collectionList = this.collectorCollectionRepository.getCollectionsByCollectorId(collector.get().getId());
             return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
         }
         return List.of();
-    }
-
-
-    public boolean isCollectorOwnerOfCollection(CollectorEntity collector, CollectionEntity collection) {
-        return collection.getCollectionsCollectors().stream()
-                .filter(cc -> cc.getCollector().getId().equals(collector.getId()))
-                .findFirst()
-                .map(CollectorCollectionEntity::isOwner)
-                .orElse(false);
     }
 
 
@@ -82,19 +85,8 @@ public class CollectorService {
         var collection = collectionsRepository.findById(favouritePayload.getCollectionId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
         );
-        // controllo se il collezionista e' l'owner della collection
-//        var isCollectorOwner = this.isCollectorOwnerOfCollection(collector, collection);
-//        if (isCollectorOwner) {
-//            //controllo se nella lista dei preferiti gia' c'e' la collection che voglio aggiungere
-//            var isCollectionInFavourites = this.isCollectionInFavourites(collector, collection);
-//            if (!isCollectionInFavourites) {
-//                collector.addCollectionToFavourites(collection);
-//                collectorsRepository.save(collector);
-//            } else {
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Collection already in favourites");
-//            }
-         if (collection.isPublic()) {
-            //se la collezione non e' privata e non sono l'owner della collection e non e' gia nella lista
+         if (collection.isPublic() || isCollectorInCollectionShareList(collector, collection)) {
+            //se la collezione non e' privata e non e' gia nella lista oppure se sono nella lista di condivisione
             //aggiungo la collezione ai preferiti
             var isCollectionInFavourites = this.isCollectionInFavourites(collector, collection);
 
@@ -114,7 +106,12 @@ public class CollectorService {
                 .anyMatch(c -> c.getId().equals(collection.getId()));
     }
 
-    public List<CollectionEntity> getFavourites(Authentication authentication) {
+    private boolean isCollectorInCollectionShareList (CollectorEntity collector, CollectionEntity collection) {
+        return collection.getCollectionsCollectors().stream()
+                .anyMatch(cc -> cc.getCollector().getId().equals(collector.getId()));
+    }
+
+    public List<CollectionEntity> getFavouritesCollections(Authentication authentication) {
         var collector = collectorsRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found")
         );

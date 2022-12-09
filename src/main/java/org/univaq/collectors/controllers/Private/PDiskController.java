@@ -1,10 +1,8 @@
 package org.univaq.collectors.controllers.Private;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
@@ -28,16 +26,16 @@ public class PDiskController {
         this.collectorService = collectorService;
     }
 //ritorna lista di dischi data una collezione
-    @GetMapping
-    public ResponseEntity<List<DiskEntity>> getDisksOfCollection(
-            @PathVariable("collectionId") Long collectionId,
-            Principal principal
-    ) {
-        var collector = this.collectorService.getCollectorByEmail(principal.getName()); //servizio che prende collezionista dal email
-        var collection = this.collectionService.getCollectorCollectionById(collector.getId(), collectionId); //collezioni mie personali tramite query
-            var result = this.diskService.getPersonalDisksFromCollection(collection.getId());
-            return ResponseEntity.ok(result);
-        }
+//    @GetMapping
+//    public ResponseEntity<List<DiskEntity>> getDisksOfCollection(
+//            @PathVariable("collectionId") Long collectionId,
+//            Principal principal
+//    ) {
+//        var collector = this.collectorService.getCollectorByEmail(principal.getName()); //servizio che prende collezionista dal email
+//        var collection = this.collectionService.getPublicCollectorCollectionById(collector.getId(), collectionId); //collezioni mie personali tramite query
+//            var result = this.diskService.getPersonalDisksFromCollection(collection.getId());
+//            return ResponseEntity.ok(result);
+//        }
 
 
     @PostMapping

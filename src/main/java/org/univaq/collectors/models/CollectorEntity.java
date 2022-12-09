@@ -3,9 +3,11 @@ package org.univaq.collectors.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.univaq.collectors.UserView;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -24,33 +26,41 @@ import java.util.Objects;
 )
 public class CollectorEntity {
 
+    @JsonView(UserView.Private.class)
     @Id
     @GeneratedValue
     private Long id;
 
+    @JsonView(UserView.Public.class)
     private String name;
 
+    @JsonView(UserView.Public.class)
     private String surname;
 
 
+    @JsonView(UserView.Public.class)
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate birthday;
 
+    @JsonView(UserView.Public.class)
     @Column(unique = true, nullable = false)
     @NotBlank
     private String username;
 
+    @JsonView(UserView.Public.class)
     @Email
     @NotBlank
     @Column(unique = true, nullable = false)
     private String email;
 
 
+    @JsonView(UserView.Private.class)
     @NotBlank
     @Column(nullable = false)
     private String password;
 
+    @JsonView(UserView.Private.class)
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JsonBackReference
     private List<CollectionEntity> favourites = new ArrayList<>();
