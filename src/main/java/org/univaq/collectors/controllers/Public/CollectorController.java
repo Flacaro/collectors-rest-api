@@ -43,6 +43,27 @@ public class CollectorController {
         return ResponseEntity.ok(this.collectorService.getAllCollectors(page, size));
     }
 
+    @GetMapping("/{collectorId}")
+    public ResponseEntity<CollectorEntity> getCollectorById(
+            @PathVariable Long collectorId
+    ) {
+        return ResponseEntity.ok(this.collectorService.getById(collectorId));
+    }
+
+    @GetMapping("/{email}")
+    public ResponseEntity<CollectorEntity> getCollectorByEmail(
+            @PathVariable String email
+    ) {
+        return ResponseEntity.ok(this.collectorService.getCollectorByEmail(email));
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<CollectorEntity> getCollectorByUsername(
+            @PathVariable String username
+    ) {
+        return ResponseEntity.ok(this.collectorService.getCollectorByUsername(username));
+    }
+
     @GetMapping(value ="/{collectorId}/collections", produces = "application/json")
     public ResponseEntity<String> getPublicCollectorCollections(
             @PathVariable("collectorId") Long collectorId,

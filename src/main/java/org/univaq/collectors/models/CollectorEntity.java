@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "collector")
 @Table(
@@ -63,10 +64,10 @@ public class CollectorEntity {
     @JsonView(UserView.Private.class)
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JsonBackReference
-    private List<CollectionEntity> favourites = new ArrayList<>();
+    private Set<CollectionEntity> favourites = Set.of();
 
 
-    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, String username, String email, String password, List<CollectionEntity> favourites) {
+    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, String username, String email, String password, Set<CollectionEntity> favourites) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -144,7 +145,7 @@ public class CollectorEntity {
         this.password = password;
     }
 
-    public List<CollectionEntity> getFavourites() {
+    public Set<CollectionEntity> getFavourites() {
         return favourites;
     }
 
@@ -156,10 +157,13 @@ public class CollectorEntity {
         this.id = id;
     }
 
-    public void setFavourites(List<CollectionEntity> favourites) {
+    public void setFavourites(Set<CollectionEntity> favourites) {
         this.favourites = favourites;
     }
 
+    public void deleteCollectionFromFavourites(CollectionEntity collection) {
+        this.favourites.remove(collection);
+    }
     @Override
     public String toString() {
         return "CollectorEntity{" +

@@ -113,20 +113,24 @@ public class CollectionService {
                 var collectorCollection = optionalCollectorCollection.get();
                 var collection = collectorCollection.getCollection();
                 var isOwner = collectorCollection.isOwner();
-                if(isOwner) {
-                    this.collectionsRepository.deleteById(collectionId);
-                    this.collectorCollectionRepository.delete(collection);
-                }
-                else {
+                if (isOwner) {
+                    var favourites = collector.getFavourites();
+                    favourites.removeIf(favourite -> favourite.getId().equals(collectionId));
+                    collector.setFavourites(favourites);
+                    this.collectorsRepository.flush();
+                    this.collectionsRepository.delete(collection);
+                } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
                 }
             } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
+                }
+//                    this.collectorCollectionRepository.delete(collection);
+//                    this.collectionsRepository.deleteById(collectionId);
+                } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
             }
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
         }
-    }
 
     public CollectionEntity updateCollectorCollectionById(Authentication authentication, Long collectionId, CollectionEntity collection) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());

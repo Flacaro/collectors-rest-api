@@ -24,4 +24,5 @@ public interface CollectorCollectionRepository extends JpaRepository<CollectionE
     @Query("select cc from collector_collection cc where cc.collector.id = ?1 and cc.collection.id = ?2 and cc.isOwner = true")
     Optional<CollectorCollectionEntity> hasCollectionAndIsOwner(Long collectorId, Long collectionId);
 
+
 }

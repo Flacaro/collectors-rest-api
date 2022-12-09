@@ -15,8 +15,5 @@ public interface CollectorsRepository extends PagingAndSortingRepository<Collect
 
     public Optional<CollectorEntity> findByUsername(String username);
 
-    @Query("select c from collector c where c.id = ?1 and c.favourites = ?2")
-    public List<CollectionEntity> findCollectionByIdInFavouritesList(Long collectorId, Long collectionId);
 
-    
 }

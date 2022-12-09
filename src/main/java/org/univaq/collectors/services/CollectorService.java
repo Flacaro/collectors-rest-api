@@ -45,8 +45,13 @@ public class CollectorService {
         return collector.orElse(null);
     }
 
-    public CollectorEntity findByUsername(String username) {
+    public CollectorEntity getCollectorByUsername(String username) {
         var collector = this.collectorsRepository.findByUsername(username);
+        return collector.orElse(null);
+    }
+
+    public CollectorEntity getById(Long collectorId) {
+        var collector = this.collectorsRepository.findById(collectorId);
         return collector.orElse(null);
     }
 
