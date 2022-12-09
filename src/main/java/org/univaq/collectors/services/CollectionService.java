@@ -141,7 +141,7 @@ public class CollectionService {
                 var collectorCollection = collectorCollectionOptional.get();
                 if (collectorCollection.isOwner()) {
                     var collectionToUpdate = collectorCollection.getCollection();
-                    collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getStatus(), collection.isPublic());
+                    collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getType(), collection.isPublic());
                     this.collectionsRepository.save(collectionToUpdate);
                     return collectionToUpdate;
                     }

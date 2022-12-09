@@ -31,12 +31,6 @@ public class CollectionEntity {
     @Column(nullable = false)
     private String name;
 
-    //ma status che e'?
-    @JsonView(UserView.Public.class)
-    @NotBlank
-    @Column(nullable = false)
-    private String status;
-
     //il tipo della collection: rock, pop ecc.
     @JsonView(UserView.Public.class)
     @Column(nullable = false)
@@ -57,10 +51,10 @@ public class CollectionEntity {
 
 
 
-    public CollectionEntity(Long id, String name, String status, boolean isPublic, String type) {
+
+    public CollectionEntity(Long id, String name, boolean isPublic, String type) {
         this.id = id;
         this.name = name;
-        this.status = status;
         this.isPublic = isPublic;
         this.type = type;
     }
@@ -85,14 +79,6 @@ public class CollectionEntity {
         this.name = name;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-
-    }
 //prendo collezioni pubbliche prima controllo
     public boolean isPublic() {
         return isPublic;
@@ -126,9 +112,9 @@ public class CollectionEntity {
 
 
     //update a collection of collector
-    public void updateCollectorCollection(String name, String status, boolean isPublic) {
+    public void updateCollectorCollection(String name, String type, boolean isPublic) {
         this.name = name;
-        this.status = status;
+        this.type = type;
         this.isPublic = isPublic;
     }
 
@@ -137,7 +123,6 @@ public class CollectionEntity {
         return "CollectionEntity{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", status='" + status + '\'' +
                 ", isPublic=" + isPublic +
                 ", type=" + type +
                 '}';
@@ -149,11 +134,11 @@ public class CollectionEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectionEntity that = (CollectionEntity) o;
-        return isPublic == that.isPublic && id.equals(that.id) && Objects.equals(name, that.name) && Objects.equals(status, that.status) && Objects.equals(collectionsCollectors, that.collectionsCollectors) && Objects.equals(type, that.type);
+        return isPublic == that.isPublic && id.equals(that.id) && Objects.equals(name, that.name)  && Objects.equals(collectionsCollectors, that.collectionsCollectors) && Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, isPublic, collectionsCollectors, type);
+        return Objects.hash(id, name, isPublic, collectionsCollectors, type);
     }
 }
