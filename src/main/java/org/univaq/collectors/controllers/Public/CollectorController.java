@@ -10,6 +10,7 @@ import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
 import org.univaq.collectors.services.DiskService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.univaq.collectors.services.TrackService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +25,15 @@ public class CollectorController {
     private final CollectorService collectorService;
     private final CollectionService collectionService;
     private final DiskService diskService;
+
+    private final TrackService trackService;
     private final ObjectMapper objectMapper;
 
-    public CollectorController(CollectorService collectorService, CollectionService collectionService, DiskService diskService, ObjectMapper objectMapper) {
+    public CollectorController(CollectorService collectorService, CollectionService collectionService, DiskService diskService, TrackService trackService, ObjectMapper objectMapper) {
         this.collectorService = collectorService;
         this.collectionService = collectionService;
         this.diskService = diskService;
+        this.trackService = trackService;
         this.objectMapper = objectMapper;
     }
 
@@ -122,6 +126,31 @@ public class CollectorController {
         }
     }
 
+    @GetMapping(value ="/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
+    public ResponseEntity<String> getPublicTracks(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId,
+            @PathVariable("diskId") Long diskId,
+            @RequestParam(required = false) String view
+    ) {
+        var result = this.trackService.getTracksFromPublicCollection(collectorId, collectionId, diskId);
+        try {
+            // Aggiungendo il query parameter alla richiesta, ?view=private
+            // si ottiene la vista privata, altrimenti la pubblica
+            if ("private".equals(view)) {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
+                );
+            } else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
+                );
+            }
+
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
 
 }

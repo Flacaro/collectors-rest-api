@@ -156,4 +156,31 @@ public class TrackService {
             }
         return Optional.empty();
     }
+
+    public List<TrackEntity> getTracksFromPublicCollection(Long collectorId, Long collectionId, Long diskId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            if (collectorCollection.isPresent()) {
+                var collection = collectorCollection.get();
+                if (collection.getCollection().isPublic()) {
+                    var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                    if (optionalDisk.isPresent()) {
+                        var optionalTrack = this.trackRepository.findTrackFromDiskId(diskId);
+                        if (optionalTrack.isPresent()) {
+                            return optionalTrack.get();
+                        }
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not found");
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    }
 }
