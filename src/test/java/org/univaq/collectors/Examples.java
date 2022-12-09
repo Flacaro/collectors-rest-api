@@ -53,7 +53,6 @@ public class Examples {
         return new CollectionEntity(
                 null,
                 "collezione 1",
-                "buono",
                 true,
                 "Pop"
         );
@@ -63,7 +62,6 @@ public class Examples {
         return new CollectionEntity(
                 null,
                 "collezione 2",
-                "ottimo",
                 false,
                 "rock"
         );
