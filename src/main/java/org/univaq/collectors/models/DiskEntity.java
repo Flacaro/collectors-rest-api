@@ -51,7 +51,7 @@ public class DiskEntity {
 
     @JsonView(UserView.Public.class)
     @Column(nullable = false)
-    private Integer year;
+    private Long year;
 
     @JsonView(UserView.Private.class)
     @ManyToOne()
@@ -62,7 +62,7 @@ public class DiskEntity {
     }
     
 
-    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate,Integer year, CollectionEntity collection) {
+    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate,Long year, CollectionEntity collection) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -139,9 +139,9 @@ public class DiskEntity {
         this.duplicate = duplicate;
     }
 
-    public Integer getYear(){ return year; }
+    public Long getYear(){ return year; }
 
-    public void setYear(Integer year){this.year = year;}
+    public void setYear(Long year){this.year = year;}
 
     public CollectionEntity getCollection() {
         return collection;

@@ -13,15 +13,16 @@ import org.univaq.collectors.models.CollectorCollectionEntity;
 
 public interface CollectionsRepository extends PagingAndSortingRepository<CollectionEntity, Long>,
         JpaRepository<CollectionEntity, Long> {
-    
-    public Optional<CollectionEntity> findByName(String name);
 
-    @Query("select c from collection c where c.isPublic = true")
-    public List<CollectionEntity> getPublicCollections(PageRequest pageRequest);
 
     @Query("select c from collection c where c.name like %?1% and c.isPublic = true")
     public List<CollectionEntity> getPublicCollectionsByName(String name, PageRequest pageRequest);
 
+    @Query("select c from collection c where c.type like %?1% and c.isPublic = true")
+    public List<CollectionEntity> getPublicCollectionsByType(String name, PageRequest pageRequest);
+
+    @Query("select c from collection c where c.isPublic = true")
+    public List<CollectionEntity> getAllPublicCollections(PageRequest pageRequest);
 
 
 }
