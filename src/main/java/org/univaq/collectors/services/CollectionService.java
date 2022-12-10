@@ -16,6 +16,7 @@ import org.univaq.collectors.repositories.DisksRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -43,17 +44,20 @@ public class CollectionService {
         this.disksRepository = disksRepository;
     }
 
-    public Optional<List<CollectionEntity>> getAllPublicCollectionsByName(Optional<String> optionalname, Integer page, Integer size) {
-        var optionalName = optionalname.orElse("");
-        if (optionalName.isEmpty()) {
-            return Optional.of(this.collectionsRepository.getPublicCollections(PageRequest.of(page, size)));
+    public Optional<List<CollectionEntity>> getAllPublicCollections(int page, int size) {
+        return Optional.of(this.collectionsRepository.getAllPublicCollections(PageRequest.of(page, size)));
+    }
 
-        } else {
-            return Optional.of(this.collectionsRepository.getPublicCollectionsByName(optionalName, PageRequest.of(page, size)));
-
-        }
+    public Optional<List<CollectionEntity>> getAllPublicCollectionsByName(String name, Integer page, Integer size) {
+            return Optional.of(collectionsRepository.getPublicCollectionsByName(name, PageRequest.of(page, size)));
 
     }
+
+    public Optional<List<CollectionEntity>> getPublicCollectionsByType(String type, Integer page, Integer size) {
+            return Optional.of(this.collectionsRepository.getPublicCollectionsByType(type, PageRequest.of(page, size)));
+
+    }
+
 
     public Optional<CollectionEntity> getPublicCollectionById(Long collectionId) {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
@@ -309,6 +313,39 @@ public class CollectionService {
                 .findFirst()
                 .map(CollectorCollectionEntity::isOwner)
                 .orElse(false);
+    }
+
+    public Optional<List<CollectionEntity>> getPublicCollectionsOfCollectorByType(Long collectorId, String type) {
+        var optionalCollector = collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collectorCollections = collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
+            //prendo le collezioni
+            var collections = new ArrayList<CollectionEntity>();
+            for (var collectorCollection : collectorCollections) {
+                if (collectorCollection.getCollection().isPublic() && collectorCollection.getCollection().getType().equals(type)) {
+                    collections.add(collectorCollection.getCollection());
+                }
+            } return Optional.of(collections);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+        }
+
+    }
+
+    public Optional<CollectionEntity> getPublicCollectionOfCollectorByName(Long collectorId, String name) {
+        var optionalCollector = collectorsRepository.findById(collectorId);
+        Optional<CollectionEntity> collectionByName = Optional.empty();
+        if (optionalCollector.isPresent()) {
+            var collectorCollections = collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
+            //prendo la collezione del collezionista dal nome collezione
+            for (var collectorCollection : collectorCollections) {
+                if (collectorCollection.getCollection().isPublic() && collectorCollection.getCollection().getName().equals(name)) {
+                    collectionByName = Optional.of(collectorCollection.getCollection());
+                }
+            }   return collectionByName;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+        }
     }
 
 

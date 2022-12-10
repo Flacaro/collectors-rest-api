@@ -19,4 +19,13 @@ public interface DisksRepository extends PagingAndSortingRepository<DiskEntity, 
 
     @Query("SELECT d FROM disk d WHERE d.collection.id = ?1 AND d.id = ?2")
     public Optional<DiskEntity> findDiskByIdFromCollectionId(Long collectionId, Long diskId);
+
+    @Query("SELECT d FROM disk d WHERE d.collection.id = ?1 and d.year = ?2")
+    public Optional<List<DiskEntity>> findByYearFromCollectionId(Long collectionId, Long year);
+
+    @Query("SELECT d FROM disk d WHERE d.collection.id = ?1 and d.format = ?2")
+    public Optional<List<DiskEntity>> findByFormatFromCollectionId(Long collectionId, String format);
+
+    @Query("SELECT d FROM disk d WHERE d.collection.id = ?1 and d.author = ?2")
+    public Optional<List<DiskEntity>> findByAuthorFromCollectionId(Long collectionId, String author);
 }

@@ -17,6 +17,8 @@ import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 import org.univaq.collectors.repositories.DisksRepository;
 
+import javax.swing.text.html.Option;
+
 @Service
 public class DiskService {
 
@@ -65,8 +67,36 @@ public class DiskService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
+<<<<<<< HEAD
     public Optional<DiskEntity> saveDisk(DiskEntity disk, Long collectionId, Authentication authentication) {
         var optionalCollector = collectorsRepository.findByEmail(authentication.getName());
+=======
+    public Optional<List<DiskEntity>> getDisksFromPublicCollectorCollection(Long collectorId, Long collectionId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+                var optionalCollectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+                if (optionalCollectorCollection.isPresent()) {
+                    var collection = optionalCollectorCollection.get().getCollection();
+                    if (collection.isPublic()) {
+                        var disks = this.disksRepository.findDisksFromCollectionId(collectionId);
+                        if(disks.isPresent()){
+                            return disks;
+                        }
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+                    }
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collector is not public");
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    //salvo disco
+    public Optional<DiskEntity> saveDisk(DiskEntity disk, Long collectionId, Long collectorId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+>>>>>>> 845604151d2a74ca037e334b5e8259a1b777fb54
         if (optionalCollector.isPresent()) {
             var collector = optionalCollector.get();
             var collectorCollectionOptional = this.collectorCollectionRepository
@@ -145,6 +175,98 @@ public class DiskService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
+
+    public Optional<List<DiskEntity>> getDisksByYearFromPublicCollection(Long collectionId, Long year){
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()){
+            var collection = optionalCollection.get();
+            if (collection.isPublic()){
+                var optionalDisks = this.disksRepository.findByYearFromCollectionId(collectionId, year);
+                if (optionalDisks.isPresent()){
+                    return optionalDisks;
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    public Optional<List<DiskEntity>> getDisksByFormatFromPublicCollection(Long collectionId, String format) {
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()) {
+            var collection = optionalCollection.get();
+            if (collection.isPublic()) {
+                var optionalDisks = this.disksRepository.findByFormatFromCollectionId(collectionId, format);
+                if (optionalDisks.isPresent()) {
+                    return optionalDisks;
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    public Optional<List<DiskEntity>> getDisksByAuthorFromPublicCollection(Long collectionId, String author) {
+        var optionalCollection = this.collectionsRepository.findById(collectionId);
+        if (optionalCollection.isPresent()) {
+            var collection = optionalCollection.get();
+            if (collection.isPublic()) {
+                var optionalDisks = this.disksRepository.findByAuthorFromCollectionId(collectionId, author);
+                if (optionalDisks.isPresent()) {
+                    return optionalDisks;
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    public Optional<List<DiskEntity>> getDisksByYearFromPublicCollection(Long collectorId, Long collectionId, Long year) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            var collectorCollectionOptional = this.collectorCollectionRepository
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (collectorCollectionOptional.isPresent()) {
+                var collectorCollection = collectorCollectionOptional.get();
+                if (collectorCollection.getCollection().isPublic()) {
+                    var optionalDisk = this.disksRepository.findByYearFromCollectionId(collectionId, year);
+                    if (optionalDisk.isPresent()) {
+                        return optionalDisk;
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+                }
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+
+    }
+
+    public Optional<List<DiskEntity>> getDisksByFormatFromPublicCollectionOfCollector(Long collectorId, Long collectionId, String format) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collector = optionalCollector.get();
+            var collectorCollectionOptional = this.collectorCollectionRepository
+                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (collectorCollectionOptional.isPresent()) {
+                var collectorCollection = collectorCollectionOptional.get();
+                if (collectorCollection.getCollection().isPublic()) {
+                    var optionalDisks = this.disksRepository.findByFormatFromCollectionId(collectionId, format);
+                    if (optionalDisks.isPresent()) {
+                        return optionalDisks;
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+                }
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    }
+
 
     //prendi i dischi personali dalla collezione
     public Optional<List<DiskEntity>> getPersonalDisksFromCollection(Long collectionId, Authentication authentication) {

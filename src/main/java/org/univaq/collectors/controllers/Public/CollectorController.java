@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.UserView;
+import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorEntity;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.CollectionService;
@@ -40,43 +41,17 @@ public class CollectorController {
     }
 
 
-    @GetMapping
-    public ResponseEntity<List<CollectorEntity>> getAllCollectors(
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<String> getAllCollectors(
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size,
-            @RequestParam() Optional<String> email
-    ) {
-        return ResponseEntity.ok(this.collectorService.getAllCollectors(page, size));
-    }
-
-    @GetMapping("/{collectorId}")
-    public ResponseEntity<CollectorEntity> getCollectorById(
-            @PathVariable Long collectorId
-    ) {
-        return ResponseEntity.ok(this.collectorService.getById(collectorId));
-    }
-
-    @GetMapping("/{email}")
-    public ResponseEntity<CollectorEntity> getCollectorByEmail(
-            @PathVariable String email
-    ) {
-        return ResponseEntity.ok(this.collectorService.getCollectorByEmail(email));
-    }
-
-    @GetMapping("/{username}")
-    public ResponseEntity<CollectorEntity> getCollectorByUsername(
-            @PathVariable String username
-    ) {
-        return ResponseEntity.ok(this.collectorService.getCollectorByUsername(username));
-    }
-
-    @GetMapping(value ="/{collectorId}/collections", produces = "application/json")
-    public ResponseEntity<String> getPublicCollectorCollections(
-            @PathVariable("collectorId") Long collectorId,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String username,
             @RequestParam(required = false) String view
     ) {
-        var result = this.collectionService.getPublicCollectionsByCollectorId(collectorId);
         try {
+        if(email == null && username == null) {
+            var result = this.collectorService.getAllCollectors(page, size);
             if ("private".equals(view)) {
                 return ResponseEntity.ok(
                         objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
@@ -86,22 +61,102 @@ public class CollectorController {
                         objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
                 );
             }
+        } else if(email != null && username == null) {
+            var result = this.collectorService.getCollectorByEmail(email);
+            if ("private".equals(view)) {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
+                );
+            } else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
+                );
+            }
+        } else if(email == null) {
+            var result = this.collectorService.getCollectorByUsername(username);
+            if ("private".equals(view)) {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
+                );
+            } else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
+                );
+            }
+        }
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/{collectorId}")
+    public ResponseEntity<CollectorEntity> getCollectorById(
+            @PathVariable Long collectorId
+    ) {
+        return ResponseEntity.ok(this.collectorService.getById(collectorId));
+    }
+
+
+    //come si concatenano le query string?
+    @GetMapping(value ="/{collectorId}/collections", produces = "application/json")
+    public ResponseEntity<String> getPublicCollectorCollections(
+            @PathVariable("collectorId") Long collectorId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String view
+    ) {
+        try {
+            if (name == null && type == null) {
+                var result = this.collectionService.getPublicCollectionsByCollectorId(collectorId);
+                if(result.isPresent()) {
+                if ("private".equals(view)) {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Private.class).writeValueAsString(this.collectionService.getPublicCollectionsByCollectorId(collectorId))
+                    );
+                } else {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result.get())
+                    );
+                }
+            }
+            } else if (name != null && type == null) {
+                var result = this.collectionService.getPublicCollectionOfCollectorByName(collectorId, name);
+                if(result.isPresent()) {
+                    if ("private".equals(view)) {
+                        return ResponseEntity.ok(
+                                objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result.get())
+                        );
+                    } else {
+                        return ResponseEntity.ok(
+                                objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result.get())
+                        );
+                    }
+                }
+            } else if (name == null) {
+                var result = this.collectionService.getPublicCollectionsOfCollectorByType(collectorId, type);
+                if (result.isPresent()) {
+                    if ("private".equals(view)) {
+                        return ResponseEntity.ok(
+                                objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result.get())
+                        );
+                    } else {
+                        return ResponseEntity.ok(
+                                objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result.get())
+                        );
+                    }
+                }
+            }
 
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok().build();
     }
 
-
-    @GetMapping("/{collectorId}/collections/{collectionId}/disks/{diskId}")
-    public ResponseEntity<Optional<DiskEntity>> getDiskFromPublicCollection(
-        @PathVariable ("collectorId") Long collectorId,
-        @PathVariable ("collectionId") Long collectionId,
-        @PathVariable ("diskId") Long diskId
-    ){
-        var result = this.diskService.getDiskByIdFromPublicCollectionOfACollector(collectorId, collectionId, diskId);
-        return ResponseEntity.ok(result);
-    }
 
     @GetMapping(value ="/{collectorId}/collections/{collectionId}", produces = "application/json")
     public ResponseEntity<String> getPublicCollectorCollectionById(
@@ -128,6 +183,76 @@ public class CollectorController {
         }
     }
 
+    @GetMapping(value = "/{collectorId}/collections/{collectionId}/disks", produces = "application/json")
+    public ResponseEntity<String> getDisksFromPublicCollection(
+            @PathVariable ("collectorId") Long collectorId,
+            @PathVariable ("collectionId") Long collectionId,
+            @RequestParam(required = false) Long year,
+            @RequestParam(required = false) String format,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String view
+    ){
+        Optional<List<DiskEntity>> optionalDisk = Optional.empty();
+        try {
+            if(year == null && format == null && author == null){
+            optionalDisk = this.diskService.getDisksFromPublicCollectorCollection(collectorId, collectionId);
+        }
+        else if (year != null && format == null && author == null){
+            optionalDisk = this.diskService.getDisksByYearFromPublicCollection(collectorId, collectionId, year);
+
+        } else if (year == null && format != null && author == null){
+            optionalDisk = this.diskService.getDisksByFormatFromPublicCollectionOfCollector(collectorId, collectionId, format);
+            }
+        if (optionalDisk.isPresent()) {
+            if ("private".equals(view)) {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalDisk.get())
+                );
+            } else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalDisk.get())
+                );
+            }
+        }
+
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+       return ResponseEntity.ok().build();
+
+    }
+
+
+
+    @GetMapping(value = "/{collectorId}/collections/{collectionId}/disks/{diskId}", produces = "application/json")
+    public ResponseEntity<String> getDiskFromPublicCollection(
+            @PathVariable ("collectorId") Long collectorId,
+            @PathVariable ("collectionId") Long collectionId,
+            @PathVariable ("diskId") Long diskId,
+            @RequestParam(required = false) String view
+    ) {
+        var optionalDisk = this.diskService.getDiskByIdFromPublicCollectionOfACollector(collectorId, collectionId, diskId);
+        try {
+            if(optionalDisk.isPresent()) {
+                // Aggiungendo il query parameter alla richiesta, ?view=private
+                // si ottiene la vista privata, altrimenti la pubblica
+                if ("private".equals(view)) {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalDisk.get())
+                    );
+                } else {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalDisk.get())
+                    );
+                }
+            }
+
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.internalServerError().build();
+            }
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping(value ="/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
     public ResponseEntity<String> getPublicTracks(
             @PathVariable("collectorId") Long collectorId,
@@ -135,23 +260,26 @@ public class CollectorController {
             @PathVariable("diskId") Long diskId,
             @RequestParam(required = false) String view
     ) {
-        var result = this.trackService.getTracksFromPublicCollectionOfCollector(collectorId, collectionId, diskId);
+        var optionalListOfTracks = this.trackService.getTracksFromPublicCollectionOfCollector(collectorId, collectionId, diskId);
         try {
-            // Aggiungendo il query parameter alla richiesta, ?view=private
-            // si ottiene la vista privata, altrimenti la pubblica
-            if ("private".equals(view)) {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
-                );
-            } else {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
-                );
+            if(optionalListOfTracks.isPresent()) {
+                // Aggiungendo il query parameter alla richiesta, ?view=private
+                // si ottiene la vista privata, altrimenti la pubblica
+                if ("private".equals(view)) {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalListOfTracks.get())
+                    );
+                } else {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalListOfTracks.get())
+                    );
+                }
             }
 
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value ="/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
@@ -163,23 +291,25 @@ public class CollectorController {
             @RequestParam(required = false) String view
     ) {
         var optionalTrack = this.trackService.getTrackFromPublicCollectionOfCollector(collectorId, collectionId, diskId, trackId);
-        var result = optionalTrack.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         try {
-            // Aggiungendo il query parameter alla richiesta, ?view=private
-            // si ottiene la vista privata, altrimenti la pubblica
-            if ("private".equals(view)) {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
-                );
-            } else {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
-                );
-            }
+            if (optionalTrack.isPresent()) {
+                // Aggiungendo il query parameter alla richiesta, ?view=private
+                // si ottiene la vista privata, altrimenti la pubblica
+                if ("private".equals(view)) {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalTrack.get())
+                    );
+                } else {
+                    return ResponseEntity.ok(
+                            objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalTrack.get())
+                    );
+                }
 
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.internalServerError().build();
+            }
+            } catch(JsonProcessingException e){
+                return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok().build();
     }
 
 
