@@ -11,6 +11,7 @@ import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
 import org.univaq.collectors.services.DiskService;
 
+import javax.swing.text.html.parser.Entity;
 import java.security.Principal;
 import java.util.List;
 
@@ -32,16 +33,31 @@ public class PDiskController {
     }
 
     @PostMapping(produces = "application/json")
-    public ResponseEntity<DiskEntity> saveDisk(
+    public ResponseEntity<String> saveDisk(
             @RequestBody DiskEntity disk,
             @PathVariable("collectionId") Long collectionId,
-            Principal principal
+            Authentication authentication,
+            @RequestParam(required = false) String view
     ) {
-        var collector = this.collectorService.getCollectorByEmail(principal.getName());
 
-        var optionalDisk = this.diskService.saveDisk(disk, collectionId, collector.getId());
-        return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        var optionalDisk = this.diskService.saveDisk(disk, collectionId, authentication);
+        var result = optionalDisk.get();
+        //return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        try{
+            if ("private".equals(view)){
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
+                );
+            }else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
+                );
+            }
+        }catch (JsonProcessingException e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
+
     @DeleteMapping("/{diskId}")
     public ResponseEntity<DiskEntity> deleteCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
@@ -52,7 +68,6 @@ public class PDiskController {
         this.diskService.deleteDiskById(collector.getId(), collectionId, diskId);
         return ResponseEntity.ok().build();
     }
-
 
     @GetMapping(value = "/{diskId}", produces = "application/json")
     public ResponseEntity<String> getDiskOfCollection(
@@ -84,14 +99,15 @@ public class PDiskController {
             @RequestParam(required = false) String view
     ){
         var disks = this.diskService.getPersonalDisksFromCollection(collectionId, authentication);
+        var result = disks.get();
         try{
             if ("private".equals(view)){
                 return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(disks)
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
                 );
             }else {
                 return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(disks)
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
                 );
             }
         }catch (JsonProcessingException e){
@@ -99,8 +115,8 @@ public class PDiskController {
         }
     }
 
-    @PutMapping("/{diskId}")
-    public ResponseEntity<DiskEntity> uptadeDiskById(
+    @PutMapping(value = "/{diskId}")
+    public ResponseEntity<Entity> uptadeDiskById(
             @RequestBody DiskEntity disk,
             @PathVariable ("diskId")  Long diskId,
             @PathVariable ("collectionId") Long collectionId,
@@ -110,3 +126,4 @@ public class PDiskController {
         return ResponseEntity.ok().build();
     }
 }
+

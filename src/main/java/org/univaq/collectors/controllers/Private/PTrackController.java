@@ -2,9 +2,11 @@ package org.univaq.collectors.controllers.Private;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.TrackEntity;
 import org.univaq.collectors.services.CollectionService;
@@ -40,14 +42,15 @@ public class PTrackController {
             @RequestParam(required = false) String view
     ) {
         var optionalTracks = this.trackService.getPersonalTracksFromDisk(diskId, collectionId, authentication);
+        var result = optionalTracks.get();
         try {
             if ("private".equals(view)) {
                 return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalTracks)
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
                 );
             } else {
                 return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalTracks)
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
                 );
             }
         } catch (JsonProcessingException e) {
@@ -55,17 +58,32 @@ public class PTrackController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<TrackEntity> saveTrack(
+    @PostMapping(produces = "application/json")
+    public ResponseEntity<String> saveTrack(
             @RequestBody TrackEntity track,
             @PathVariable("diskId") Long diskId,
             @PathVariable("collectionId") Long collectionId,
-            Authentication authentication
+            Authentication authentication,
+            @RequestParam(required = false) String view
+
     ) {
         var optionalTrack = this.trackService.saveTrack(track, diskId, collectionId, authentication);
-        return optionalTrack.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        // return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        var result = optionalTrack.get();
+        try {
+            if ("private".equals(view)) {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
+                );
+            } else {
+                return ResponseEntity.ok(
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
+                );
+            }
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
-
     @DeleteMapping("/{trackId}")
     public ResponseEntity<TrackEntity> deleteTrackById(
             @PathVariable("collectionId") Long collectionId,
@@ -85,8 +103,9 @@ public class PTrackController {
             @PathVariable("collectionId") Long collectionId,
             Authentication authentication
     ) {
-        this.trackService.updateTrack(track, trackId, diskId, collectionId, authentication);
-        return ResponseEntity.ok().build();
+        var optionalTrack = this.trackService.updateTrack(track, trackId, diskId, collectionId, authentication);
+        var result = optionalTrack.orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/{trackId}", produces = "application/json")
@@ -98,14 +117,15 @@ public class PTrackController {
             @RequestParam(required = false) String view
     ) {
         var optionalTrack = this.trackService.getPersonalTrackByIdFromDiskId(trackId, diskId, collectionId, authentication);
+        var result = optionalTrack.get();
         try {
             if ("private".equals(view)) {
                 return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalTrack)
+                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(result)
                 );
             } else {
                 return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalTrack)
+                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(result)
                 );
             }
         } catch (JsonProcessingException e) {

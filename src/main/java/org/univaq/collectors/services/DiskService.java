@@ -65,9 +65,8 @@ public class DiskService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    //salvo disco
-    public Optional<DiskEntity> saveDisk(DiskEntity disk, Long collectionId, Long collectorId) {
-        var optionalCollector = this.collectorsRepository.findById(collectorId);
+    public Optional<DiskEntity> saveDisk(DiskEntity disk, Long collectionId, Authentication authentication) {
+        var optionalCollector = collectorsRepository.findByEmail(authentication.getName());
         if (optionalCollector.isPresent()) {
             var collector = optionalCollector.get();
             var collectorCollectionOptional = this.collectorCollectionRepository
@@ -75,16 +74,18 @@ public class DiskService {
 
             if (collectorCollectionOptional.isPresent()) {
                 var collectorCollection = collectorCollectionOptional.get();
-
-                disk.setCollection(collectorCollection.getCollection());
-
-                var savedDisk = this.disksRepository.save(disk);
-
-                return Optional.of(savedDisk);
+                var isOwner = collectorCollection.isOwner();
+                if (isOwner) {
+                    var collection = collectorCollection.getCollection();
+                    disk.setCollection(collection);
+                    //var savedDisk = this.disksRepository.save(disk);
+                    return Optional.of(this.disksRepository.save(disk));
+                }
+                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You aren't the owner of this collection");
             }
+            else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
-
-        return Optional.empty();
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 
     //elimina disco dalla collezione privata
@@ -107,7 +108,6 @@ public class DiskService {
             }
         }
     }
-
 
     public Optional<DiskEntity> getDiskByIdFromPublicCollection(Long collectionId, Long diskId) {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
@@ -147,7 +147,7 @@ public class DiskService {
     }
 
     //prendi i dischi personali dalla collezione
-    public List<DiskEntity> getPersonalDisksFromCollection(Long collectionId, Authentication authentication) {
+    public Optional<List<DiskEntity>> getPersonalDisksFromCollection(Long collectionId, Authentication authentication) {
         var optionalcollector = collectorsRepository.findByEmail(authentication.getName());
         if (optionalcollector.isPresent()) {
             var collector = optionalcollector.get();
@@ -158,7 +158,7 @@ public class DiskService {
                 if (isOwner) {
                     var diskList = this.disksRepository.findDisksFromCollectionId(collectionId);
                     if (diskList.isPresent()) {
-                        return diskList.get();
+                        return diskList;
                     } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk List not found");
                 } else
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
@@ -193,32 +193,34 @@ public class DiskService {
         return optionalDisk;
     }
 
-    public ResponseEntity<DiskEntity> updateDisk (DiskEntity disk, Long diskId, Long collectionId, Authentication authentication){
-        var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
-        if (optionalCollector.isPresent()) {
+    public Optional<DiskEntity> updateDisk (DiskEntity disk, Long diskId, Long collectionId, Authentication authentication){
+        var optionalCollector = collectorsRepository.findByEmail(authentication.getName());
+        if (optionalCollector.isPresent()){
             var collector = optionalCollector.get();
-            //collezionista = ower
-            collectorCollectionRepository.hasCollectionAndIsOwner(collector.getId(), collectionId
-            ).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not owner of this collection")
-            );
+            var collectorCollectionOptional = this.collectorCollectionRepository.
+                    findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (collectorCollectionOptional.isPresent()){
+                var collectorCollection = collectorCollectionOptional.get();
+                var isOwner = collectorCollection.isOwner();
+                if (isOwner) {
+                    var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                    if (optionalDisk.isPresent()) {
+                        var updateDisk = optionalDisk.get();
+                        updateDisk.setTitle(disk.getTitle());
+                        updateDisk.setAuthor(disk.getAuthor());
+                        updateDisk.setLabel(disk.getLabel());
+                        updateDisk.setState(disk.getState());
+                        updateDisk.setFormat(disk.getFormat());
+                        updateDisk.setBarcode(disk.getBarcode());
+                        updateDisk.setDuplicate(disk.getDuplicate());
+                        updateDisk.setYear(disk.getYear());
+                        disksRepository.saveAndFlush(updateDisk);
+                        return Optional.of(updateDisk);
+                    }else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not found");
+                }else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner");
+                }
+            else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
-        var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
-        if (optionalDisk.isPresent()){
-            var updateDisk = optionalDisk.get();
-            updateDisk.setTitle(disk.getTitle());
-            updateDisk.setAuthor(disk.getAuthor());
-            updateDisk.setLabel(disk.getLabel());
-            updateDisk.setState(disk.getState());
-            updateDisk.setFormat(disk.getFormat());
-            updateDisk.setBarcode(disk.getBarcode());
-            updateDisk.setDuplicate(disk.getDuplicate());
-            updateDisk.setYear(disk.getYear());
-            return new ResponseEntity<>(disksRepository.saveAndFlush(updateDisk), HttpStatus.OK);
-        }
-        else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 }
-
-
