@@ -31,15 +31,15 @@ public class TrackService {
         this.collectorCollectionRepository = collectorCollectionRepository;
     }
 
-    public List<TrackEntity> getAll(int page, int size, Optional<String> optionalTitle) {
-        return optionalTitle
-                .map(title -> this.trackRepository.findByTitle(title))
-                .map(trackOptional -> trackOptional
-                        .map(track -> List.of(track))
-                        .orElseGet(() -> List.of())
-                )
-                .orElseGet(() -> this.trackRepository.findAll(PageRequest.of(page, size)).toList());
-    }
+//    public List<TrackEntity> getAll(int page, int size, Optional<String> optionalTitle) {
+//        return optionalTitle
+//                .map(this.trackRepository::findByTitle)
+//                .map(trackOptional -> trackOptional
+//                        .map(List::of)
+//                        .orElseGet(List::of)
+//                )
+//                .orElseGet(() -> this.trackRepository.findAll(PageRequest.of(page, size)).toList());
+//    }
 
     //ritorna tracce dato un disco
     public List<TrackEntity> getPersonalTracksFromDisk(Long diskId, Long collectionId, Authentication authentication) {
@@ -157,7 +157,7 @@ public class TrackService {
         return Optional.empty();
     }
 
-    public Optional<List<TrackEntity>> getTracksFromPublicCollectionOfCollector(Long collectorId, Long collectionId, Long diskId) {
+    public Optional<List<TrackEntity>> getTracksFromPublicCollection(Long collectorId, Long collectionId, Long diskId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
             var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
@@ -184,7 +184,7 @@ public class TrackService {
     }
 
 
-    public Optional<TrackEntity> getTrackFromPublicCollectionOfCollector(Long collectorId, Long collectionId, Long diskId, Long trackId) {
+    public Optional<TrackEntity> getTrackFromPublicCollection(Long collectorId, Long collectionId, Long diskId, Long trackId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
             var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
@@ -266,7 +266,7 @@ public class TrackService {
 
 
 
-    public Optional<TrackEntity> getTrackByTitleFromPublicCollectionOfCollector(Long collectorId, Long collectionId, Long diskId, String title) {
+    public Optional<TrackEntity> getTrackByTitleFromPublicCollections(Long collectorId, Long collectionId, Long diskId, String title) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
             var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
@@ -292,4 +292,14 @@ public class TrackService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
 
     }
+
+//    public Optional<TrackEntity> getTracksByTitle( String title, int page, int size) {
+//        var optionalTracks = this.trackRepository.findByTitle(title, page, size);
+//        if (optionalTracks.isPresent()) {
+//            return optionalTracks;
+//        }
+//        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Track not found");
+//    }
+
+
 }

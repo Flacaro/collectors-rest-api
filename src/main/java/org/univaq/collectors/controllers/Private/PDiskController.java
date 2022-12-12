@@ -7,12 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.DiskEntity;
-import org.univaq.collectors.services.CollectionService;
-import org.univaq.collectors.services.CollectorService;
 import org.univaq.collectors.services.DiskService;
 
-import java.security.Principal;
-import java.util.List;
 
 
 @RestController
@@ -20,14 +16,10 @@ import java.util.List;
 public class PDiskController {
 
     private final DiskService diskService;
-    private final CollectionService collectionService;
-    private final CollectorService collectorService;
     private final ObjectMapper objectMapper;
 
-    public PDiskController(DiskService diskService, CollectionService collectionService, CollectorService collectorService, ObjectMapper objectMapper) {
+    public PDiskController(DiskService diskService, ObjectMapper objectMapper) {
         this.diskService = diskService;
-        this.collectionService = collectionService;
-        this.collectorService = collectorService;
         this.objectMapper = objectMapper;
     }
 
@@ -35,21 +27,18 @@ public class PDiskController {
     public ResponseEntity<DiskEntity> saveDisk(
             @RequestBody DiskEntity disk,
             @PathVariable("collectionId") Long collectionId,
-            Principal principal
+            Authentication authentication
     ) {
-        var collector = this.collectorService.getCollectorByEmail(principal.getName());
-
-        var optionalDisk = this.diskService.saveDisk(disk, collectionId, collector.getId());
+        var optionalDisk = this.diskService.saveDisk(disk, collectionId, authentication);
         return optionalDisk.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     @DeleteMapping("/{diskId}")
     public ResponseEntity<DiskEntity> deleteCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
             @PathVariable("diskId") Long diskId,
-            Principal principal
+            Authentication authentication
     ) {
-        var collector = this.collectorService.getCollectorByEmail(principal.getName());
-        this.diskService.deleteDiskById(collector.getId(), collectionId, diskId);
+        this.diskService.deleteDiskById(authentication, collectionId, diskId);
         return ResponseEntity.ok().build();
     }
 

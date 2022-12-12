@@ -54,7 +54,7 @@ public class PCollectorController {
             Authentication authentication
     ) {
         var collector = this.collectorService.getCollectorByEmail(authentication.getName());
-        return ResponseEntity.ok(collector);
+        return collector.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping(value ="/favourites", produces = "application/json")

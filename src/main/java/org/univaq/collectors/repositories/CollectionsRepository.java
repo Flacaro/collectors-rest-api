@@ -16,13 +16,16 @@ public interface CollectionsRepository extends PagingAndSortingRepository<Collec
 
 
     @Query("select c from collection c where c.name like %?1% and c.isPublic = true")
-    public List<CollectionEntity> getPublicCollectionsByName(String name, PageRequest pageRequest);
+    public Optional<List<CollectionEntity>> getPublicCollectionsByName(String name, PageRequest pageRequest);
 
     @Query("select c from collection c where c.type like %?1% and c.isPublic = true")
-    public List<CollectionEntity> getPublicCollectionsByType(String name, PageRequest pageRequest);
+    public Optional<List<CollectionEntity>> getPublicCollectionsByType(String name, PageRequest pageRequest);
 
     @Query("select c from collection c where c.isPublic = true")
-    public List<CollectionEntity> getAllPublicCollections(PageRequest pageRequest);
+    public Optional<List<CollectionEntity>> getAllPublicCollections(PageRequest pageRequest);
+
+    @Query("select c from collection c where c.name like %?1% and c.type like %?2% and c.isPublic = true")
+    public Optional<List<CollectionEntity>> getPublicCollectionsByNameAndType(String name, String type, PageRequest pageRequest);
 
 
 }

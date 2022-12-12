@@ -36,23 +36,21 @@ public class CollectorService {
     }
 
 
-    public List<CollectorEntity> getAllCollectors(int page, int size) {
-        return this.collectorsRepository.findAll(PageRequest.of(page, size)).toList();
+    public Optional<List<CollectorEntity>> getAllCollectors(int page, int size) {
+        return Optional.of(collectorsRepository.findAll(PageRequest.of(page, size)).getContent());
     }
 
-    public CollectorEntity getCollectorByEmail(String email) {
-        var collector = this.collectorsRepository.findByEmail(email);
-        return collector.orElse(null);
+    public Optional<CollectorEntity> getCollectorByEmailAndUsername(String email, String username) {
+        return this.collectorsRepository.findByEmailAndUsername(email, username);
     }
 
-    public CollectorEntity getCollectorByUsername(String username) {
-        var collector = this.collectorsRepository.findByUsername(username);
-        return collector.orElse(null);
+    public Optional<CollectorEntity> getCollectorByEmail(String email) {
+        return this.collectorsRepository.findByEmail(email);
     }
 
-    public CollectorEntity getById(Long collectorId) {
-        var collector = this.collectorsRepository.findById(collectorId);
-        return collector.orElse(null);
+
+    public Optional<CollectorEntity> getById(Long collectorId) {
+        return this.collectorsRepository.findById(collectorId);
     }
 
     public CollectionEntity getPublicCollectorCollectionById(Long collectorId, Long collectionId) {

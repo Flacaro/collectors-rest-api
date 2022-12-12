@@ -29,33 +29,20 @@ public class CollectionService {
 
     private final CollectorCollectionRepository collectorCollectionRepository;
 
-    private final DisksRepository disksRepository;
 
     public CollectionService(
             CollectionsRepository collectionsRepository,
             CollectorCollectionRepository collectorCollectionRepository,
-            CollectorsRepository collectorsRepository,
-            DisksRepository disksRepository
+            CollectorsRepository collectorsRepository
 
     ) {
         this.collectionsRepository = collectionsRepository;
         this.collectorCollectionRepository = collectorCollectionRepository;
         this.collectorsRepository = collectorsRepository;
-        this.disksRepository = disksRepository;
     }
 
     public Optional<List<CollectionEntity>> getAllPublicCollections(int page, int size) {
-        return Optional.of(this.collectionsRepository.getAllPublicCollections(PageRequest.of(page, size)));
-    }
-
-    public Optional<List<CollectionEntity>> getAllPublicCollectionsByName(String name, Integer page, Integer size) {
-            return Optional.of(collectionsRepository.getPublicCollectionsByName(name, PageRequest.of(page, size)));
-
-    }
-
-    public Optional<List<CollectionEntity>> getPublicCollectionsByType(String type, Integer page, Integer size) {
-            return Optional.of(this.collectionsRepository.getPublicCollectionsByType(type, PageRequest.of(page, size)));
-
+        return collectionsRepository.getAllPublicCollections(PageRequest.of(page, size));
     }
 
 
@@ -72,9 +59,29 @@ public class CollectionService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
+    public Optional<CollectionEntity> getPublicCollectionById(Long collectorId, Long collectionId) {
+        var optionalCollector = this.collectorsRepository.findById(collectorId);
+        if (optionalCollector.isPresent()) {
+            var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            if (collectorCollection.isPresent()) {
+                var collection = collectorCollection.get().getCollection();
+                if (collection.isPublic()) {
+                    return Optional.of(collection);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
+                }
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    public Optional<List<CollectionEntity>> getPublicCollectionsByNameAndType (String name, String type, int page, int size) {
+        return collectionsRepository.getPublicCollectionsByNameAndType(name, type, PageRequest.of(page, size));
+    }
+
     //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
     // che corrispondono al predicato specificato.
-    public Optional<List<CollectionEntity>> getPublicCollectionsByCollectorId(Long collectorId) {
+    public Optional<List<CollectionEntity>> getPublicCollections(Long collectorId) {
         List<CollectionEntity> publicCollections = new ArrayList<>();
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
@@ -87,7 +94,6 @@ public class CollectionService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
-
 
     public Optional<CollectionEntity> saveCollectorCollection(CollectionEntity collection, Authentication authentication) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
@@ -103,21 +109,6 @@ public class CollectionService {
         }
     }
 
-
-    //perche sta qua?
-//    public List<DiskEntity> getPublicDisks(Long collectionId) {
-//        var optionalCollection = this.collectionsRepository.findById(collectionId);
-//        if (optionalCollection.isPresent()) {
-//            var collection = optionalCollection.get();
-//            if (collection.isPublic()) {
-//                var optionalDisk = this.disksRepository.findDisksFromCollectionId(collectionId);
-//                if (optionalDisk.isPresent()) {
-//                    return optionalDisk.get();
-//                }
-//            }
-//        }
-//        return List.of();
-//    }
 
 
     public void deleteCollectorCollectionById(Authentication authentication, Long collectionId) {
@@ -314,44 +305,12 @@ public class CollectionService {
                 .map(CollectorCollectionEntity::isOwner)
                 .orElse(false);
     }
-
-    public Optional<List<CollectionEntity>> getPublicCollectionsOfCollectorByType(Long collectorId, String type) {
-        var optionalCollector = collectorsRepository.findById(collectorId);
-        if (optionalCollector.isPresent()) {
-            var collectorCollections = collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
-            //prendo le collezioni
-            var collections = new ArrayList<CollectionEntity>();
-            for (var collectorCollection : collectorCollections) {
-                if (collectorCollection.getCollection().isPublic() && collectorCollection.getCollection().getType().equals(type)) {
-                    collections.add(collectorCollection.getCollection());
-                }
-            } return Optional.of(collections);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
-        }
-
-    }
-
-    public Optional<CollectionEntity> getPublicCollectionOfCollectorByName(Long collectorId, String name) {
-        var optionalCollector = collectorsRepository.findById(collectorId);
-        Optional<CollectionEntity> collectionByName = Optional.empty();
-        if (optionalCollector.isPresent()) {
-            var collectorCollections = collectorCollectionRepository.getCollectionsByCollectorId(collectorId);
-            //prendo la collezione del collezionista dal nome collezione
-            for (var collectorCollection : collectorCollections) {
-                if (collectorCollection.getCollection().isPublic() && collectorCollection.getCollection().getName().equals(name)) {
-                    collectionByName = Optional.of(collectorCollection.getCollection());
-                }
-            }   return collectionByName;
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
-        }
-    }
-
-
-
-
 }
+
+
+
+
+
 
 
 

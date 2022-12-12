@@ -26,6 +26,8 @@ public class DiskEntity {
     @Column(nullable = false)
     private String author;
 
+
+    //casa editrice
     @JsonView(UserView.Public.class)
     @NotBlank
     @Column(nullable = false)
@@ -53,6 +55,11 @@ public class DiskEntity {
     @Column(nullable = false)
     private Long year;
 
+    @JsonView(UserView.Public.class)
+    @Column(nullable = false)
+    private String genre;
+
+
     @JsonView(UserView.Private.class)
     @ManyToOne()
     private CollectionEntity collection;
@@ -62,7 +69,7 @@ public class DiskEntity {
     }
     
 
-    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate,Long year, CollectionEntity collection) {
+    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate,Long year, String genre, CollectionEntity collection) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -72,6 +79,7 @@ public class DiskEntity {
         this.barcode = barcode;
         this.duplicate = duplicate;
         this.year = year;
+        this.genre = genre;
         this.collection = collection;
     }
 
@@ -143,6 +151,14 @@ public class DiskEntity {
 
     public void setYear(Long year){this.year = year;}
 
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
     public CollectionEntity getCollection() {
         return collection;
     }
@@ -151,20 +167,19 @@ public class DiskEntity {
         this.collection = collection;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DiskEntity that = (DiskEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(author, that.author) && Objects.equals(label, that.label) && Objects.equals(state, that.state) && Objects.equals(format, that.format) && Objects.equals(barcode, that.barcode) && Objects.equals(duplicate, that.duplicate) && Objects.equals(collection, that.collection);
+        DiskEntity disk = (DiskEntity) o;
+        return Objects.equals(id, disk.id) && Objects.equals(title, disk.title) && Objects.equals(author, disk.author) && Objects.equals(label, disk.label) && Objects.equals(state, disk.state) && Objects.equals(format, disk.format) && Objects.equals(barcode, disk.barcode) && Objects.equals(duplicate, disk.duplicate) && Objects.equals(year, disk.year) && Objects.equals(genre, disk.genre) && Objects.equals(collection, disk.collection);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, label, state, format, barcode, duplicate, collection);
+        return Objects.hash(id, title, author, label, state, format, barcode, duplicate, year, genre, collection);
     }
-
-
 }
 
 
