@@ -129,7 +129,7 @@ public class PCollectionController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/collections/{collectionId}/share")
+    @PostMapping(value = "/collections/{collectionId}/share", produces = "application/json")
     public ResponseEntity<String> shareCollectorCollectionById(
             @PathVariable("collectionId") Long collectionId,
             @RequestBody List<Long> collectorIds,
@@ -137,7 +137,7 @@ public class PCollectionController {
             Authentication authentication
     ) {
         var optionalCollection = this.collectionService.shareCollection(collectorIds, collectionId,authentication);
-       try {
+        try {
            if (optionalCollection.isPresent()) {
                return getStringResponseEntityCollection(view, optionalCollection);
            }

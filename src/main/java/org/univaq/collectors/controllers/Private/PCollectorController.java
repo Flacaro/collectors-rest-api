@@ -40,9 +40,8 @@ public class PCollectorController {
             Authentication authentication,
             @RequestParam(required = false) String view
     ) {
-        try {
-            var collector = this.collectorService.getCollectorByEmail(authentication.getName());
-            if (collector.isPresent()) {
+        var collector = this.collectorService.getCollectorByEmail(authentication.getName());
+            try {   if (collector.isPresent()) {
                 if (view != null && view.equals("private")) {
                     return ResponseEntity.ok(this.serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PRIVATE, collector));
                 } else {
@@ -65,10 +64,9 @@ public class PCollectorController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String view
     ) {
-        try {
-            var favouritesByParameters = new ArrayList<CollectionEntity>();
-            var favourites = this.collectorService.getFavouritesCollections(authentication);
-            if (favourites.isPresent()) {
+        var favouritesByParameters = new ArrayList<CollectionEntity>();
+        var favourites = this.collectorService.getFavouritesCollections(authentication);
+            try {   if (favourites.isPresent()) {
                 if (name == null && type == null) {
                     return getStringResponseEntity(view, favourites);
                 } else {
