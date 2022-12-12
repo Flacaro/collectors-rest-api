@@ -7,6 +7,18 @@ import javax.validation.constraints.NotBlank;
 import java.util.Objects;
 
 @Entity(name = "track")
+
+@Table(
+        indexes = {
+                @Index(name = "collection_name_index", columnList = "title"),
+                @Index(name = "collector_type_index", columnList = "artist"),
+                @Index(name = "collector_type_index", columnList = "album"),
+                @Index(name = "collector_type_index", columnList = "band"),
+                @Index(name = "collector_type_index", columnList = "compositor")
+
+        }
+)
+
 public class TrackEntity {
 
     @JsonView(UserView.Public.class)
@@ -124,6 +136,15 @@ public class TrackEntity {
 
     public void setDisk(DiskEntity disk) {
         this.disk = disk;
+    }
+
+    public void updateTrack (TrackEntity track) {
+        this.title = track.getTitle();
+        this.artist = track.getArtist();
+        this.album = track.getAlbum();
+        this.band = track.getBand();
+        this.compositor = track.getCompositor();
+        this.time = track.getTime();
     }
 
     @Override

@@ -64,10 +64,10 @@ public class CollectorEntity {
     @JsonView(UserView.Private.class)
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JsonBackReference
-    private Set<CollectionEntity> favourites = Set.of();
+    private List<CollectionEntity> favourites = new ArrayList<>();
 
 
-    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, String username, String email, String password, Set<CollectionEntity> favourites) {
+    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, String username, String email, String password, List<CollectionEntity> favourites) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -145,7 +145,7 @@ public class CollectorEntity {
         this.password = password;
     }
 
-    public Set<CollectionEntity> getFavourites() {
+    public List<CollectionEntity> getFavourites() {
         return favourites;
     }
 
@@ -157,13 +157,14 @@ public class CollectorEntity {
         this.id = id;
     }
 
-    public void setFavourites(Set<CollectionEntity> favourites) {
+    public void setFavourites(List<CollectionEntity> favourites) {
         this.favourites = favourites;
     }
 
     public void deleteCollectionFromFavourites(CollectionEntity collection) {
         this.favourites.remove(collection);
     }
+
     @Override
     public String toString() {
         return "CollectorEntity{" +
@@ -174,6 +175,7 @@ public class CollectorEntity {
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", favourites=" + favourites +
                 '}';
     }
 
@@ -182,14 +184,7 @@ public class CollectorEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectorEntity that = (CollectorEntity) o;
-        return id.equals(that.id)
-                && Objects.equals(name, that.name)
-                && Objects.equals(surname, that.surname)
-                && Objects.equals(birthday, that.birthday)
-                && Objects.equals(username, that.username)
-                && email.equals(that.email)
-                && Objects.equals(password, that.password)
-                && Objects.equals(favourites, that.favourites);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(surname, that.surname) && Objects.equals(birthday, that.birthday) && Objects.equals(username, that.username) && Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(favourites, that.favourites);
     }
 
     @Override
@@ -197,3 +192,5 @@ public class CollectorEntity {
         return Objects.hash(id, name, surname, birthday, username, email, password, favourites);
     }
 }
+
+

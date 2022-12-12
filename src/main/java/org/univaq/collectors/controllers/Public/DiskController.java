@@ -9,6 +9,7 @@ import org.univaq.collectors.SerializeWithView;
 import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.services.DiskService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,9 @@ public class DiskController {
         this.serializeWithView = serializeWithView;
     }
 
+
+
+//vedere come si fa la paginazione
     @GetMapping(value = "collections/{collectionId}/disks", produces = "application/json")
     public ResponseEntity<String> getDisksFromPublicCollection(
             @PathVariable Long collectionId,
@@ -35,18 +39,33 @@ public class DiskController {
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String band,
             @RequestParam(required = false) String view
     ) {
         try {
-            // merge query params with AND string
+            var disksOfPublicCollectionByParameters = new ArrayList<DiskEntity>();
+            var disks = diskService.getDisksFromPublicCollection(collectionId);
+            if(disks.isPresent()) {
+                if (year == null && format == null && author == null && genre == null && title == null) {
+                    return getStringResponseEntityDisk(view, disks);
+                } else {
+                    var result = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
+                    if (result.isPresent()) {
+                        for (DiskEntity disk : result.get()) {
+                            if (disks.get().contains(disk)) {
+                                disksOfPublicCollectionByParameters.add(disk);
+                            }
+                        }
+                        return getStringResponseEntityDisk(view, Optional.of(disksOfPublicCollectionByParameters));
+                    }
+                }
+            }
 
-            var result = this.diskService.getDiskByParameters(year, format, author, genre, title);
-
-//        return ResponseEntity.ok(result);
-        return getStringResponseEntityDisk(view, result);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+        return ResponseEntity.ok().build();
 
     }
 
@@ -60,7 +79,7 @@ public class DiskController {
         try {
             var disk = diskService.getDiskByIdFromPublicCollection(collectionId, diskId);
             if (disk.isPresent()) {
-                if (view == null) {
+                if (view != null && view.equals("public")) {
                     ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, disk));
                 } else {
                     ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disk));
@@ -83,43 +102,32 @@ public class DiskController {
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String genre,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String band,
             @RequestParam(required = false) String view
     ) {
+        var disksOfPublicCollectionByParameters = new ArrayList<DiskEntity>();
+        var disks = diskService.getDisksFromPublicCollection(collectorId, collectionId);
         try {
-            if (year == null && format == null && author == null && genre == null && title == null) {
-                var disks = diskService.getDisksFromPublicCollection(collectorId, collectionId);
-                return getStringResponseEntityDisk(view, disks);
-            }
-            if (year != null) {
-                var disksByYear = diskService.getDisksByYearFormatAuthorGenreTitleFromPublicCollectionById(collectionId, year, null, null, null, null, page, size);
-                return getStringResponseEntityDisk(view, disksByYear);
-            }
-
-            if (format != null) {
-                var disksByFormat = diskService.getDisksByYearFormatAuthorGenreTitleFromPublicCollectionById(collectionId, null, format, null, null, null, page, size);
-                return getStringResponseEntityDisk(view, disksByFormat);
-            }
-
-            if (author != null) {
-                var disksByAuthor = diskService.getDisksByYearFormatAuthorGenreTitleFromPublicCollectionById(collectionId, null, null, author, null, null, page, size);
-                return getStringResponseEntityDisk(view, disksByAuthor);
-            }
-
-            if (genre != null) {
-                var disksByAuthor = diskService.getDisksByYearFormatAuthorGenreTitleFromPublicCollectionById(collectionId, null, null, null, genre, null, page, size);
-                return getStringResponseEntityDisk(view, disksByAuthor);
-            }
-            if (title != null) {
-                var disksByAuthor = diskService.getDisksByYearFormatAuthorGenreTitleFromPublicCollectionById(collectionId, null, null, null, null, title, page, size);
-                return getStringResponseEntityDisk(view, disksByAuthor);
-            }
-                var disksByYearFormatAuthorGenreTitle = diskService.getDisksByYearFormatAuthorGenreTitleFromPublicCollectionById(collectionId, year, format, author, genre, title, page, size);
-                return getStringResponseEntityDisk(view, disksByYearFormatAuthorGenreTitle);
-
-
+            if(disks.isPresent()) {
+                if (year == null && format == null && author == null && genre == null && title == null) {
+                    return getStringResponseEntityDisk(view, disks);
+                } else {
+                    var result = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
+                    if (result.isPresent()) {
+                        for (DiskEntity disk : result.get()) {
+                            if (disks.get().contains(disk)) {
+                                disksOfPublicCollectionByParameters.add(disk);
+                            }
+                        }
+                        return getStringResponseEntityDisk(view, Optional.of(disksOfPublicCollectionByParameters));
+                        }
+                    }
+                }
             } catch(JsonProcessingException e){
                 return ResponseEntity.internalServerError().build();
             }
+            return ResponseEntity.ok().build();
 
         }
 
@@ -131,13 +139,13 @@ public class DiskController {
                 @PathVariable("diskId") Long diskId,
                 @RequestParam(required = false) String view
     ){
-            try {
-                var disk = diskService.getDiskByIdFromPublicCollection(collectorId, collectionId, diskId);
-                if (disk.isPresent()) {
+        var disk = diskService.getDiskByIdFromPublicCollection(collectorId, collectionId, diskId);
+                    try {
+                        if (disk.isPresent()) {
                     if (view != null && view.equals("public")) {
-                        ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, disk));
+                        return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, disk));
                     } else {
-                        ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disk));
+                        return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disk));
                     }
                 }
             } catch (JsonProcessingException e) {

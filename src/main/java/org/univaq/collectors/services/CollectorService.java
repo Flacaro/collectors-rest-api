@@ -1,7 +1,12 @@
 package org.univaq.collectors.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -16,6 +21,8 @@ import org.univaq.collectors.repositories.CollectorsRepository;
 
 
 import org.univaq.collectors.models.CollectorEntity;
+
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
 
 @Service
 public class CollectorService {
@@ -40,10 +47,6 @@ public class CollectorService {
         return Optional.of(collectorsRepository.findAll(PageRequest.of(page, size)).getContent());
     }
 
-    public Optional<CollectorEntity> getCollectorByEmailAndUsername(String email, String username) {
-        return this.collectorsRepository.findByEmailAndUsername(email, username);
-    }
-
     public Optional<CollectorEntity> getCollectorByEmail(String email) {
         return this.collectorsRepository.findByEmail(email);
     }
@@ -53,31 +56,34 @@ public class CollectorService {
         return this.collectorsRepository.findById(collectorId);
     }
 
-    public CollectionEntity getPublicCollectorCollectionById(Long collectorId, Long collectionId) {
-        var optionalCollector = this.collectorsRepository.findById(collectorId);
-        if (optionalCollector.isPresent()) {
-            var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
-            if (collectorCollection.isPresent()) {
-                var collection = collectorCollection.get().getCollection();
-                if (collection.isPublic()) {
-                    return collection;
-                } else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection is not public");
-                }
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found for this collector");
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+    public Optional<List<CollectorEntity>> getCollectorsByParameters(String email, String username) {
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                .withMatcher("email", contains().ignoreCase())
+                .withMatcher("username", contains().ignoreCase());
+
+        CollectorEntity example = new CollectorEntity();
+        example.setEmail(email);
+        example.setUsername(username);
+
+        return Optional.of(this.collectorsRepository.findAll(Example.of(example, matcher)));
     }
 
-    public List<CollectionEntity> getPersonalCollections(Authentication authentication) {
+
+    public List<CollectionEntity> getPersonalCollections(Authentication authentication, Integer page, Integer size) {
         var collector = collectorsRepository.findByEmail(authentication.getName());
         if (collector.isPresent()) {
-            var collectionList = this.collectorCollectionRepository.getCollectionsByCollectorId(collector.get().getId());
-            return collectionList.stream().map(CollectorCollectionEntity::getCollection).toList();
-        }
-        return List.of();
+            var collectionList = this.collectorCollectionRepository.findCollectionsByCollectorId(collector.get().getId(), PageRequest.of(page, size));
+            if (collectionList.isPresent()) {
+                var personalCollections = new ArrayList<CollectionEntity>();
+                for (CollectorCollectionEntity collectorCollection : collectionList.get()) {
+                    personalCollections.add(collectorCollection.getCollection());
+                }
+                return personalCollections;
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No personal collections found");
+
+            }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 
 
@@ -114,20 +120,25 @@ public class CollectorService {
                 .anyMatch(cc -> cc.getCollector().getId().equals(collector.getId()));
     }
 
-    public List<CollectionEntity> getFavouritesCollections(Authentication authentication) {
+    public Optional<List<CollectionEntity>> getFavouritesCollections(Authentication authentication) {
         var collector = collectorsRepository.findByEmail(authentication.getName()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found")
         );
         var favourites = collector.getFavourites();
-        return favourites.stream()
-                .map(f -> f.getCollectionsCollectors().stream()
-                        .map(CollectorCollectionEntity::getCollection)
-                        .findFirst()
-                        .orElseThrow(
-                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
-                        )
-                )
-                .toList();
+        if (favourites.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No favourites collections found");
+        }
+        return Optional.of(favourites);
+
+//        return favourites.stream()
+//                .map(f -> f.getCollectionsCollectors().stream()
+//                        .map(CollectorCollectionEntity::getCollection)
+//                        .findFirst()
+//                        .orElseThrow(
+//                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
+//                        )
+//                )
+//                .toList();
     }
 
 

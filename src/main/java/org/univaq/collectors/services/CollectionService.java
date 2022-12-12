@@ -1,5 +1,7 @@
 package org.univaq.collectors.services;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -8,16 +10,15 @@ import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
 import org.univaq.collectors.models.CollectorEntity;
-import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
-import org.univaq.collectors.repositories.DisksRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
 
 @Service
 public class CollectionService {
@@ -41,8 +42,52 @@ public class CollectionService {
         this.collectorsRepository = collectorsRepository;
     }
 
+
+    public Optional<CollectionEntity> getCollectionById(Long collectionId, Authentication authentication) {
+        var collector = collectorsRepository.findByEmail(authentication.getName());
+        if (collector.isPresent()) {
+            var collectorCollection = collectorCollectionRepository.findCollectionByCollectorId(collector.get().getId());
+            if (collectorCollection.isPresent()) {
+                return collectionsRepository.findById(collectionId);
+            }
+        }
+        return collectionsRepository.findById(collectionId);
+    }
+
+    public Optional<List<CollectionEntity>> getAllPersonalCollections (int page, int size, Authentication authentication) {
+        var collector = collectorsRepository.findByEmail(authentication.getName());
+        if (collector.isPresent()) {
+            var collectorCollections = collectorCollectionRepository.findCollectionsByCollectorId(collector.get().getId(), PageRequest.of(page, size));
+            var collections = new ArrayList<CollectionEntity>();
+            if(collectorCollections.isPresent()) {
+                var collectorCollection = collectorCollections.get();
+                for (CollectorCollectionEntity collectorCollectionEntity : collectorCollection) {
+                    collections.add(collectorCollectionEntity.getCollection());
+                }
+                return Optional.of(collections);
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No collections found");
+
+            }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No collector found");
+
+    }
+
+
     public Optional<List<CollectionEntity>> getAllPublicCollections(int page, int size) {
         return collectionsRepository.getAllPublicCollections(PageRequest.of(page, size));
+    }
+
+    public Optional<List<CollectionEntity>> getCollectionsByParameters(String name, String type) {
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                .withMatcher("name", contains().ignoreCase())
+                .withMatcher("type", contains().ignoreCase());
+
+        CollectionEntity example = new CollectionEntity();
+        example.setName(name);
+        example.setType(type);
+
+        return Optional.of(this.collectionsRepository.findAll(Example.of(example, matcher)));
     }
 
 
@@ -85,12 +130,14 @@ public class CollectionService {
         List<CollectionEntity> publicCollections = new ArrayList<>();
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-            var publicCollectorCollections = this.collectorCollectionRepository.getPublicCollectionsByCollectorId(collectorId);
-            for (var publicCollectorCollection : publicCollectorCollections) {
-                var collectionEntity = this.collectionsRepository.findById(publicCollectorCollection.getCollection().getId());
-                collectionEntity.ifPresent(publicCollections::add);
+            var publicCollectorCollections = this.collectorCollectionRepository.findPublicCollectionsByCollectorId(collectorId);
+            if (publicCollectorCollections.isPresent()) {
+                for (var publicCollectorCollection : publicCollectorCollections.get()) {
+                    var collectionEntity = this.collectionsRepository.findById(publicCollectorCollection.getCollection().getId());
+                    collectionEntity.ifPresent(publicCollections::add);
+                }
+                return Optional.of(publicCollections);
             }
-            return Optional.of(publicCollections);
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
@@ -111,6 +158,7 @@ public class CollectionService {
 
 
 
+    //vedere
     public void deleteCollectorCollectionById(Authentication authentication, Long collectionId) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());
         if (optionalCollector.isPresent()) {
@@ -189,9 +237,15 @@ public class CollectionService {
             //prendo il collezionista loggato
             var authenticateCollector = optionalAuthenticateCollector.get();
             //controllo se l'utente loggato e' il proprietario della collection
-            var owner = collectorCollectionRepository.hasCollectionAndIsOwner(authenticateCollector.getId(), collectionId);
-            if (owner.isPresent()) {
-                if (authenticateCollector.getId().equals(owner.get().getCollector().getId()) && owner.get().getCollection().getId().equals(collectionId)) {
+            var collectorCollections = collectorCollectionRepository.findCollectionByIdAndCollectorById(authenticateCollector.getId(), collectionId);
+            if(collectorCollections.isPresent()) {
+            var isOwner = this.isCollectorOwnerOfCollection(authenticateCollector, collection);
+
+            if (isOwner) {
+                var owner = collectorCollections.get().getCollector();
+                var collectionOfOwner = collectorCollections.get().getCollection();
+
+                if (authenticateCollector.getId().equals(owner.getId()) && collectionOfOwner.getId().equals(collectionId)) {
                     //controllo se la collection e' gia' condivisa con gli utenti che voglio aggiungere
                     for (var collector : collectors) {
                         if (!collectorsInCollection.contains(collector)) {
@@ -204,6 +258,7 @@ public class CollectionService {
                     collectionsRepository.save(collection);
                     return Optional.of(collection);
                 }
+            }
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
             }
@@ -305,6 +360,8 @@ public class CollectionService {
                 .map(CollectorCollectionEntity::isOwner)
                 .orElse(false);
     }
+
+
 }
 
 

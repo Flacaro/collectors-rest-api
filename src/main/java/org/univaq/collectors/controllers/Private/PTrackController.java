@@ -1,72 +1,93 @@
 package org.univaq.collectors.controllers.Private;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.univaq.collectors.UserView;
+import org.springframework.web.server.ResponseStatusException;
+import org.univaq.collectors.SerializeWithView;
 import org.univaq.collectors.models.TrackEntity;
-import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
-import org.univaq.collectors.services.DiskService;
 import org.univaq.collectors.services.TrackService;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/collections/{collectionId}/disks/{diskId}/tracks")
+@RequestMapping("/private")
 public class PTrackController {
 
     private final TrackService trackService;
-    private final DiskService diskService;
+
     private final CollectorService collectorService;
-    private final CollectionService collectionService;
-    private final ObjectMapper objectMapper;
+    private final SerializeWithView serializeWithView;
 
     //costruttore
-    public PTrackController(TrackService trackService, DiskService diskService, CollectorService collectorService, CollectionService collectionService, ObjectMapper objectMapper) {
+    public PTrackController(TrackService trackService, SerializeWithView serializeWithView, CollectorService collectorService) {
         this.trackService = trackService;
-        this.diskService = diskService;
+        this.serializeWithView = serializeWithView;
         this.collectorService = collectorService;
-        this.collectionService = collectionService;
-        this.objectMapper = objectMapper;
     }
 
     //metodi
-    @GetMapping(produces = "application/json")
+    @GetMapping(value = "/collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
     public ResponseEntity<String> getPersonalTracksOfDisk(
             @PathVariable("collectionId") Long collectionId,
             @PathVariable("diskId") Long diskId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String album,
+            @RequestParam(required = false) String band,
+            @RequestParam(required = false) String compositor,
             Authentication authentication,
             @RequestParam(required = false) String view
     ) {
-        var optionalTracks = this.trackService.getPersonalTracksFromDisk(diskId, collectionId, authentication);
         try {
-            if ("private".equals(view)) {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalTracks)
-                );
-            } else {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalTracks)
-                );
+            var tracks = trackService.getPersonalTracksFromDisk(diskId, collectionId, authentication);
+            var tracksByParameters = new ArrayList<TrackEntity>();
+            if(tracks.isPresent()) {
+                if (title == null && artist == null && album == null && band == null && compositor == null) {
+                    return getStringResponseEntityTrack(view, tracks);
+                } else {
+                    var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
+                    if (result.isPresent()) {
+                        for (TrackEntity track : result.get()) {
+                            if (tracks.get().contains(track)) {
+                                tracksByParameters.add(track);
+                            }
+                        }
+                        return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
+                    }
+                }
+            }
+        }  catch(JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/collections/{collectionId}/disks/{diskId}/tracks",produces = "application/json")
+    public ResponseEntity<String> saveTrack(
+            @RequestBody TrackEntity track,
+            @PathVariable("diskId") Long diskId,
+            @PathVariable("collectionId") Long collectionId,
+            Authentication authentication,
+            @RequestParam(required = false) String view
+
+    ) {
+        try {
+            var optionalTrack = this.trackService.saveTrack(track, diskId, collectionId, authentication);
+            if(optionalTrack.isPresent()) {
+                return getStringResponseEntity(view, optionalTrack);
             }
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok().build();
     }
-
-    @PostMapping
-    public ResponseEntity<TrackEntity> saveTrack(
-            @RequestBody TrackEntity track,
-            @PathVariable("diskId") Long diskId,
-            @PathVariable("collectionId") Long collectionId,
-            Authentication authentication
-    ) {
-        var optionalTrack = this.trackService.saveTrack(track, diskId, collectionId, authentication);
-        return optionalTrack.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{trackId}")
+    @DeleteMapping("/collections/{collectionId}/disks/{diskId}/tracks/{trackId}")
     public ResponseEntity<TrackEntity> deleteTrackById(
             @PathVariable("collectionId") Long collectionId,
             @PathVariable("diskId") Long diskId,
@@ -77,19 +98,27 @@ public class PTrackController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{trackId}")
-    public ResponseEntity<TrackEntity> updateTrackById(
+    @PutMapping(value = "/collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
+    public ResponseEntity<String> updateTrackById(
             @RequestBody TrackEntity track, //contiene dati ma non rappresenta una traccia nel db trackDTo
             @PathVariable("trackId") Long trackId,
             @PathVariable("diskId") Long diskId,
             @PathVariable("collectionId") Long collectionId,
+            @RequestParam(required = false) String view,
             Authentication authentication
     ) {
-        this.trackService.updateTrack(track, trackId, diskId, collectionId, authentication);
+        var optionalTrack = this.trackService.updateTrack(track, trackId, diskId, collectionId, authentication);
+        try {
+            if(optionalTrack.isPresent()) {
+                return getStringResponseEntity(view, optionalTrack);
+            }
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/{trackId}", produces = "application/json")
+    @GetMapping(value = "collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
     public ResponseEntity<String> getTrackById(
             @PathVariable("trackId") Long trackId,
             @PathVariable("diskId") Long diskId,
@@ -97,19 +126,108 @@ public class PTrackController {
             Authentication authentication,
             @RequestParam(required = false) String view
     ) {
-        var optionalTrack = this.trackService.getPersonalTrackByIdFromDiskId(trackId, diskId, collectionId, authentication);
-        try {
-            if ("private".equals(view)) {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Private.class).writeValueAsString(optionalTrack)
-                );
-            } else {
-                return ResponseEntity.ok(
-                        objectMapper.writerWithView(UserView.Public.class).writeValueAsString(optionalTrack)
-                );
+        var track = trackService.getPersonalTrackByIdFromDiskId(trackId, diskId, collectionId, authentication);
+            try {
+                if (track.isPresent()) {
+                return getStringResponseEntity(view, track);
             }
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok().build();
     }
+
+    @GetMapping(value ="collectors/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
+    public ResponseEntity<String> getPublicTracks(
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId,
+            Authentication authentication,
+            @PathVariable("diskId") Long diskId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String album,
+            @RequestParam(required = false) String band,
+            @RequestParam(required = false) String compositor,
+            @RequestParam(required = false) String view
+    ) {
+        var collector = collectorService.getById(collectorId);
+            try {
+                if (collector.isPresent()) {
+                if (collector.get().getEmail().equals(authentication.getName())) {
+                    var tracks = trackService.getPersonalTracksFromDisk(diskId, collectionId, authentication);
+                    var tracksByParameters = new ArrayList<TrackEntity>();
+                    if (tracks.isPresent()) {
+                        if (title == null && artist == null && album == null && band == null && compositor == null) {
+                            return getStringResponseEntityTrack(view, tracks);
+                        } else {
+                            var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
+                            if (result.isPresent()) {
+                                for (TrackEntity track : result.get()) {
+                                    if (tracks.get().contains(track)) {
+                                        tracksByParameters.add(track);
+                                    }
+                                }
+                                return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
+                            }
+                        }
+                    }
+                }
+            }
+        } catch(JsonProcessingException e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping(value ="collectors/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
+    public ResponseEntity<String> getPublicTrackById(
+            Authentication authentication,
+            @PathVariable("collectorId") Long collectorId,
+            @PathVariable("collectionId") Long collectionId,
+            @PathVariable("diskId") Long diskId,
+            @PathVariable("trackId") Long trackId,
+            @RequestParam(required = false) String view
+    ) {
+        var collector = collectorService.getById(collectorId);
+            try {
+                if (collector.isPresent()) {
+                if (collector.get().getEmail().equals(authentication.getName())) {
+                    var track = trackService.getPersonalTrackByIdFromDiskId(trackId, diskId, collectionId, authentication);
+                    if (track.isPresent()) {
+                        return getStringResponseEntity(view, track);
+                    }
+                }
+            }
+
+        } catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
+
+    private ResponseEntity<String> getStringResponseEntityTrack(@RequestParam(required = false) String view, Optional<List<TrackEntity>> publicTracks) throws JsonProcessingException {
+        if (publicTracks.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+        }
+        if (view != null && view.equals("private")) {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, publicTracks.get()));
+        } else {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, publicTracks.get()));
+        }
+    }
+
+    private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<TrackEntity> track) throws JsonProcessingException {
+        if (track.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+        }
+        if (view != null && view.equals("private")) {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track.get()));
+        } else {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, track.get()));
+        }
+    }
+
 }

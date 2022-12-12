@@ -1,5 +1,4 @@
 package org.univaq.collectors.models;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.univaq.collectors.UserView;
 
@@ -9,6 +8,18 @@ import java.util.Objects;
 
 
 @Entity(name = "disk")
+
+@Table(
+        indexes = {
+                @Index(name = "collection_name_index", columnList = "title"),
+                @Index(name = "collector_type_index", columnList = "author"),
+                @Index(name = "collector_type_index", columnList = "format"),
+                @Index(name = "collector_type_index", columnList = "year"),
+                @Index(name = "collector_type_index", columnList = "genre"),
+
+        }
+)
+
 public class DiskEntity {
 
     @JsonView(UserView.Public.class)
@@ -59,6 +70,14 @@ public class DiskEntity {
     @Column(nullable = false)
     private String genre;
 
+    @JsonView(UserView.Public.class)
+    @Column(nullable = false)
+    private String artist;
+
+    @JsonView(UserView.Public.class)
+    @Column(nullable = false)
+    private String band;
+
 
     @JsonView(UserView.Private.class)
     @ManyToOne()
@@ -69,7 +88,7 @@ public class DiskEntity {
     }
     
 
-    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate,Long year, String genre, CollectionEntity collection) {
+    public DiskEntity(Long id, String title, String author, String label,  String state, String format, Integer barcode, Integer duplicate,Long year, String genre, String artist, String band, CollectionEntity collection) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -80,6 +99,8 @@ public class DiskEntity {
         this.duplicate = duplicate;
         this.year = year;
         this.genre = genre;
+        this.artist = artist;
+        this.band = band;
         this.collection = collection;
     }
 
@@ -159,6 +180,22 @@ public class DiskEntity {
         this.genre = genre;
     }
 
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public String getBand() {
+        return band;
+    }
+
+    public void setBand(String band) {
+        this.band = band;
+    }
+
     public CollectionEntity getCollection() {
         return collection;
     }
@@ -167,18 +204,32 @@ public class DiskEntity {
         this.collection = collection;
     }
 
+    public void updateDisk(DiskEntity disk){
+        this.title = disk.getTitle();
+        this.author = disk.getAuthor();
+        this.label = disk.getLabel();
+        this.state = disk.getState();
+        this.format = disk.getFormat();
+        this.barcode = disk.getBarcode();
+        this.duplicate = disk.getDuplicate();
+        this.year = disk.getYear();
+        this.genre = disk.getGenre();
+        this.artist = disk.getArtist();
+        this.band = disk.getBand();
+        this.collection = disk.getCollection();
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DiskEntity disk = (DiskEntity) o;
-        return Objects.equals(id, disk.id) && Objects.equals(title, disk.title) && Objects.equals(author, disk.author) && Objects.equals(label, disk.label) && Objects.equals(state, disk.state) && Objects.equals(format, disk.format) && Objects.equals(barcode, disk.barcode) && Objects.equals(duplicate, disk.duplicate) && Objects.equals(year, disk.year) && Objects.equals(genre, disk.genre) && Objects.equals(collection, disk.collection);
+        return Objects.equals(id, disk.id) && Objects.equals(title, disk.title) && Objects.equals(author, disk.author) && Objects.equals(label, disk.label) && Objects.equals(state, disk.state) && Objects.equals(format, disk.format) && Objects.equals(barcode, disk.barcode) && Objects.equals(duplicate, disk.duplicate) && Objects.equals(year, disk.year) && Objects.equals(genre, disk.genre) && Objects.equals(artist, disk.artist) && Objects.equals(band, disk.band) && Objects.equals(collection, disk.collection);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, author, label, state, format, barcode, duplicate, year, genre, collection);
+        return Objects.hash(id, title, author, label, state, format, barcode, duplicate, year, genre, artist, band, collection);
     }
 }
 

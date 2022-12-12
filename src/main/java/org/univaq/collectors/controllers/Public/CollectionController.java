@@ -1,5 +1,6 @@
 package org.univaq.collectors.controllers.Public;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.SerializeWithView;
-import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.services.CollectionService;
 
@@ -38,20 +38,24 @@ public class CollectionController {
             @RequestParam(required = false) String view
     ) {
         try {
-            if (name == null && type == null) {
-                var publicCollections = collectionService.getAllPublicCollections(page, size);
-                return getStringResponseEntity(view, publicCollections);
+            var collectionsByParameters = new ArrayList<CollectionEntity>();
+            var publicCollections = collectionService.getAllPublicCollections(page, size);
+            if (publicCollections.isPresent()) {
+                if (name == null && type == null) {
+                    return getStringResponseEntity(view, publicCollections);
+                } else {
+                    var result = this.collectionService.getCollectionsByParameters(name, type);
+                    if (result.isPresent()) {
+                        for (CollectionEntity collection : result.get()) {
+                            if (publicCollections.get().contains(collection)) {
+                                collectionsByParameters.add(collection);
+                            }
+                        }
+                        return getStringResponseEntity(view, Optional.of(collectionsByParameters));
+                    }
+                }
             }
 
-            if (name != null && type == null) {
-                var publicCollectionByName = collectionService.getPublicCollectionsByNameAndType(name, null, page, size);
-                return getStringResponseEntity(view, publicCollectionByName);
-            }
-
-            if (name == null) {
-                var publicCollectionByType = collectionService.getPublicCollectionsByNameAndType(null, type, page, size);
-                return getStringResponseEntity(view, publicCollectionByType);
-            }
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -89,19 +93,23 @@ public class CollectionController {
             @RequestParam(required = false) String view
     ) {
         try {
-            if (name == null && type == null) {
-                var collections = this.collectionService.getPublicCollections(collectorId);
-                return getStringResponseEntity(view, collections);
+            var publicCollectionsOfCollectorByParameters = new ArrayList<CollectionEntity>();
+            var collections = collectionService.getPublicCollections(collectorId);
+            if(collections.isPresent()) {
+                if (name == null && type == null) {
+                    return getStringResponseEntity(view, collections);
+                } else {
+                    var result = this.collectionService.getCollectionsByParameters(name, type);
+                    if (result.isPresent()) {
+                        for (CollectionEntity collection : result.get()) {
+                            if (collections.get().contains(collection)) {
+                                publicCollectionsOfCollectorByParameters.add(collection);
+                            }
+                        }
+                        return getStringResponseEntity(view, Optional.of(publicCollectionsOfCollectorByParameters));
+                    }
                 }
-            if (name != null && type == null) {
-                var collectionsByName = this.collectionService.getPublicCollectionsByNameAndType(name, null, page, size);
-                return getStringResponseEntity(view, collectionsByName);
             }
-            if (name == null) {
-                var collectionsByType = this.collectionService.getPublicCollectionsByNameAndType(null, type, page, size);
-                return getStringResponseEntity(view, collectionsByType);
-            }
-
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
         }

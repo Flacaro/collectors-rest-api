@@ -7,12 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.SerializeWithView;
 import org.univaq.collectors.models.CollectorEntity;
-import org.univaq.collectors.services.CollectionService;
 import org.univaq.collectors.services.CollectorService;
-import org.univaq.collectors.services.DiskService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.univaq.collectors.services.TrackService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,19 +37,22 @@ public class CollectorController {
             @RequestParam(required = false) String view
     ) {
         try {
-            if (email == null && username == null) {
-                var publicCollectors = collectorService.getAllCollectors(page, size);
-                return getStringResponseEntityCollectors(view, publicCollectors);
-            }
-
-            if (email != null && username == null) {
-                var publicCollectorByEmail = collectorService.getCollectorByEmailAndUsername(email, null);
-                return getStringResponseEntityCollector(view, publicCollectorByEmail);
-            }
-
-            if (email == null ) {
-                var publicCollectionByType = collectorService.getCollectorByEmailAndUsername(null, username);
-                return getStringResponseEntityCollector(view, publicCollectionByType);
+            var collectors = collectorService.getAllCollectors(page, size);
+            var collectorsByParameters = new ArrayList<CollectorEntity>();
+            if(collectors.isPresent()) {
+                if (email == null && username == null) {
+                    return getStringResponseEntityCollectors(view, collectors);
+                } else {
+                    var result = this.collectorService.getCollectorsByParameters(email, username);
+                    if (result.isPresent()) {
+                        for (CollectorEntity collector : result.get()) {
+                            if (collectors.get().contains(collector)) {
+                                collectorsByParameters.add(collector);
+                            }
+                        }
+                        return getStringResponseEntityCollectors(view, Optional.of(collectorsByParameters));
+                    }
+                }
             }
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -70,9 +70,9 @@ public class CollectorController {
             var collector = collectorService.getById(collectorId);
             if (collector.isEmpty()) {
                 if (view != null && view.equals("private")) {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, collector));
+                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PRIVATE, collector));
                 }
-                ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, collector));
+                ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PUBLIC, collector));
             }
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -88,20 +88,9 @@ public class CollectorController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
         }
         if (view != null && view.equals("private")) {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, publicCollectors.get()));
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PRIVATE, publicCollectors.get()));
         } else {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, publicCollectors.get()));
-        }
-    }
-
-    private ResponseEntity<String> getStringResponseEntityCollector(@RequestParam(required = false) String view, Optional<CollectorEntity> publicCollector) throws JsonProcessingException {
-        if (publicCollector.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
-        }
-        if (view != null && view.equals("private")) {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, publicCollector.get()));
-        } else {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, publicCollector.get()));
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PUBLIC, publicCollectors.get()));
         }
     }
 

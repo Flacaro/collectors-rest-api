@@ -1,16 +1,15 @@
 package org.univaq.collectors.controllers.Public;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.hibernate.type.EntityType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.SerializeWithView;
-import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.TrackEntity;
 import org.univaq.collectors.services.TrackService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,57 +25,58 @@ public class TrackController {
         this.serializeWithView = serializeWithView;
     }
 
-//    @GetMapping(value = "/tracks", produces = "application/json")
-//    public ResponseEntity<String> getTracksByTitle (
-//            @RequestParam(required = false) Integer page,
-//            @RequestParam(required = false) Integer size,
-//            @RequestParam(required = false) String title,
-//            @RequestParam(required = false) String artist,
-//            @RequestParam(required = false) String album,
-//            @RequestParam(required = false) String band,
-//            @RequestParam(required = false) String compositor,
-//            @RequestParam(required = false) String view
-//    ) {
-//        try {
-//            if (title != null) {
-//                var tracks = trackService.getTracksByTitle(title, page, size);
-//                return getStringResponseEntity(view, tracks);
-//            }
-//        } catch (JsonProcessingException e) {
-//            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-//        }
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
-//    }
 
-    @GetMapping(value = "/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
+    @GetMapping(value = "collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
     public ResponseEntity<String> getTracksFromPublicCollection(
             @PathVariable Long collectionId,
             @PathVariable Long diskId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String album,
+            @RequestParam(required = false) String band,
+            @RequestParam(required = false) String compositor,
             @RequestParam(required = false) String view
     ) {
         try {
             var tracks = trackService.getTracksFromPublicCollection(collectionId, diskId);
-            return getStringResponseEntityTrack(view, tracks);
+            var tracksByParameters = new ArrayList<TrackEntity>();
+            if(tracks.isPresent()) {
+                if (title == null && artist == null && album == null && band == null && compositor == null) {
+                    return getStringResponseEntityTrack(view, tracks);
+                } else {
+                    var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
+                    if (result.isPresent()) {
+                        for (TrackEntity track : result.get()) {
+                            if (tracks.get().contains(track)) {
+                                tracksByParameters.add(track);
+                            }
+                        }
+                        return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
+                    }
+                }
+            }
         }  catch(JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
+        return ResponseEntity.ok().build();
     }
 
 
-    @GetMapping(value = "/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
+    @GetMapping(value = "collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
     public ResponseEntity<String> getTrackFromPublicCollection(
             @PathVariable Long collectionId,
             @PathVariable Long diskId,
             @PathVariable Long trackId,
             @RequestParam(required = false) String view
     ) {
-        try {
-            var track = trackService.getTrackFromPublicCollection(collectionId, diskId, trackId);
-            if (track.isPresent()) {
+        var optionalTrack = trackService.getTrackFromPublicCollection(collectionId, diskId, trackId);
+            try {
+                if (optionalTrack.isPresent()) {
+                var track = optionalTrack.get();
                 if (view != null && view.equals("private")) {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track));
+                    return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track));
                 } else {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, track));
+                   return  ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, track));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -87,27 +87,43 @@ public class TrackController {
     }
 
 
-    @GetMapping(value ="/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
+    @GetMapping(value ="collectors/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks", produces = "application/json")
     public ResponseEntity<String> getPublicTracks(
             @PathVariable("collectorId") Long collectorId,
             @PathVariable("collectionId") Long collectionId,
             @PathVariable("diskId") Long diskId,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String album,
+            @RequestParam(required = false) String band,
+            @RequestParam(required = false) String compositor,
             @RequestParam(required = false) String view
     ) {
-       try {
-           if (title == null) {
-                var tracks = trackService.getTracksFromPublicCollection(collectorId, collectionId, diskId);
-                return getStringResponseEntityTrack(view, tracks);
+        var tracks = trackService.getTracksFromPublicCollection(collectorId, collectionId, diskId);
+        var tracksByParameters = new ArrayList<TrackEntity>();
+           try {
+               if (tracks.isPresent()) {
+               if (title == null && artist == null && album == null && band == null && compositor == null) {
+                   return getStringResponseEntityTrack(view, tracks);
+               } else {
+                     var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
+                     if (result.isPresent()) {
+                          for (TrackEntity track : result.get()) {
+                            if (tracks.get().contains(track)) {
+                                 tracksByParameters.add(track);
+                            }
+                          }
+                          return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
+                     }
+               }
            }
-                var track = trackService.getTrackByTitleFromPublicCollections(collectorId, collectionId, diskId, title);
-                return getStringResponseEntity(view, track);
        } catch (JsonProcessingException e) {
            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
        }
+         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value ="/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
+    @GetMapping(value ="collectors/{collectorId}/collections/{collectionId}/disks/{diskId}/tracks/{trackId}", produces = "application/json")
     public ResponseEntity<String> getPublicTrackById(
             @PathVariable("collectorId") Long collectorId,
             @PathVariable("collectionId") Long collectionId,
@@ -115,13 +131,13 @@ public class TrackController {
             @PathVariable("trackId") Long trackId,
             @RequestParam(required = false) String view
     ) {
-        try {
-            var track = trackService.getTrackFromPublicCollection(collectorId, collectionId, diskId, trackId);
-            if (track.isPresent()) {
+        var track = trackService.getTrackFromPublicCollection(collectorId, collectionId, diskId, trackId);
+            try {
+                if (track.isPresent()) {
                 if (view != null && view.equals("private")) {
                     ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track));
                 } else {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track));
+                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, track));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -135,20 +151,9 @@ public class TrackController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
         }
         if (view != null && view.equals("private")) {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, publicTracks.get()));
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, publicTracks.get()));
         } else {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, publicTracks.get()));
-        }
-    }
-
-    private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<TrackEntity> publicTrack) throws JsonProcessingException {
-        if (publicTrack.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
-        }
-        if (view != null && view.equals("private")) {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, publicTrack.get()));
-        } else {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, publicTrack.get()));
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, publicTracks.get()));
         }
     }
 
