@@ -51,15 +51,14 @@ public class CollectionEntity {
 
 
 
+    public CollectionEntity() {
+    }
 
     public CollectionEntity(Long id, String name, boolean isPublic, String type) {
         this.id = id;
         this.name = name;
         this.isPublic = isPublic;
         this.type = type;
-    }
-
-    public CollectionEntity() {
     }
 
 

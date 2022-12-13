@@ -117,11 +117,7 @@ public class CollectionService {
                 }
             }
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    }
-
-    public Optional<List<CollectionEntity>> getPublicCollectionsByNameAndType (String name, String type, int page, int size) {
-        return collectionsRepository.getPublicCollectionsByNameAndType(name, type, PageRequest.of(page, size));
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 
     //Stream filter(Predicate predicate) restituisce un flusso costituito dagli elementi di questo flusso
@@ -180,8 +176,6 @@ public class CollectionService {
             } else {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
                 }
-//                    this.collectorCollectionRepository.delete(collection);
-//                    this.collectionsRepository.deleteById(collectionId);
                 } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
             }

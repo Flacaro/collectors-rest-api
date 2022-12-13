@@ -210,7 +210,7 @@ public class PTrackController {
 
     private ResponseEntity<String> getStringResponseEntityTrack(@RequestParam(required = false) String view, Optional<List<TrackEntity>> publicTracks) throws JsonProcessingException {
         if (publicTracks.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No tracks found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, publicTracks.get()));
@@ -221,7 +221,7 @@ public class PTrackController {
 
     private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<TrackEntity> track) throws JsonProcessingException {
         if (track.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No track found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track.get()));

@@ -212,7 +212,7 @@ public class PDiskController {
 
     private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<List<DiskEntity>> disks) throws JsonProcessingException {
         if (disks.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No disks found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disks.get()));
@@ -223,7 +223,7 @@ public class PDiskController {
 
     private ResponseEntity<String> getStringResponseEntityDisk(@RequestParam(required = false) String view, Optional<DiskEntity> disk) throws JsonProcessingException {
         if (disk.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No disk found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disk.get()));

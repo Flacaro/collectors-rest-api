@@ -1,14 +1,12 @@
 package org.univaq.collectors.controllers.Private;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import org.univaq.collectors.SerializeWithView;
-import org.univaq.collectors.UserView;
 import org.univaq.collectors.controllers.requests.payload.FavouritePayload;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorEntity;
@@ -20,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/collectors")
+@RequestMapping("/private")
 public class PCollectorController {
 
     private final CollectorService collectorService;
@@ -35,19 +33,16 @@ public class PCollectorController {
     }
 
 
-    @GetMapping(value = "/profile", produces = "application/json")
+    @GetMapping(value = "/collectors/profile", produces = "application/json")
     public ResponseEntity<String> getCollector(
             Authentication authentication,
             @RequestParam(required = false) String view
     ) {
         var collector = this.collectorService.getCollectorByEmail(authentication.getName());
-            try {   if (collector.isPresent()) {
-                if (view != null && view.equals("private")) {
-                    return ResponseEntity.ok(this.serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PRIVATE, collector));
-                } else {
-                    return ResponseEntity.ok(this.serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PUBLIC, collector));
+            try {
+                if (collector.isPresent()) {
+                    return getStringResponseEntityCollector(view, collector);
                 }
-            }
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -55,7 +50,7 @@ public class PCollectorController {
     }
 
 
-    @GetMapping(value ="/favourites", produces = "application/json")
+    @GetMapping(value ="/collectors/favourites", produces = "application/json")
     public ResponseEntity<String> getFavouritesCollections(
             Authentication authentication,
             @RequestParam(required = false, defaultValue = "0") Integer page,
@@ -66,7 +61,8 @@ public class PCollectorController {
     ) {
         var favouritesByParameters = new ArrayList<CollectionEntity>();
         var favourites = this.collectorService.getFavouritesCollections(authentication);
-            try {   if (favourites.isPresent()) {
+            try {
+                if (favourites.isPresent()) {
                 if (name == null && type == null) {
                     return getStringResponseEntity(view, favourites);
                 } else {
@@ -89,7 +85,7 @@ public class PCollectorController {
     }
 
 
-    @PostMapping("/collections/favourites")
+    @PostMapping("/collectors/collections/favourites")
     public ResponseEntity<CollectionEntity> addCollectionToFavourites(
             @RequestBody FavouritePayload favouritePayload,
             Authentication authentication
@@ -102,14 +98,25 @@ public class PCollectorController {
 
 
 
-    private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<List<CollectionEntity>> publicCollections) throws JsonProcessingException {
-        if (publicCollections.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+    private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<List<CollectionEntity>> collectors) throws JsonProcessingException {
+        if (collectors.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collector found");
         }
         if (view != null && view.equals("private")) {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, publicCollections.get()));
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PRIVATE, collectors.get()));
         } else {
-            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, publicCollections.get()));
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PUBLIC, collectors.get()));
+        }
+    }
+
+    private ResponseEntity<String> getStringResponseEntityCollector(@RequestParam(required = false) String view, Optional<CollectorEntity> collector) throws JsonProcessingException {
+        if (collector.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collector found");
+        }
+        if (view != null && view.equals("private")) {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PRIVATE, collector.get()));
+        } else {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTOR, SerializeWithView.ViewType.PUBLIC, collector.get()));
         }
     }
 

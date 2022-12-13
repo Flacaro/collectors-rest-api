@@ -15,7 +15,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("public/")
+@RequestMapping("/public")
 public class CollectorController {
 
 
@@ -61,7 +61,7 @@ public class CollectorController {
     }
 
 
-    @GetMapping("/{collectorId}")
+    @GetMapping("collectors/{collectorId}")
     public ResponseEntity<String> getCollectorById(
             @PathVariable Long collectorId,
             @RequestParam(required = false) String view

@@ -7,10 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.univaq.collectors.SerializeWithView;
-import org.univaq.collectors.UserView;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.services.CollectionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;

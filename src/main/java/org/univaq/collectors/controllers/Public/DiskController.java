@@ -15,7 +15,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping ("public/")
+@RequestMapping ("/public")
 public class DiskController {
 
     private final DiskService diskService;
@@ -43,24 +43,24 @@ public class DiskController {
             @RequestParam(required = false) String band,
             @RequestParam(required = false) String view
     ) {
-        try {
-            var disksOfPublicCollectionByParameters = new ArrayList<DiskEntity>();
-            var disks = diskService.getDisksFromPublicCollection(collectionId);
-            if(disks.isPresent()) {
-                if (year == null && format == null && author == null && genre == null && title == null) {
-                    return getStringResponseEntityDisk(view, disks);
-                } else {
-                    var result = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
-                    if (result.isPresent()) {
-                        for (DiskEntity disk : result.get()) {
-                            if (disks.get().contains(disk)) {
-                                disksOfPublicCollectionByParameters.add(disk);
+        var disksOfPublicCollectionByParameters = new ArrayList<DiskEntity>();
+        var disks = diskService.getDisksFromPublicCollection(collectionId);
+            try {
+                if(disks.isPresent()) {
+                    if (year == null && format == null && author == null && genre == null && title == null) {
+                        return getStringResponseEntityDisk(view, disks);
+                    } else {
+                        var result = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
+                        if (result.isPresent()) {
+                            for (DiskEntity disk : result.get()) {
+                                if (disks.get().contains(disk)) {
+                                    disksOfPublicCollectionByParameters.add(disk);
+                                }
                             }
+                            return getStringResponseEntityDisk(view, Optional.of(disksOfPublicCollectionByParameters));
                         }
-                        return getStringResponseEntityDisk(view, Optional.of(disksOfPublicCollectionByParameters));
                     }
                 }
-            }
 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -76,14 +76,10 @@ public class DiskController {
             @PathVariable Long diskId,
             @RequestParam(required = false) String view
     ) {
+        var disk = diskService.getDiskByIdFromPublicCollection(collectionId, diskId);
         try {
-            var disk = diskService.getDiskByIdFromPublicCollection(collectionId, diskId);
             if (disk.isPresent()) {
-                if (view != null && view.equals("public")) {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, disk));
-                } else {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disk));
-                }
+                return getStringResponseEntity(view, disk);
             }
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -142,11 +138,7 @@ public class DiskController {
         var disk = diskService.getDiskByIdFromPublicCollection(collectorId, collectionId, diskId);
                     try {
                         if (disk.isPresent()) {
-                    if (view != null && view.equals("public")) {
-                        return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, disk));
-                    } else {
-                        return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, disk));
-                    }
+                            return getStringResponseEntity(view, disk);
                 }
             } catch (JsonProcessingException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -158,12 +150,24 @@ public class DiskController {
 
     private ResponseEntity<String> getStringResponseEntityDisk(@RequestParam(required = false) String view, Optional<List<DiskEntity>> publicDisks) throws JsonProcessingException {
         if (publicDisks.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No public disks found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, publicDisks.get()));
         } else {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, publicDisks.get()));
+        }
+    }
+
+
+    private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<DiskEntity> publicDisk) throws JsonProcessingException {
+        if (publicDisk.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No public disk found");
+        }
+        if (view != null && view.equals("private")) {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PRIVATE, publicDisk.get()));
+        } else {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.DISK, SerializeWithView.ViewType.PUBLIC, publicDisk.get()));
         }
     }
 

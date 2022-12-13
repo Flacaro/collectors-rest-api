@@ -15,7 +15,7 @@ import org.univaq.collectors.services.CollectionService;
 
 
 @RestController
-@RequestMapping("public/")
+@RequestMapping("/public")
 public class CollectionController {
 
     private final CollectionService collectionService;
@@ -37,24 +37,25 @@ public class CollectionController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String view
     ) {
-        try {
-            var collectionsByParameters = new ArrayList<CollectionEntity>();
-            var publicCollections = collectionService.getAllPublicCollections(page, size);
-            if (publicCollections.isPresent()) {
-                if (name == null && type == null) {
-                    return getStringResponseEntity(view, publicCollections);
-                } else {
-                    var result = this.collectionService.getCollectionsByParameters(name, type);
-                    if (result.isPresent()) {
-                        for (CollectionEntity collection : result.get()) {
-                            if (publicCollections.get().contains(collection)) {
-                                collectionsByParameters.add(collection);
+        var collectionsByParameters = new ArrayList<CollectionEntity>();
+        var publicCollections = collectionService.getAllPublicCollections(page, size);
+            try {
+                if (publicCollections.isPresent()) {
+                    if (name == null && type == null) {
+                        return getStringResponseEntity(view, publicCollections);
+                    } else {
+                        var result = this.collectionService.getCollectionsByParameters(name, type);
+                        if (result.isPresent()) {
+                            for (CollectionEntity collection : result.get()) {
+                                if (publicCollections.get().contains(collection)) {
+                                    collectionsByParameters.add(collection);
+
+                                }
                             }
+                            return getStringResponseEntity(view, Optional.of(collectionsByParameters));
                         }
-                        return getStringResponseEntity(view, Optional.of(collectionsByParameters));
                     }
                 }
-            }
 
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -63,7 +64,7 @@ public class CollectionController {
     }
 
 
-    @GetMapping(value = "/{collectionId}", produces = "application/json")
+    @GetMapping(value = "collections/{collectionId}", produces = "application/json")
     public ResponseEntity<String> getPublicCollectionById(
             @PathVariable Long collectionId,
             @RequestParam(required = false) String view
@@ -71,10 +72,7 @@ public class CollectionController {
         try {
             var collection = collectionService.getPublicCollectionById(collectionId);
             if (collection.isEmpty()) {
-                if (view != null && view.equals("private")) {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, collection));
-                }
-                ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, collection));
+                return getStringResponseEntityCollection(view, collection);
             }
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -83,7 +81,7 @@ public class CollectionController {
     }
 
 
-    @GetMapping(value ="/{collectorId}/collections", produces = "application/json")
+    @GetMapping(value ="collectors/{collectorId}/collections", produces = "application/json")
     public ResponseEntity<String> getPublicCollectorCollections(
             @PathVariable("collectorId") Long collectorId,
             @RequestParam(required = false) Integer page,
@@ -106,8 +104,8 @@ public class CollectionController {
                                 publicCollectionsOfCollectorByParameters.add(collection);
                             }
                         }
-                        return getStringResponseEntity(view, Optional.of(publicCollectionsOfCollectorByParameters));
                     }
+                    return getStringResponseEntity(view, Optional.of(publicCollectionsOfCollectorByParameters));
                 }
             }
         } catch (JsonProcessingException e) {
@@ -116,7 +114,7 @@ public class CollectionController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value ="/{collectorId}/collections/{collectionId}", produces = "application/json")
+    @GetMapping(value ="collectors/{collectorId}/collections/{collectionId}", produces = "application/json")
     public ResponseEntity<String> getPublicCollectorCollectionById(
             @PathVariable("collectorId") Long collectorId,
             @PathVariable("collectionId") Long collectionId,
@@ -125,10 +123,7 @@ public class CollectionController {
         try {
             var collection = this.collectionService.getPublicCollectionById(collectorId, collectionId);
             if (collection.isEmpty()) {
-                if (view != null && view.equals("private")) {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, collection));
-                }
-                ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, collection));
+                return getStringResponseEntityCollection(view, collection);
             }
         } catch (JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
@@ -141,12 +136,23 @@ public class CollectionController {
 
     private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<List<CollectionEntity>> publicCollections) throws JsonProcessingException {
         if (publicCollections.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No public collections found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, publicCollections.get()));
         } else {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, publicCollections.get()));
+        }
+    }
+
+    private ResponseEntity<String> getStringResponseEntityCollection(@RequestParam(required = false) String view, Optional<CollectionEntity> publicCollection) throws JsonProcessingException {
+        if (publicCollection.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No public collection found");
+        }
+        if (view != null && view.equals("private")) {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PRIVATE, publicCollection.get()));
+        } else {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.COLLECTION, SerializeWithView.ViewType.PUBLIC, publicCollection.get()));
         }
     }
 

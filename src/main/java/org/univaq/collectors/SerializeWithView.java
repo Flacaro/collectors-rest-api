@@ -33,12 +33,6 @@ public class SerializeWithView {
     );
 
 
-//    public String serialize(String targetViewEntity, String targetView) throws JsonProcessingException {
-//            return mapper
-//                    .writerWithView(views.get(targetViewEntity).get(targetView))
-//                    .writeValueAsString(this);
-//    }
-
     public String serialize(EntityView targetViewEntity, ViewType targetView, Object object) throws JsonProcessingException {
             return mapper
                     .writerWithView(views.get(targetViewEntity).get(targetView))

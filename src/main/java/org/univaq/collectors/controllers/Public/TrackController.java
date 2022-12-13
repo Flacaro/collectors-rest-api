@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("public/")
+@RequestMapping("/public")
 public class TrackController {
 
     private final TrackService trackService;
@@ -72,13 +72,9 @@ public class TrackController {
         var optionalTrack = trackService.getTrackFromPublicCollection(collectionId, diskId, trackId);
             try {
                 if (optionalTrack.isPresent()) {
-                var track = optionalTrack.get();
-                if (view != null && view.equals("private")) {
-                    return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track));
-                } else {
-                   return  ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, track));
+                return getStringResponseEntity(view, optionalTrack);
                 }
-            }
+
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 
@@ -134,12 +130,8 @@ public class TrackController {
         var track = trackService.getTrackFromPublicCollection(collectorId, collectionId, diskId, trackId);
             try {
                 if (track.isPresent()) {
-                if (view != null && view.equals("private")) {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, track));
-                } else {
-                    ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, track));
+                    return getStringResponseEntity(view, track);
                 }
-            }
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -148,12 +140,23 @@ public class TrackController {
 
     private ResponseEntity<String> getStringResponseEntityTrack(@RequestParam(required = false) String view, Optional<List<TrackEntity>> publicTracks) throws JsonProcessingException {
         if (publicTracks.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No collections found");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No public tracks found");
         }
         if (view != null && view.equals("private")) {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, publicTracks.get()));
         } else {
             return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, publicTracks.get()));
+        }
+    }
+
+    private ResponseEntity<String> getStringResponseEntity(@RequestParam(required = false) String view, Optional<TrackEntity> publicTrack) throws JsonProcessingException {
+        if (publicTrack.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No public track found");
+        }
+        if (view != null && view.equals("private")) {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PRIVATE, publicTrack.get()));
+        } else {
+            return ResponseEntity.ok(serializeWithView.serialize(SerializeWithView.EntityView.TRACK, SerializeWithView.ViewType.PUBLIC, publicTrack.get()));
         }
     }
 
