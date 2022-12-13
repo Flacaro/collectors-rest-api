@@ -52,11 +52,9 @@ public class PTrackController {
                     return getStringResponseEntityTrack(view, tracks);
                 } else {
                     var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
-                    if (result.isPresent()) {
-                        for (TrackEntity track : result.get()) {
+                        for (TrackEntity track : result) {
                             if (tracks.get().contains(track)) {
                                 tracksByParameters.add(track);
-                            }
                         }
                         return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
                     }
@@ -161,12 +159,10 @@ public class PTrackController {
                             return getStringResponseEntityTrack(view, tracks);
                         } else {
                             var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
-                            if (result.isPresent()) {
-                                for (TrackEntity track : result.get()) {
+                                for (TrackEntity track : result) {
                                     if (tracks.get().contains(track)) {
                                         tracksByParameters.add(track);
                                     }
-                                }
                                 return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
                             }
                         }

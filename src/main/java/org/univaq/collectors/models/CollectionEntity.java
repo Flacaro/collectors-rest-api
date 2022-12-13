@@ -38,7 +38,7 @@ public class CollectionEntity {
 
     @JsonView(UserView.Public.class)
     @Column(nullable = false)
-    private boolean isPublic;
+    private Boolean isPublic;
 
 
     @JsonView(UserView.Private.class)
@@ -79,11 +79,11 @@ public class CollectionEntity {
     }
 
 //prendo collezioni pubbliche prima controllo
-    public boolean isPublic() {
+    public Boolean isPublic() {
         return isPublic;
     }
 
-    public void setPublic(boolean aPublic) {
+    public void setPublic(Boolean aPublic) {
         isPublic = aPublic;
     }
 
@@ -122,22 +122,22 @@ public class CollectionEntity {
         return "CollectionEntity{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
                 ", isPublic=" + isPublic +
-                ", type=" + type +
+                ", collectionsCollectors=" + collectionsCollectors +
                 '}';
     }
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectionEntity that = (CollectionEntity) o;
-        return isPublic == that.isPublic && id.equals(that.id) && Objects.equals(name, that.name)  && Objects.equals(collectionsCollectors, that.collectionsCollectors) && Objects.equals(type, that.type);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(type, that.type) && Objects.equals(isPublic, that.isPublic) && Objects.equals(collectionsCollectors, that.collectionsCollectors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, isPublic, collectionsCollectors, type);
+        return Objects.hash(id, name, type, isPublic, collectionsCollectors);
     }
 }

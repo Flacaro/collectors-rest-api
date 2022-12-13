@@ -78,16 +78,29 @@ public class CollectionService {
         return collectionsRepository.getAllPublicCollections(PageRequest.of(page, size));
     }
 
-    public Optional<List<CollectionEntity>> getCollectionsByParameters(String name, String type) {
+//    public List<CollectionEntity> getPublicCollectionsByParameters(String name, String type, Boolean isPublic) {
+//        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+//                .withMatcher("name", contains().ignoreCase())
+//                .withMatcher("type", contains().ignoreCase())
+//                .withMatcher("isPublic",contains().ignoreCase());
+//
+//        CollectionEntity example = new CollectionEntity();
+//        example.setName(name);
+//        example.setType(type);
+//        example.setPublic(isPublic);
+//
+//        return this.collectionsRepository.findAll(Example.of(example, matcher));
+//    }
+
+    public List<CollectionEntity> getCollectionsByParameters(String name, String type) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                 .withMatcher("name", contains().ignoreCase())
                 .withMatcher("type", contains().ignoreCase());
-
         CollectionEntity example = new CollectionEntity();
         example.setName(name);
         example.setType(type);
 
-        return Optional.of(this.collectionsRepository.findAll(Example.of(example, matcher)));
+        return this.collectionsRepository.findAll(Example.of(example, matcher));
     }
 
 

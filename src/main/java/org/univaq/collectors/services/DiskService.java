@@ -160,7 +160,7 @@ public class DiskService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 
-    public Optional<List<DiskEntity>> getDisksByParameters(Long year, String format, String author, String genre, String title, String artist, String band) {
+    public List<DiskEntity> getDisksByParameters(Long year, String format, String author, String genre, String title, String artist, String band) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                 .withMatcher("year", contains().ignoreCase())
                 .withMatcher("format", contains().ignoreCase())
@@ -179,7 +179,7 @@ public class DiskService {
         example.setArtist(artist);
         example.setBand(band);
 
-        return Optional.of(this.disksRepository.findAll(Example.of(example, matcher)));
+        return this.disksRepository.findAll(Example.of(example, matcher));
     }
 
 

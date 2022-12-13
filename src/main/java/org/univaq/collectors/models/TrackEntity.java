@@ -53,14 +53,14 @@ public class TrackEntity {
 
     @JsonView(UserView.Public.class)
     @Column(nullable = false)
-    private double time;
+    private Long time;
 
     @JsonView(UserView.Private.class)
     @ManyToOne()
     private DiskEntity disk;
 
 
-    public TrackEntity(Long id, String title, String artist, String album, String band, String compositor, double time, DiskEntity disk) {
+    public TrackEntity(Long id, String title, String artist, String album, String band, String compositor, Long time, DiskEntity disk) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -122,11 +122,11 @@ public class TrackEntity {
         this.compositor = compositor;
     }
 
-    public double getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 
@@ -148,16 +148,29 @@ public class TrackEntity {
     }
 
     @Override
+    public String toString() {
+        return "TrackEntity{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", artist='" + artist + '\'' +
+                ", album='" + album + '\'' +
+                ", band='" + band + '\'' +
+                ", compositor='" + compositor + '\'' +
+                ", time=" + time +
+                ", disk=" + disk +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TrackEntity that = (TrackEntity) o;
-        return time == that.time && Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(artist, that.artist) && Objects.equals(album, that.album) && Objects.equals(band, that.band) && Objects.equals(compositor, that.compositor) && Objects.equals(disk, that.disk);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(artist, that.artist) && Objects.equals(album, that.album) && Objects.equals(band, that.band) && Objects.equals(compositor, that.compositor) && Objects.equals(time, that.time) && Objects.equals(disk, that.disk);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, title, artist, album, band, compositor, time, disk);
     }
-
 }

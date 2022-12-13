@@ -57,15 +57,10 @@ public class PDiskController {
                         return getStringResponseEntity(view, disks);
                     } else {
                         var diskWithParameters = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
-                        if (diskWithParameters.isPresent()) {
-                            for (DiskEntity disk : diskWithParameters.get()) {
+                            for (DiskEntity disk : diskWithParameters) {
                                 if (disks.get().contains(disk)) {
                                     disksByParameters.add(disk);
                                 }
-                            }
-                            return getStringResponseEntity(view, Optional.of(disksByParameters));
-                        } else {
-
                             return getStringResponseEntity(view, Optional.of(disksByParameters));
                         }
                     }
@@ -123,20 +118,16 @@ public class PDiskController {
             var disks = this.diskService.getPersonalDisksFromCollection(collectionId, authentication);
             var disksByParameters = new ArrayList<DiskEntity>();
             if (disks.isPresent()) {
-                if(title == null && author == null && format == null && year == null && genre == null && artist == null && band == null) {
+                if (title == null && author == null && format == null && year == null && genre == null && artist == null && band == null) {
                     return getStringResponseEntity(view, disks);
                 } else {
                     var diskWithParameters = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
-                    if (diskWithParameters.isPresent()) {
-                        for (DiskEntity disk : diskWithParameters.get()) {
-                            if (disks.get().contains(disk)) {
-                                disksByParameters.add(disk);
-                            }
+                    for (DiskEntity disk : diskWithParameters) {
+                        if (disks.get().contains(disk)) {
+                            disksByParameters.add(disk);
                         }
                         return getStringResponseEntity(view, Optional.of(disksByParameters));
-                    } else {
 
-                        return getStringResponseEntity(view, Optional.of(disksByParameters));
                     }
                 }
             }

@@ -67,11 +67,9 @@ public class PCollectorController {
                     return getStringResponseEntity(view, favourites);
                 } else {
                     var result = this.collectionService.getCollectionsByParameters(name, type);
-                    if (result.isPresent()) {
-                        for (CollectionEntity collection : result.get()) {
+                        for (CollectionEntity collection : result) {
                             if (favourites.get().contains(collection)) {
                                 favouritesByParameters.add(collection);
-                            }
                         }
                         return getStringResponseEntity(view, Optional.of(favouritesByParameters));
                     }

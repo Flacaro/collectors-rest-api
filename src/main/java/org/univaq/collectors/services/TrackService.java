@@ -2,14 +2,10 @@ package org.univaq.collectors.services;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.univaq.collectors.models.CollectionEntity;
-import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.models.TrackEntity;
 import org.univaq.collectors.repositories.*;
 
@@ -35,7 +31,7 @@ public class TrackService {
         this.collectorCollectionRepository = collectorCollectionRepository;
     }
 
-    public Optional<List<TrackEntity>> getTracksByParameters(String title, String artist, String album, String band, String compositor) {
+    public List<TrackEntity> getTracksByParameters(String title, String artist, String album, String band, String compositor) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                 .withMatcher("title", contains().ignoreCase())
                 .withMatcher("artist", contains().ignoreCase())
@@ -50,7 +46,7 @@ public class TrackService {
         example.setBand(band);
         example.setCompositor(compositor);
 
-        return Optional.of(this.trackRepository.findAll(Example.of(example, matcher)));
+        return this.trackRepository.findAll(Example.of(example, matcher));
     }
 
     public Optional<List<TrackEntity>> getPersonalTracksFromDisk(Long diskId, Long collectionId, Authentication authentication) {
@@ -65,7 +61,7 @@ public class TrackService {
                 if (isOwner) {
                     var disk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (disk.isPresent()) {
-                        var trackList = this.trackRepository.findTrackFromDiskId(diskId);
+                        var trackList = this.trackRepository.findTracksFromDiskId(diskId);
                         if (trackList.isPresent()) {
                             return Optional.of(trackList.get());
                         } else
@@ -188,13 +184,14 @@ public class TrackService {
     public Optional<List<TrackEntity>> getTracksFromPublicCollection(Long collectorId, Long collectionId, Long diskId) {
         var optionalCollector = this.collectorsRepository.findById(collectorId);
         if (optionalCollector.isPresent()) {
-            var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
-            if (collectorCollection.isPresent()) {
-                var collection = collectorCollection.get();
-                if (collection.getCollection().isPublic()) {
+            var collectorCollectionOptional = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
+            if (collectorCollectionOptional.isPresent()) {
+                var collectorCollection = collectorCollectionOptional.get();
+                var collection = collectorCollection.getCollection();
+                if (collection.isPublic()) {
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (optionalDisk.isPresent()) {
-                        var optionalTracks = this.trackRepository.findTrackFromDiskId(diskId);
+                        var optionalTracks = this.trackRepository.findTracksFromDiskId(diskId);
                         if (optionalTracks.isPresent()) {
                             return optionalTracks;
                         }
@@ -221,7 +218,7 @@ public class TrackService {
                 if (collection.getCollection().isPublic()) {
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (optionalDisk.isPresent()) {
-                        var optionalTrack = this.trackRepository.findTrackFromDiskId(diskId);
+                        var optionalTrack = this.trackRepository.findTracksFromDiskId(diskId);
                         if (optionalTrack.isPresent()) {
                             var tracks = optionalTrack.get();
                             for (TrackEntity t : tracks) {
@@ -252,7 +249,7 @@ public class TrackService {
             if (collection.isPublic()) {
                 var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                 if (optionalDisk.isPresent()) {
-                    var optionalTracks = this.trackRepository.findTrackFromDiskId(diskId);
+                    var optionalTracks = this.trackRepository.findTracksFromDiskId(diskId);
                     if (optionalTracks.isPresent()) {
                         return optionalTracks;
                     }
@@ -262,8 +259,6 @@ public class TrackService {
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
             }
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }

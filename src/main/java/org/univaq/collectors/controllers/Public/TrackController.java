@@ -38,19 +38,18 @@ public class TrackController {
             @RequestParam(required = false) String view
     ) {
         try {
-            var tracks = trackService.getTracksFromPublicCollection(collectionId, diskId);
             var tracksByParameters = new ArrayList<TrackEntity>();
+            var tracks = trackService.getTracksFromPublicCollection(collectionId, diskId);
             if(tracks.isPresent()) {
                 if (title == null && artist == null && album == null && band == null && compositor == null) {
                     return getStringResponseEntityTrack(view, tracks);
                 } else {
                     var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
-                    if (result.isPresent()) {
-                        for (TrackEntity track : result.get()) {
+                        for (TrackEntity track : result) {
                             if (tracks.get().contains(track)) {
                                 tracksByParameters.add(track);
                             }
-                        }
+
                         return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
                     }
                 }
@@ -95,20 +94,19 @@ public class TrackController {
             @RequestParam(required = false) String compositor,
             @RequestParam(required = false) String view
     ) {
-        var tracks = trackService.getTracksFromPublicCollection(collectorId, collectionId, diskId);
         var tracksByParameters = new ArrayList<TrackEntity>();
+        var tracks = trackService.getTracksFromPublicCollection(collectorId, collectionId, diskId);
            try {
                if (tracks.isPresent()) {
                if (title == null && artist == null && album == null && band == null && compositor == null) {
                    return getStringResponseEntityTrack(view, tracks);
                } else {
                      var result = this.trackService.getTracksByParameters(title, artist, album, band, compositor);
-                     if (result.isPresent()) {
-                          for (TrackEntity track : result.get()) {
+                          for (TrackEntity track : result) {
                             if (tracks.get().contains(track)) {
                                  tracksByParameters.add(track);
                             }
-                          }
+
                           return getStringResponseEntityTrack(view, Optional.of(tracksByParameters));
                      }
                }

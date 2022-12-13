@@ -56,7 +56,7 @@ public class CollectorService {
         return this.collectorsRepository.findById(collectorId);
     }
 
-    public Optional<List<CollectorEntity>> getCollectorsByParameters(String email, String username) {
+    public List<CollectorEntity> getCollectorsByParameters(String email, String username) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                 .withMatcher("email", contains().ignoreCase())
                 .withMatcher("username", contains().ignoreCase());
@@ -65,7 +65,7 @@ public class CollectorService {
         example.setEmail(email);
         example.setUsername(username);
 
-        return Optional.of(this.collectorsRepository.findAll(Example.of(example, matcher)));
+        return this.collectorsRepository.findAll(Example.of(example, matcher));
     }
 
 
@@ -130,15 +130,6 @@ public class CollectorService {
         }
         return Optional.of(favourites);
 
-//        return favourites.stream()
-//                .map(f -> f.getCollectionsCollectors().stream()
-//                        .map(CollectorCollectionEntity::getCollection)
-//                        .findFirst()
-//                        .orElseThrow(
-//                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
-//                        )
-//                )
-//                .toList();
     }
 
 

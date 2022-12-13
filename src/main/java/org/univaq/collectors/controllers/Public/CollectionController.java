@@ -45,13 +45,11 @@ public class CollectionController {
                         return getStringResponseEntity(view, publicCollections);
                     } else {
                         var result = this.collectionService.getCollectionsByParameters(name, type);
-                        if (result.isPresent()) {
-                            for (CollectionEntity collection : result.get()) {
+                            for (CollectionEntity collection : result) {
                                 if (publicCollections.get().contains(collection)) {
                                     collectionsByParameters.add(collection);
 
                                 }
-                            }
                             return getStringResponseEntity(view, Optional.of(collectionsByParameters));
                         }
                     }
@@ -98,12 +96,12 @@ public class CollectionController {
                     return getStringResponseEntity(view, collections);
                 } else {
                     var result = this.collectionService.getCollectionsByParameters(name, type);
-                    if (result.isPresent()) {
-                        for (CollectionEntity collection : result.get()) {
-                            if (collections.get().contains(collection)) {
-                                publicCollectionsOfCollectorByParameters.add(collection);
-                            }
-                        }
+                        for (CollectionEntity collection : result) {
+                                if (collections.get().contains(collection)) {
+                                    publicCollectionsOfCollectorByParameters.add(collection);
+
+                                }
+
                     }
                     return getStringResponseEntity(view, Optional.of(publicCollectionsOfCollectorByParameters));
                 }

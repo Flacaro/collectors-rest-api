@@ -44,11 +44,9 @@ public class CollectorController {
                     return getStringResponseEntityCollectors(view, collectors);
                 } else {
                     var result = this.collectorService.getCollectorsByParameters(email, username);
-                    if (result.isPresent()) {
-                        for (CollectorEntity collector : result.get()) {
+                        for (CollectorEntity collector : result) {
                             if (collectors.get().contains(collector)) {
                                 collectorsByParameters.add(collector);
-                            }
                         }
                         return getStringResponseEntityCollectors(view, Optional.of(collectorsByParameters));
                     }

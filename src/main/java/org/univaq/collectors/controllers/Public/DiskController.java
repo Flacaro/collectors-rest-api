@@ -51,11 +51,9 @@ public class DiskController {
                         return getStringResponseEntityDisk(view, disks);
                     } else {
                         var result = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
-                        if (result.isPresent()) {
-                            for (DiskEntity disk : result.get()) {
+                            for (DiskEntity disk : result) {
                                 if (disks.get().contains(disk)) {
                                     disksOfPublicCollectionByParameters.add(disk);
-                                }
                             }
                             return getStringResponseEntityDisk(view, Optional.of(disksOfPublicCollectionByParameters));
                         }
@@ -110,11 +108,9 @@ public class DiskController {
                     return getStringResponseEntityDisk(view, disks);
                 } else {
                     var result = this.diskService.getDisksByParameters(year, format, author, genre, title, artist, band);
-                    if (result.isPresent()) {
-                        for (DiskEntity disk : result.get()) {
+                        for (DiskEntity disk : result) {
                             if (disks.get().contains(disk)) {
                                 disksOfPublicCollectionByParameters.add(disk);
-                            }
                         }
                         return getStringResponseEntityDisk(view, Optional.of(disksOfPublicCollectionByParameters));
                         }

@@ -45,12 +45,10 @@ public class PCollectionController {
                     return getStringResponseEntity(view, collections);
                 } else {
                     var result = this.collectionService.getCollectionsByParameters(name, type);
-                    if (result.isPresent()) {
-                        for (CollectionEntity collection : result.get()) {
+                        for (CollectionEntity collection : result) {
                             if (collections.get().contains(collection)) {
                                 collectionsByParameters.add(collection);
                             }
-                        }
                         return getStringResponseEntity(view, Optional.of(collectionsByParameters));
                     }
                 }
