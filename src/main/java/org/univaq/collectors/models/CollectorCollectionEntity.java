@@ -73,6 +73,7 @@ public class CollectorCollectionEntity implements Serializable {
         isOwner = owner;
     }
 
+
     @Override
     public String toString() {
         return "CollectorCollectionEntity{" +

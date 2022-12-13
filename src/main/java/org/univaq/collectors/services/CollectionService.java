@@ -78,19 +78,6 @@ public class CollectionService {
         return collectionsRepository.getAllPublicCollections(PageRequest.of(page, size));
     }
 
-//    public List<CollectionEntity> getPublicCollectionsByParameters(String name, String type, Boolean isPublic) {
-//        ExampleMatcher matcher = ExampleMatcher.matchingAll()
-//                .withMatcher("name", contains().ignoreCase())
-//                .withMatcher("type", contains().ignoreCase())
-//                .withMatcher("isPublic",contains().ignoreCase());
-//
-//        CollectionEntity example = new CollectionEntity();
-//        example.setName(name);
-//        example.setType(type);
-//        example.setPublic(isPublic);
-//
-//        return this.collectionsRepository.findAll(Example.of(example, matcher));
-//    }
 
     public List<CollectionEntity> getCollectionsByParameters(String name, String type) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
@@ -176,23 +163,28 @@ public class CollectionService {
             if (optionalCollectorCollection.isPresent()) {
                 var collectorCollection = optionalCollectorCollection.get();
                 var collection = collectorCollection.getCollection();
+                var collectors = this.collectorsRepository.findAll();
                 var isOwner = collectorCollection.isOwner();
                 if (isOwner) {
-                    var favourites = collector.getFavourites();
-                    favourites.removeIf(favourite -> favourite.getId().equals(collectionId));
-                    collector.setFavourites(favourites);
-                    this.collectorsRepository.flush();
+                    for (var collectorEntity : collectors) {
+                        var favourites = collectorEntity.getFavourites();
+                        favourites.removeIf(favourite -> favourite.getId().equals(collection.getId()));
+                        this.collectorsRepository.flush();
+                    }
+                    this.collectorCollectionRepository.delete(collection);
                     this.collectionsRepository.delete(collection);
                 } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection");
                 }
+
             } else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
-                }
-                } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found");
             }
         }
+        else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
+        }
+    }
 
     public Optional<CollectionEntity> updateCollectorCollectionById(Authentication authentication, Long collectionId, CollectionEntity collection) {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());

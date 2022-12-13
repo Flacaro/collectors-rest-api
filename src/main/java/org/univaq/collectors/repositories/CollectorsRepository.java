@@ -10,12 +10,8 @@ import org.univaq.collectors.models.CollectorEntity;
 
 // Repository<Domain class, ID type of the domain class>
 public interface CollectorsRepository extends PagingAndSortingRepository<CollectorEntity, Long>, JpaRepository<CollectorEntity, Long> {
-    // findBy<field name>
-    public Optional<CollectorEntity> findByEmailAndUsername(String email, String username);
 
     public Optional<CollectorEntity> findByEmail(String email);
-
-
 
 
 
