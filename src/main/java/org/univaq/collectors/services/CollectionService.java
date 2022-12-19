@@ -95,7 +95,7 @@ public class CollectionService {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
         if (optionalCollection.isPresent()) {
             var collection = optionalCollection.get();
-            if (collection.isPublic()) {
+            if (collection.isVisible()) {
                 return optionalCollection;
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
@@ -110,7 +110,7 @@ public class CollectionService {
             var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
             if (collectorCollection.isPresent()) {
                 var collection = collectorCollection.get().getCollection();
-                if (collection.isPublic()) {
+                if (collection.isVisible()) {
                     return Optional.of(collection);
                 } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Collection is not public");
@@ -195,7 +195,7 @@ public class CollectionService {
                 var collectorCollection = collectorCollectionOptional.get();
                 if (collectorCollection.isOwner()) {
                     var collectionToUpdate = collectorCollection.getCollection();
-                    collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getType(), collection.isPublic());
+                    collectionToUpdate.updateCollectorCollection(collection.getName(), collection.getType(), collection.isVisible());
                     this.collectionsRepository.save(collectionToUpdate);
                     return Optional.of(collectionToUpdate);
                     }

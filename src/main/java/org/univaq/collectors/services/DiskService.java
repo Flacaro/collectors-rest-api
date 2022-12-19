@@ -42,7 +42,7 @@ public class DiskService {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
         if (optionalCollection.isPresent()) {
             var collection = optionalCollection.get();
-            if (collection.isPublic()) {
+            if (collection.isVisible()) {
                 var disks = this.disksRepository.findDisksFromCollectionId(collection.getId());
                 if (disks.isPresent()) {
                     return disks;
@@ -63,7 +63,7 @@ public class DiskService {
                 var collection = optionalCollection.get();
                 var collectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collection.getId());
                 if(collectorCollection.isPresent()) {
-                    if (collectorCollection.get().getCollection().isPublic()) {
+                    if (collectorCollection.get().getCollection().isVisible()) {
                         var disks = this.disksRepository.findDisksFromCollectionId(collectorCollection.get().getCollection().getId());
                         if (disks.isPresent()) {
                             return disks;
@@ -127,7 +127,7 @@ public class DiskService {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
         if (optionalCollection.isPresent()) {
             var collection = optionalCollection.get();
-            if (collection.isPublic()) {
+            if (collection.isVisible()) {
                 var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                 if (optionalDisk.isPresent()) {
                     return optionalDisk;
@@ -147,7 +147,7 @@ public class DiskService {
                     .findCollectionByIdAndCollectorById(collector.getId(), collectionId);
             if (collectorCollectionOptional.isPresent()) {
                 var collectorCollection = collectorCollectionOptional.get();
-                if (collectorCollection.getCollection().isPublic()) {
+                if (collectorCollection.getCollection().isVisible()) {
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (optionalDisk.isPresent()) {
                         return optionalDisk;

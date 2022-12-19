@@ -188,7 +188,7 @@ public class TrackService {
             if (collectorCollectionOptional.isPresent()) {
                 var collectorCollection = collectorCollectionOptional.get();
                 var collection = collectorCollection.getCollection();
-                if (collection.isPublic()) {
+                if (collection.isVisible()) {
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (optionalDisk.isPresent()) {
                         var optionalTracks = this.trackRepository.findTracksFromDiskId(diskId);
@@ -215,7 +215,7 @@ public class TrackService {
             var collectorCollection = collectorCollectionRepository.findCollectionByIdAndCollectorById(collectorId, collectionId);
             if (collectorCollection.isPresent()) {
                 var collection = collectorCollection.get();
-                if (collection.getCollection().isPublic()) {
+                if (collection.getCollection().isVisible()) {
                     var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                     if (optionalDisk.isPresent()) {
                         var optionalTrack = this.trackRepository.findTracksFromDiskId(diskId);
@@ -246,7 +246,7 @@ public class TrackService {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
         if (optionalCollection.isPresent()) {
             var collection = optionalCollection.get();
-            if (collection.isPublic()) {
+            if (collection.isVisible()) {
                 var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                 if (optionalDisk.isPresent()) {
                     var optionalTracks = this.trackRepository.findTracksFromDiskId(diskId);
@@ -268,7 +268,7 @@ public class TrackService {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
         if (optionalCollection.isPresent()) {
             var collection = optionalCollection.get();
-            if (collection.isPublic()) {
+            if (collection.isVisible()) {
                 var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
                 if (optionalDisk.isPresent()) {
                     var optionalTrack = this.trackRepository.findTrackFromDiskIdAndTrackId(diskId, trackId);

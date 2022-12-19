@@ -15,7 +15,7 @@ public interface CollectionsRepository extends PagingAndSortingRepository<Collec
         JpaRepository<CollectionEntity, Long> {
 
 
-    @Query("select c from collection c where c.isPublic = true")
+    @Query("select c from collection c where c.visible = true")
     public Optional<List<CollectionEntity>> getAllPublicCollections(PageRequest pageRequest);
 
 }

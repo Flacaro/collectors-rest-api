@@ -3,7 +3,6 @@ package org.univaq.collectors.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -94,7 +93,7 @@ public class CollectorService {
         var collection = collectionsRepository.findById(favouritePayload.getCollectionId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
         );
-         if (collection.isPublic() || isCollectorInCollectionShareList(collector, collection)) {
+         if (collection.isVisible() || isCollectorInCollectionShareList(collector, collection)) {
             //se la collezione non e' privata e non e' gia nella lista oppure se sono nella lista di condivisione
             //aggiungo la collezione ai preferiti
             var isCollectionInFavourites = this.isCollectionInFavourites(collector, collection);

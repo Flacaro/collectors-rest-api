@@ -38,7 +38,7 @@ public class CollectionEntity {
 
     @JsonView(UserView.Public.class)
     @Column(nullable = false)
-    private Boolean isPublic;
+    private Boolean visible;
 
 
     @JsonView(UserView.Private.class)
@@ -54,10 +54,10 @@ public class CollectionEntity {
     public CollectionEntity() {
     }
 
-    public CollectionEntity(Long id, String name, boolean isPublic, String type) {
+    public CollectionEntity(Long id, String name, boolean visible, String type) {
         this.id = id;
         this.name = name;
-        this.isPublic = isPublic;
+        this.visible = visible;
         this.type = type;
     }
 
@@ -79,12 +79,12 @@ public class CollectionEntity {
     }
 
 //prendo collezioni pubbliche prima controllo
-    public Boolean isPublic() {
-        return isPublic;
+    public Boolean isVisible() {
+        return visible;
     }
 
-    public void setPublic(Boolean aPublic) {
-        isPublic = aPublic;
+    public void setVisible(Boolean aPublic) {
+        visible = aPublic;
     }
 
     public List<CollectorCollectionEntity> getCollectionsCollectors() {
@@ -114,7 +114,7 @@ public class CollectionEntity {
     public void updateCollectorCollection(String name, String type, boolean isPublic) {
         this.name = name;
         this.type = type;
-        this.isPublic = isPublic;
+        this.visible = isPublic;
     }
 
     @Override
@@ -123,7 +123,7 @@ public class CollectionEntity {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
-                ", isPublic=" + isPublic +
+                ", isPublic=" + visible +
                 ", collectionsCollectors=" + collectionsCollectors +
                 '}';
     }
@@ -133,11 +133,11 @@ public class CollectionEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectionEntity that = (CollectionEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(type, that.type) && Objects.equals(isPublic, that.isPublic) && Objects.equals(collectionsCollectors, that.collectionsCollectors);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(type, that.type) && Objects.equals(visible, that.visible) && Objects.equals(collectionsCollectors, that.collectionsCollectors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, type, isPublic, collectionsCollectors);
+        return Objects.hash(id, name, type, visible, collectionsCollectors);
     }
 }
