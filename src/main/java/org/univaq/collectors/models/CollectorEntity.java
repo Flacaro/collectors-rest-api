@@ -63,11 +63,16 @@ public class CollectorEntity {
 
     @JsonView(UserView.Private.class)
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JsonBackReference
+    @JsonBackReference(value="favourites-collection")
     private List<CollectionEntity> favourites = new ArrayList<>();
 
+    @JsonView(UserView.Private.class)
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JsonBackReference(value="favourites-disk")
+    private List<DiskEntity> favouritesDisk = new ArrayList<>();
 
-    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, String username, String email, String password, List<CollectionEntity> favourites) {
+
+    public CollectorEntity(Long id, String name, String surname, LocalDate birthday, String username, String email, String password, List<CollectionEntity> favourites, List<DiskEntity> favouritesDisk) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -76,6 +81,7 @@ public class CollectorEntity {
         this.email = email;
         this.password = new BCryptPasswordEncoder().encode(password);
         this.favourites = favourites;
+        this.favouritesDisk = favouritesDisk;
     }
 
     public CollectorEntity() {
@@ -149,9 +155,15 @@ public class CollectorEntity {
         return favourites;
     }
 
+    public List<DiskEntity> getFavouritesDisk() {
+        return favouritesDisk;
+    }
+
     public void addCollectionToFavourites(CollectionEntity collection) {
         this.favourites.add(collection);
     }
+
+    public void addDiskToFavourites (DiskEntity disk) {this.favouritesDisk.add(disk); }
 
     public void setId(Long id) {
         this.id = id;
@@ -161,9 +173,15 @@ public class CollectorEntity {
         this.favourites = favourites;
     }
 
+    public void setFavouritesDisk(List<DiskEntity> favouritesDisk) {
+        this.favouritesDisk = favouritesDisk;
+    }
+
     public void deleteCollectionFromFavourites(CollectionEntity collection) {
         this.favourites.remove(collection);
     }
+
+    public void deleteDiskFromFavourites(DiskEntity disk){this.favouritesDisk.remove(disk); }
 
     @Override
     public String toString() {
@@ -176,6 +194,7 @@ public class CollectorEntity {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", favourites=" + favourites +
+                ", favouritesDisk" + favouritesDisk +
                 '}';
     }
 
@@ -184,12 +203,12 @@ public class CollectorEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectorEntity that = (CollectorEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(surname, that.surname) && Objects.equals(birthday, that.birthday) && Objects.equals(username, that.username) && Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(favourites, that.favourites);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(surname, that.surname) && Objects.equals(birthday, that.birthday) && Objects.equals(username, that.username) && Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(favourites, that.favourites) && Objects.equals(favouritesDisk, that.favouritesDisk);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, surname, birthday, username, email, password, favourites);
+        return Objects.hash(id, name, surname, birthday, username, email, password, favourites, favouritesDisk);
     }
 }
 

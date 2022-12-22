@@ -45,6 +45,7 @@ public class AuthController {
                 collector.getUsername(),
                 collector.getEmail(),
                 collector.getPassword(),
+                null,
                 null
         );
 

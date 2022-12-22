@@ -16,6 +16,7 @@ public class Examples {
                 "mario1",
                 "mario@rossi.com",
                 "secret",
+                null,
                 null
         );
     }
@@ -29,6 +30,7 @@ public class Examples {
                 "Rosa",
                 "rosa@bianchi.com",
                 "secret",
+                null,
                 null
         );
 
@@ -43,6 +45,7 @@ public class Examples {
                 "Daniele",
                 "daniele@neri.com",
                 "secret",
+                null,
                 null
         );
 

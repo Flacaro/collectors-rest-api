@@ -11,34 +11,40 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.univaq.collectors.controllers.requests.payload.FavouriteDiskPayload;
 import org.univaq.collectors.controllers.requests.payload.FavouritePayload;
 import org.univaq.collectors.models.CollectionEntity;
 import org.univaq.collectors.models.CollectorCollectionEntity;
+import org.univaq.collectors.models.DiskEntity;
 import org.univaq.collectors.repositories.CollectionsRepository;
 import org.univaq.collectors.repositories.CollectorCollectionRepository;
 import org.univaq.collectors.repositories.CollectorsRepository;
 
 
 import org.univaq.collectors.models.CollectorEntity;
+import org.univaq.collectors.repositories.DisksRepository;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
 
 @Service
 public class CollectorService {
-    
+
     private final CollectorsRepository collectorsRepository;
     private final CollectorCollectionRepository collectorCollectionRepository;
 
     private final CollectionsRepository collectionsRepository;
+    private final DisksRepository disksRepository;
 
     public CollectorService(
             CollectorsRepository collectorsRepository,
             CollectorCollectionRepository collectorCollectionRepository,
-            CollectionsRepository collectionsRepository
+            CollectionsRepository collectionsRepository,
+            DisksRepository disksRepository
     ) {
         this.collectorsRepository = collectorsRepository;
         this.collectorCollectionRepository = collectorCollectionRepository;
         this.collectionsRepository = collectionsRepository;
+        this.disksRepository = disksRepository;
     }
 
 
@@ -81,7 +87,7 @@ public class CollectorService {
             }
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No personal collections found");
 
-            }
+        }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found");
     }
 
@@ -93,7 +99,7 @@ public class CollectorService {
         var collection = collectionsRepository.findById(favouritePayload.getCollectionId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
         );
-         if (collection.isVisible() || isCollectorInCollectionShareList(collector, collection)) {
+        if (collection.isVisible() || isCollectorInCollectionShareList(collector, collection)) {
             //se la collezione non e' privata e non e' gia nella lista oppure se sono nella lista di condivisione
             //aggiungo la collezione ai preferiti
             var isCollectionInFavourites = this.isCollectionInFavourites(collector, collection);
@@ -109,12 +115,12 @@ public class CollectorService {
         }
     }
 
-    private boolean isCollectionInFavourites (CollectorEntity collector, CollectionEntity collection) {
+    private boolean isCollectionInFavourites(CollectorEntity collector, CollectionEntity collection) {
         return collector.getFavourites().stream()
                 .anyMatch(c -> c.getId().equals(collection.getId()));
     }
 
-    private boolean isCollectorInCollectionShareList (CollectorEntity collector, CollectionEntity collection) {
+    private boolean isCollectorInCollectionShareList(CollectorEntity collector, CollectionEntity collection) {
         return collection.getCollectionsCollectors().stream()
                 .anyMatch(cc -> cc.getCollector().getId().equals(collector.getId()));
     }
@@ -131,6 +137,46 @@ public class CollectorService {
 
     }
 
+    public void addDiskInFavouritesDiskList(String collectorEmail, Long collectionId, FavouriteDiskPayload favouriteDiskPayload) {
+        var collector = collectorsRepository.findByEmail(collectorEmail).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found")
+        );
+        var collection = collectionsRepository.findById(collectionId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection not found")
+        );
+        if (collection.isVisible() || isCollectorInCollectionShareList(collector, collection)) {
+            var disk = disksRepository.findById(favouriteDiskPayload.getDiskId()).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk not Found")
+            );
+            //aggiungo disk ai preferiti
+            var isDiskInFavourites = this.isDiskInFavourites(collector, disk);
 
+            if (!isDiskInFavourites) {
+                collector.addDiskToFavourites(disk);
+                collectorsRepository.save(collector);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Disk already in favourites");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this collection and it is not public");
+        }
+    }
+
+    private boolean isDiskInFavourites(CollectorEntity collector, DiskEntity disk) {
+        return collector.getFavouritesDisk().stream()
+                .anyMatch(c -> c.getId().equals(disk.getId()));
+    }
+
+    public Optional<List<DiskEntity>> getFavouritesDisks(Authentication authentication) {
+        var collector = collectorsRepository.findByEmail(authentication.getName()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector not found")
+        );
+        var favouritesDisk = collector.getFavouritesDisk();
+        if (favouritesDisk.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No favourites disks found");
+        }
+        return Optional.of(favouritesDisk);
+
+    }
 
 }

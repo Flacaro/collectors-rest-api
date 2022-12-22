@@ -40,6 +40,7 @@ public class DatabaseGenerator {
                 "mario",
                 "mario@rossi.com",
                 "secret",
+                null,
                 null
         );
 
@@ -51,6 +52,7 @@ public class DatabaseGenerator {
                 "maria",
                 "maria@bianchi.com",
                 "secret",
+                null,
                 null
         );
 
@@ -62,6 +64,7 @@ public class DatabaseGenerator {
                 "daniele",
                 "daniele@neri.com",
                 "secret",
+                null,
                 null
         );
 
