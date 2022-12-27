@@ -107,21 +107,35 @@ public class DiskService {
         var optionalCollector = this.collectorsRepository.findByEmail(authentication.getName());   //trovo il collezionista
         if (optionalCollector.isPresent()) { //se il collezionista e' presente
             var collector = optionalCollector.get(); //prendo il collezionista
-            var collectorCollectionOptional = this.collectorCollectionRepository
-                    .findCollectionByIdAndCollectorById(collector.getId(), collectionId); //trovo la collezione del collezionista
-
-            if (collectorCollectionOptional.isPresent()) { //se la collezione e' presente
-                var collectorCollection = collectorCollectionOptional.get();
-
-                var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
-                if (optionalDisk.isPresent()) {
-                    var disk = optionalDisk.get();
-                    this.disksRepository.delete(disk);
+            var optionalCollectorCollection = this.collectorCollectionRepository.findCollectionByIdAndCollectorById(collector.getId(), collectionId);
+            if (optionalCollectorCollection.isPresent()) { //se la collezione e' presente
+                var collectorCollection = optionalCollectorCollection.get();
+                var isOwner = collectorCollection.isOwner();
+                if (isOwner) {
+                    var optionalDisk = this.disksRepository.findDiskByIdFromCollectionId(collectionId, diskId);
+                    if (optionalDisk.isPresent()) {
+                        var disk = optionalDisk.get();
+                        var collectors = this.collectorsRepository.findAll();
+                        for (var collectorEntity : collectors) {
+                            var favourites = collectorEntity.getFavouritesDisk();
+                            favourites.removeIf(favourite -> favourite.getId().equals(disk.getId()));
+                            this.collectorsRepository.flush();
+                        }
+                        this.disksRepository.delete(disk);
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Disk is not found");
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the Owner");
                 }
-
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collection is not found");
             }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Collector is not found");
         }
     }
+
 
     public Optional<DiskEntity> getDiskByIdFromPublicCollection(Long collectionId, Long diskId) {
         var optionalCollection = this.collectionsRepository.findById(collectionId);
